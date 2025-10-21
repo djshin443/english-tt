@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>단어 러너 게임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            touch-action: none;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 50%, #7BB8D1 100%);
+            border: 4px solid #4A5568;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            aspect-ratio: 16 / 9;
+        }
+
+        /* PC - 가로 화면 최적화 */
+        @media (min-width: 801px) {
+            #gameContainer {
+                max-width: min(90vw, calc(90vh * 16 / 9));
+                max-height: min(90vh, calc(90vw * 9 / 16));
+            }
+        }
+
+        /* 모바일 - 가로 화면 전용 */
+        @media (max-width: 800px) and (orientation: landscape) {
+            #gameContainer {
+                max-width: 100vw;
+                max-height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
+        }
+
+        /* 세로 모드 회전 안내 */
+        #rotatePrompt {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #rotatePrompt .rotate-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: rotate 2s infinite ease-in-out;
+        }
+
+        @keyframes rotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+
+        #rotatePrompt h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #FFD700;
+        }
+
+        #rotatePrompt p {
+            font-size: 16px;
+            color: #FFFFFF;
+        }
+
+        @media (max-width: 800px) and (orientation: portrait) {
+            #gameContainer {
+                display: none;
+            }
+            #rotatePrompt {
+                display: flex !important;
+            }
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
+        }
+
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #energyContainer {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .energyHeart {
+            width: 30px;
+            height: 30px;
+            background: #FF0000;
+            clip-path: polygon(50% 15%, 61% 6%, 75% 0%, 86% 6%, 95% 19%, 95% 35%, 50% 90%, 5% 35%, 5% 19%, 14% 6%, 25% 0%, 39% 6%);
+            transition: all 0.3s;
+        }
+
+        .energyHeart.empty {
+            background: #444;
+        }
+
+        #wordProgress {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            max-width: 400px;
+            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* 퀴즈/보스 모드 - wordProgress를 우측 상단 유지 (가로 모드에서는 문제없음) */
+        #wordProgress.quiz-mode {
+            position: fixed !important;
+            left: auto !important;
+            right: 10px !important;
+            top: 10px !important;
+            bottom: auto !important;
+            transform: none !important;
+            max-width: 300px !important;
+            text-align: left !important;
+            z-index: 5 !important;
+            font-size: 16px !important;
+            padding: 10px 15px !important;
+        }
+
+        #wordProgress.boss-mode {
+            position: fixed !important;
+            left: auto !important;
+            right: 10px !important;
+            top: 10px !important;
+            bottom: auto !important;
+            transform: none !important;
+            max-width: 300px !important;
+            text-align: left !important;
+            z-index: 5 !important;
+            font-size: 16px !important;
+            padding: 10px 15px !important;
+        }
+
+        #stageDisplay {
+            color: #FFD700;
+            font-size: 20px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        #targetWord {
+            color: #FFD700;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        #collectedLetters {
+            color: #00FF00;
+            font-size: 20px;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            display: none;
+            z-index: 100;
+        }
+
+        #gameOver h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #FF4444;
+        }
+
+        #gameOver.success h2 {
+            color: #00FF00;
+        }
+
+        #gameOver p {
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+
+        #gameOver button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            pointer-events: all;
+            transition: all 0.3s;
+        }
+
+        #gameOver button:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 200;
+        }
+
+        #startScreen h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+        }
+
+        #startScreen p {
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        #startScreen button {
+            margin-top: 30px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #startScreen button:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .controls {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #FFD700;
+        }
+
+        /* 모바일 조이스틱 */
+        #mobileControls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: none;
+            justify-content: space-between;
+            padding: 0 20px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        @media (max-width: 800px), (hover: none) {
+            #mobileControls {
+                display: flex;
+            }
+        }
+
+        .joystick-container {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            pointer-events: all;
+        }
+
+        .joystick-base {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .joystick-stick {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 3px solid rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s;
+        }
+
+        /* 모바일 가로 화면 최적화 (16:9 전용) */
+        @media (max-width: 800px) and (orientation: landscape) {
+            #startScreen h1 {
+                font-size: 28px;
+            }
+
+            #startScreen p {
+                font-size: 12px;
+                padding: 0 15px;
+                margin-bottom: 5px;
+            }
+
+            #startScreen button {
+                padding: 12px 25px;
+                font-size: 18px;
+                margin-top: 15px;
+            }
+
+            .controls {
+                font-size: 12px;
+                margin-top: 10px;
+            }
+
+            #mobileControls {
+                bottom: 10px;
+                padding: 0 10px;
+            }
+
+            .joystick-container {
+                width: 100px;
+                height: 100px;
+            }
+
+            .joystick-stick {
+                width: 40px;
+                height: 40px;
+            }
+
+            #energyContainer {
+                padding: 4px;
+                gap: 3px;
+            }
+
+            .energyHeart {
+                width: 20px;
+                height: 20px;
+            }
+
+            #wordProgress {
+                padding: 6px 10px;
+                font-size: 14px;
+            }
+
+            #wordProgress.quiz-mode,
+            #wordProgress.boss-mode {
+                font-size: 13px !important;
+                padding: 6px 10px !important;
+                max-width: 250px !important;
+            }
+
+            #stageDisplay {
+                font-size: 14px !important;
+            }
+
+            #targetWord {
+                font-size: 13px !important;
+            }
+
+            #collectedLetters {
+                font-size: 12px !important;
+            }
+
+            #gameOver {
+                padding: 25px 20px;
+            }
+
+            #gameOver h2 {
+                font-size: 26px;
+            }
+
+            #gameOver p {
+                font-size: 15px;
+                margin-bottom: 20px;
+            }
+
+            #gameOver button {
+                padding: 12px 25px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 세로 모드 회전 안내 -->
+    <div id="rotatePrompt">
+        <div class="rotate-icon">📱</div>
+        <h2>화면을 회전해주세요</h2>
+        <p>이 게임은 가로 모드에 최적화되어 있습니다.</p>
+        <p>기기를 가로로 돌려서 플레이해주세요!</p>
+    </div>
+
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="ui">
+            <div id="energyContainer">
+                <div class="energyHeart"></div>
+                <div class="energyHeart"></div>
+                <div class="energyHeart"></div>
+                <div class="energyHeart"></div>
+                <div class="energyHeart"></div>
+                <div class="energyHeart"></div>
+                <div class="energyHeart"></div>
+            </div>
+        </div>
+
+        <div id="wordProgress">
+            <div id="stageDisplay">Stage 1/20</div>
+            <div id="targetWord">목표: ???</div>
+            <div id="collectedLetters">수집: </div>
+        </div>
+
+        <div id="startScreen">
+            <h1>🎮 지율이의 영어 모험 🎮</h1>
+            <p>🌟 총 20개 스테이지를 클리어하세요!</p>
+            <p>📝 알파벳을 모아 단어를 완성하세요!</p>
+            <p>🎯 단어의 뜻을 맞추면 스테이지 클리어!</p>
+            <p>🏆 5, 10, 15, 20 스테이지는 보스전!</p>
+            <p>🏓 탁구 라켓으로 공을 쳐서 보스를 물리치세요!</p>
+            <p>👾 몬스터를 피하고 포션을 먹으세요!</p>
+            <div class="controls">
+                <p>🎮 방향키 또는 WASD로 이동</p>
+                <p>⚡ 스페이스로 탁구공 발사</p>
+                <p>📱 모바일: 화면 조이스틱 사용</p>
+            </div>
+            <button onclick="startGame()">게임 시작</button>
+        </div>
+
+        <div id="gameOver">
+            <h2>게임 오버!</h2>
+            <p id="gameOverMessage"></p>
+            <button onclick="restartGame()">다시 시작</button>
+        </div>
+
+        <!-- 모바일 조이스틱 -->
+        <div id="mobileControls">
+            <div class="joystick-container" id="joystickContainer">
+                <div class="joystick-base"></div>
+                <div class="joystick-stick" id="joystickStick"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="characters-player.js"></script>
+    <script src="characters-alphabet.js"></script>
+    <script src="characters-boss.js"></script>
+    <script src="words.js"></script>
+    <script src="backgrounds.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
