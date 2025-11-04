@@ -733,78 +733,79 @@
         /* 작은 모바일 (세로 모드) */
         @media (max-width: 500px) {
             #titleScreen {
-                padding-top: 25px;
+                padding-top: 15px;
             }
 
             .title-container {
-                padding: 8px;
+                padding: 5px;
+                transform: scale(0.9);
             }
 
             .main-title {
-                font-size: 28px;
-                gap: 3px;
+                font-size: 24px;
+                gap: 2px;
             }
 
             .title-eng {
                 letter-spacing: 0px;
-                font-size: clamp(11px, 2.8vw, 19px);
+                font-size: clamp(10px, 2.4vw, 16px);
             }
 
             .title-main {
                 letter-spacing: 0px;
-                font-size: clamp(19px, 4.4vw, 32px);
+                font-size: clamp(16px, 3.8vw, 28px);
             }
 
             .title-j {
-                font-size: clamp(26px, 5.6vw, 45px);
+                font-size: clamp(22px, 4.8vw, 38px);
             }
 
             .title-subtitle {
-                font-size: 9px;
+                font-size: 8px;
                 letter-spacing: 0px;
-                margin-bottom: 8px;
+                margin-bottom: 6px;
             }
 
             .title-sparkles {
-                font-size: 18px;
-                gap: 6px;
-                margin-bottom: 14px;
+                font-size: 16px;
+                gap: 4px;
+                margin-bottom: 10px;
             }
 
             .title-start-btn {
-                font-size: 12px;
-                padding: 7px 18px;
+                font-size: 11px;
+                padding: 6px 16px;
                 border-width: 2px;
             }
 
             .title-credit {
-                font-size: 7px;
-                margin-top: 14px;
-                margin-bottom: 20px;
+                font-size: 6px;
+                margin-top: 10px;
+                margin-bottom: 15px;
             }
 
             .title-glow {
-                width: 180px;
-                height: 180px;
+                width: 150px;
+                height: 150px;
             }
 
             #titleScreen::after {
-                font-size: 18px;
+                font-size: 16px;
             }
 
             .title-description {
-                font-size: 8px;
-                margin-bottom: 8px;
+                font-size: 7px;
+                margin-bottom: 6px;
                 letter-spacing: 0px;
             }
 
             .title-hint {
-                font-size: 6px;
-                margin-top: 5px;
+                font-size: 5px;
+                margin-top: 4px;
             }
 
             .float-emoji {
-                font-size: 20px;
+                font-size: 18px;
             }
         }
 
@@ -901,6 +902,20 @@
             font-size: clamp(12px, 2vw, 16px);
             color: #FFD700;
             max-width: 90%;
+        }
+
+        /* PC/모바일 전용 표시 */
+        .mobile-only {
+            display: none;
+        }
+
+        @media (max-width: 800px), (hover: none) {
+            .pc-only {
+                display: none;
+            }
+            .mobile-only {
+                display: block;
+            }
         }
 
         /* 모바일 조이스틱 */
@@ -1199,7 +1214,8 @@
             <p>⚔️ 신검과 탁구공으로 영어 제국 외계인을 무찔러!</p>
             <p>🎯 20개 스테이지를 클리어하면 금메달 주인공!</p>
             <div class="controls">
-                <p>🎮 방향키/WASD로 이동, 스페이스로 공격</p>
+                <p class="pc-only">🎮 방향키/WASD로 이동, 스페이스로 공격</p>
+                <p class="mobile-only">🎮 조이스틱으로 이동, 버튼으로 공격</p>
                 <p>📱 모바일: 조이스틱 + 버튼 사용</p>
             </div>
             <button onclick="showOpening()">🎬 스토리 시작!</button>

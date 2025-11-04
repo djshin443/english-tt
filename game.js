@@ -211,10 +211,6 @@ if (swordBtn) {
         e.stopPropagation(); // 이벤트 전파 방지 (조이스틱으로 전파 차단)
         if (gameState.mode === GAME_MODE.COLLECTING && gameState.isRunning && !dialogueState.active) {
             swordBtnPressed = true;
-            // 조이스틱 비활성화 (신검 버튼 터치 시 이동 방지)
-            joystick.active = false;
-            joystick.deltaX = 0;
-            joystick.deltaY = 0;
         }
     });
     // 터치 끝
@@ -235,10 +231,6 @@ if (swordBtn) {
         e.stopPropagation();
         if (gameState.mode === GAME_MODE.COLLECTING && gameState.isRunning && !dialogueState.active) {
             swordBtnPressed = true;
-            // 조이스틱 비활성화
-            joystick.active = false;
-            joystick.deltaX = 0;
-            joystick.deltaY = 0;
         }
     });
     swordBtn.addEventListener('mouseup', (e) => {
@@ -260,10 +252,6 @@ if (ballBtn) {
         e.stopPropagation(); // 이벤트 전파 방지 (조이스틱으로 전파 차단)
         if ((gameState.mode === GAME_MODE.QUIZ || gameState.mode === GAME_MODE.BOSS) && gameState.isRunning && !dialogueState.active) {
             ballBtnPressed = true;
-            // 조이스틱 비활성화 (탁구공 버튼 터치 시 이동 방지)
-            joystick.active = false;
-            joystick.deltaX = 0;
-            joystick.deltaY = 0;
         }
     });
     // 터치 끝
@@ -284,10 +272,6 @@ if (ballBtn) {
         e.stopPropagation();
         if ((gameState.mode === GAME_MODE.QUIZ || gameState.mode === GAME_MODE.BOSS) && gameState.isRunning && !dialogueState.active) {
             ballBtnPressed = true;
-            // 조이스틱 비활성화
-            joystick.active = false;
-            joystick.deltaX = 0;
-            joystick.deltaY = 0;
         }
     });
     ballBtn.addEventListener('mouseup', (e) => {
@@ -313,6 +297,21 @@ function updateActionButtons() {
         // 퀴즈/보스 모드: 탁구공 버튼만 표시
         swordBtn.classList.add('hidden');
         ballBtn.classList.remove('hidden');
+    }
+}
+
+// 모바일 컨트롤 표시/숨김
+function showMobileControls() {
+    const mobileControls = document.getElementById('mobileControls');
+    if (mobileControls) {
+        mobileControls.style.display = 'block';
+    }
+}
+
+function hideMobileControls() {
+    const mobileControls = document.getElementById('mobileControls');
+    if (mobileControls) {
+        mobileControls.style.display = 'none';
     }
 }
 
@@ -626,8 +625,10 @@ class QuizChoice {
     constructor(x, y, text, isCorrect, index) {
         this.x = x;
         this.y = y;
-        this.width = 220;
-        this.height = 90;
+        // 모바일에서는 더 작은 크기 사용
+        const isMobile = window.innerWidth <= 800;
+        this.width = isMobile ? 160 : 220;
+        this.height = isMobile ? 65 : 90;
         this.text = text;
         this.isCorrect = isCorrect;
         this.index = index;
@@ -675,7 +676,9 @@ class QuizChoice {
 
         // 텍스트
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 20px Arial';
+        // 모바일에서는 더 작은 폰트 사용
+        const isMobile = window.innerWidth <= 800;
+        ctx.font = isMobile ? 'bold 14px Arial' : 'bold 20px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.shadowColor = '#000000';
@@ -1337,9 +1340,11 @@ function createQuizChoices() {
     }
 
     // 선택지 배치 (오른쪽에 세로로)
-    const startX = canvas.width - 280;  // 오른쪽에 배치
-    const startY = 50;
-    const spacingY = 110;  // 세로 간격
+    // 모바일에서는 더 작은 간격과 위치 사용
+    const isMobile = window.innerWidth <= 800;
+    const startX = isMobile ? canvas.width - 180 : canvas.width - 280;
+    const startY = isMobile ? 20 : 50;
+    const spacingY = isMobile ? 80 : 110;  // 세로 간격
 
     for (let i = 0; i < 4; i++) {
         const x = startX;
@@ -1424,23 +1429,28 @@ function drawDialogue() {
         ctx.fillText(line, padding * 2, y);
     }
 
-    // 스페이스바 안내
+    // 스페이스바/터치 안내 (PC에서만 스페이스바 표시)
+    const isMobile = window.innerWidth <= 800;
     ctx.fillStyle = '#00FF00';
     ctx.font = `${Math.max(12, fontSize - 4)}px Arial`;
     ctx.textAlign = 'right';
-    ctx.fillText('스페이스바를 눌러 계속...', canvas.width - padding * 2, canvas.height - padding * 2);
+    const continueText = isMobile ? '화면을 터치하여 계속...' : '스페이스바를 눌러 계속...';
+    ctx.fillText(continueText, canvas.width - padding * 2, canvas.height - padding * 2);
 }
 
 // 보스 스테이지 시작
 function startBossStage(stageNum) {
     gameState.mode = GAME_MODE.BOSS;
 
-    // 지율이 위치 초기화 (중앙)
-    jiyulQuizY = 1;  // 중앙 위치
+    // 플레이어 위치 초기화
+    player.x = 100;
+    player.y = canvas.height / 2 - player.height / 2;
+    player.vx = 0;
+    player.vy = 0;
 
     // 공 초기화 (지율이 위치에서 발사)
     const jiyulX = 100;
-    const jiyulY = canvas.height / 2;
+    const jiyulY = player.y + player.height / 2;
     ball = new Ball(jiyulX + player.width + 60, jiyulY);
 
     // 보스 생성
@@ -2101,7 +2111,8 @@ function updateUI() {
         collectedDisplay.innerHTML = '수집: ' + displayText;
     } else if (gameState.mode === GAME_MODE.QUIZ) {
         wordDisplay.textContent = currentStageData.word + '의 뜻은?';
-        collectedDisplay.textContent = '스페이스로 공 발사!';
+        const isMobile = window.innerWidth <= 800;
+        collectedDisplay.textContent = isMobile ? '버튼으로 공 발사!' : '스페이스로 공 발사!';
     } else if (gameState.mode === GAME_MODE.BOSS) {
         wordDisplay.textContent = '보스전!';
         collectedDisplay.textContent = '공을 쳐서 보스를 공격!';
@@ -2136,6 +2147,10 @@ function gameWin() {
 // 게임 오버
 function gameOver() {
     gameState.isRunning = false;
+
+    // 모바일 컨트롤 숨기기 (게임 오버 시)
+    hideMobileControls();
+
     const gameOverDiv = document.getElementById('gameOver');
     gameOverDiv.classList.remove('success');
     gameOverDiv.querySelector('h2').textContent = '게임 오버!';
@@ -2275,7 +2290,7 @@ function gameLoop() {
                 swordCooldown--;
             }
 
-            if ((spacePressed || ballBtnPressed) && swordCooldown <= 0) {
+            if ((spacePressed || ballBtnPressed) && ball && !ball.active && swordCooldown <= 0) {
                 launchBall();
                 swordCooldown = SWORD_COOLDOWN_MAX;
             }
@@ -2343,6 +2358,9 @@ function showStartScreen() {
 window.addEventListener('DOMContentLoaded', () => {
     const titleScreen = document.getElementById('titleScreen');
 
+    // 타이틀 화면에서는 모바일 컨트롤 숨기기
+    hideMobileControls();
+
     // 엔터키나 스페이스바로 시작
     const handleTitleKeyPress = (e) => {
         if (titleScreen && titleScreen.style.display !== 'none') {
@@ -2356,6 +2374,22 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     window.addEventListener('keydown', handleTitleKeyPress);
+
+    // 캔버스 터치/클릭 이벤트로 대화 진행 (모바일 지원)
+    canvas.addEventListener('touchstart', (e) => {
+        // 대화 중이면 다음 대화로 진행
+        if (dialogueState.active) {
+            e.preventDefault();
+            advanceDialogue();
+        }
+    });
+
+    canvas.addEventListener('click', (e) => {
+        // 대화 중이면 다음 대화로 진행 (PC에서 클릭으로도 가능)
+        if (dialogueState.active) {
+            advanceDialogue();
+        }
+    });
 });
 
 // 오프닝 보여주기 (애니메이션)
@@ -2365,6 +2399,9 @@ function showOpening() {
     // 캔버스 표시
     const canvas = document.getElementById('gameCanvas');
     canvas.style.display = 'block';
+
+    // 모바일 컨트롤 숨기기 (오프닝 중에는 안 보이게)
+    hideMobileControls();
 
     // 스토리 애니메이션 시작
     if (storyScene) {
@@ -2384,6 +2421,10 @@ function showOpening() {
 function startGame() {
     document.getElementById('startScreen').style.display = 'none';
     gameState.isRunning = true;
+
+    // 모바일 컨트롤 보이기 (게임 플레이 중에는 보이게)
+    showMobileControls();
+
     initGame();
     gameLoop();
 }
@@ -2391,6 +2432,9 @@ function startGame() {
 // 엔딩 보여주기 (애니메이션)
 function showEnding() {
     gameState.isRunning = false;
+
+    // 모바일 컨트롤 숨기기 (엔딩 중에는 안 보이게)
+    hideMobileControls();
 
     // 스토리 애니메이션 시작
     if (storyScene) {
@@ -2420,6 +2464,10 @@ function showEnding() {
 function restartGame() {
     document.getElementById('gameOver').style.display = 'none';
     gameState.isRunning = true;
+
+    // 모바일 컨트롤 보이기 (게임 재시작 시)
+    showMobileControls();
+
     initGame();
     gameLoop();
 }

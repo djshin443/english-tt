@@ -1824,8 +1824,8 @@ class StoryScene {
         // 프레임 증가 (애니메이션은 계속 진행하되, 씬 전환은 사용자 입력 대기)
         this.animationFrame++;
 
-        // 씬이 충분히 표시되었는지 확인 (최소 2초 - 텍스트를 빠르게 읽을 수 있도록)
-        const minDisplayTime = 120; // 2초 (60fps 기준) - 빠르게 변경
+        // 씬이 충분히 표시되었는지 확인 (최소 1초 - 텍스트를 빠르게 읽을 수 있도록)
+        const minDisplayTime = 60; // 1초 (60fps 기준) - 빠르게 변경
         if (this.animationFrame >= minDisplayTime && !this.waitingForInput) {
             this.waitingForInput = true;
             this.canProceed = false;
@@ -1880,11 +1880,14 @@ class StoryScene {
             }
         }
 
-        // 스킵 안내 (좌측 하단)
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        this.ctx.font = '14px Arial';
-        this.ctx.textAlign = 'left';
-        this.ctx.fillText('스페이스바: 전체 스킵', 20, this.canvas.height - 20);
+        // 스킵 안내 (좌측 하단) - PC에서만 스페이스바 표시
+        const isMobileSkip = window.matchMedia('(max-width: 800px)').matches;
+        if (!isMobileSkip) {
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            this.ctx.font = '14px Arial';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText('스페이스바: 전체 스킵', 20, this.canvas.height - 20);
+        }
     }
 
     // 스킵
