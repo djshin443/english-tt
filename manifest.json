@@ -1,0 +1,26 @@
+{
+  "name": "잉글리쉬 탁구 헌터 J - English Ping Pong Hunter",
+  "short_name": "탁구헌터J",
+  "description": "영어를 배우며 탁구 실력도 키우는 재미있는 교육 게임",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "games"],
+  "lang": "ko-KR"
+}

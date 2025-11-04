@@ -22,15 +22,15 @@ const GAME_MODE = {
     BOSS: 'boss'                // 보스전 모드
 };
 
-// 게임 상태
+// 게임 상태 - EASY MODE!
 let gameState = {
     isRunning: false,
     isPaused: false,
     currentStage: 1,
     maxStage: 20,
-    energy: 7,  // 5 -> 7로 증가 (난이도 쉽게)
-    maxEnergy: 7,  // 5 -> 7로 증가
-    scrollSpeed: 2,
+    energy: 10,  // 7 -> 10으로 더 쉽게!
+    maxEnergy: 10,  // 더 많은 체력!
+    scrollSpeed: 1.5,  // 2 -> 1.5로 느리게!
     mode: GAME_MODE.COLLECTING,
     stageWords: [],  // 20개 스테이지 단어들
     clearedStages: 0
@@ -70,9 +70,16 @@ const player = {
 // 탁구공
 let ball = null;
 
+// 신검(Divine Sword) 배열
+let divineSwords = [];
+
 // 지율이 스매싱 상태
 let jiyulSmashing = false;
 let smashTimer = 0;
+
+// 신검 발사 쿨다운
+let swordCooldown = 0;
+const SWORD_COOLDOWN_MAX = 15;  // 15프레임마다 발사 (약 0.25초)
 
 // 퀴즈 선택지
 let quizChoices = [];
@@ -82,10 +89,18 @@ let jiyulQuizY = 0;  // 현재 선택한 선택지 인덱스 (0~3)
 
 // 입력 처리
 const keys = {};
+let spacePressed = false;  // 스페이스바 눌림 상태 (연속 발사용)
+
 window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
     if (e.key === ' ') {
         e.preventDefault();
+
+        // 스토리 씬 중이면 스킵
+        if (storyScene && (storyScene.scenes && storyScene.currentScene < storyScene.scenes.length)) {
+            storyScene.skip();
+            return;
+        }
 
         // 대화 중이면 다음 대화로 진행
         if (dialogueState.active) {
@@ -93,19 +108,17 @@ window.addEventListener('keydown', (e) => {
             return;
         }
 
-        if (gameState.mode === GAME_MODE.QUIZ) {
-            // 퀴즈 모드: 현재 선택한 선택지로 공 발사
-            if (!ball.active) {
-                launchBall();
-                // 공이 선택지와 충돌하면 Ball 클래스의 update()에서 자동으로 답 처리됨
-            }
-        } else if (gameState.mode === GAME_MODE.BOSS) {
-            launchBall();
+        // 게임 플레이 중일 때만 발사 상태 활성화
+        if (gameState.isRunning && !dialogueState.active) {
+            spacePressed = true;
         }
     }
 });
 window.addEventListener('keyup', (e) => {
     keys[e.key] = false;
+    if (e.key === ' ') {
+        spacePressed = false;
+    }
 });
 
 // 터치 조이스틱
@@ -183,6 +196,97 @@ joystickContainer.addEventListener('touchstart', handleTouchStart, { passive: fa
 joystickContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
 joystickContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
 joystickContainer.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+
+// 모바일 액션 버튼
+const swordBtn = document.getElementById('swordBtn');
+const ballBtn = document.getElementById('ballBtn');
+let swordBtnPressed = false;  // 신검 버튼 눌림 상태
+let ballBtnPressed = false;   // 탁구공 버튼 눌림 상태
+
+// 신검 버튼 - 누르고 있는 동안 연속 발사
+if (swordBtn) {
+    // 터치 시작
+    swordBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (gameState.mode === GAME_MODE.COLLECTING && gameState.isRunning && !dialogueState.active) {
+            swordBtnPressed = true;
+        }
+    });
+    // 터치 끝
+    swordBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        swordBtnPressed = false;
+    });
+    swordBtn.addEventListener('touchcancel', (e) => {
+        e.preventDefault();
+        swordBtnPressed = false;
+    });
+
+    // 마우스 지원 (PC 테스트용)
+    swordBtn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        if (gameState.mode === GAME_MODE.COLLECTING && gameState.isRunning && !dialogueState.active) {
+            swordBtnPressed = true;
+        }
+    });
+    swordBtn.addEventListener('mouseup', (e) => {
+        e.preventDefault();
+        swordBtnPressed = false;
+    });
+    swordBtn.addEventListener('mouseleave', (e) => {
+        swordBtnPressed = false;
+    });
+}
+
+// 탁구공 버튼 - 누르고 있는 동안 연속 발사
+if (ballBtn) {
+    // 터치 시작
+    ballBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if ((gameState.mode === GAME_MODE.QUIZ || gameState.mode === GAME_MODE.BOSS) && gameState.isRunning && !dialogueState.active) {
+            ballBtnPressed = true;
+        }
+    });
+    // 터치 끝
+    ballBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        ballBtnPressed = false;
+    });
+    ballBtn.addEventListener('touchcancel', (e) => {
+        e.preventDefault();
+        ballBtnPressed = false;
+    });
+
+    // 마우스 지원 (PC 테스트용)
+    ballBtn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        if ((gameState.mode === GAME_MODE.QUIZ || gameState.mode === GAME_MODE.BOSS) && gameState.isRunning && !dialogueState.active) {
+            ballBtnPressed = true;
+        }
+    });
+    ballBtn.addEventListener('mouseup', (e) => {
+        e.preventDefault();
+        ballBtnPressed = false;
+    });
+    ballBtn.addEventListener('mouseleave', (e) => {
+        ballBtnPressed = false;
+    });
+}
+
+// 게임 모드에 따라 버튼 표시/숨김
+function updateActionButtons() {
+    if (!swordBtn || !ballBtn) return;
+
+    if (gameState.mode === GAME_MODE.COLLECTING) {
+        // 수집 모드: 신검 버튼만 표시
+        swordBtn.classList.remove('hidden');
+        ballBtn.classList.add('hidden');
+    } else if (gameState.mode === GAME_MODE.QUIZ || gameState.mode === GAME_MODE.BOSS) {
+        // 퀴즈/보스 모드: 탁구공 버튼만 표시
+        swordBtn.classList.add('hidden');
+        ballBtn.classList.remove('hidden');
+    }
+}
 
 // 배경 스크롤
 let backgroundX = 0;
@@ -314,6 +418,176 @@ class Ball {
         ctx.beginPath();
         ctx.arc(this.x - this.radius * 0.3, this.y - this.radius * 0.3, this.radius * 0.3, 0, Math.PI * 2);
         ctx.fill();
+
+        ctx.restore();
+    }
+}
+
+// 신검(Divine Sword) 클래스 - 케데헌 조이 스타일
+class DivineSword {
+    constructor(x, y, angle) {
+        this.x = x;
+        this.y = y;
+        this.angle = angle;  // 발사 각도
+        this.speed = 12;  // 빠른 속도
+        this.vx = Math.cos(angle) * this.speed;
+        this.vy = Math.sin(angle) * this.speed;
+        this.active = true;
+        this.width = 40;  // 검 길이
+        this.height = 8;   // 검 두께
+        this.rotation = 0;  // 회전 애니메이션
+        this.trail = [];  // 잔상 효과
+        this.glowPhase = 0;  // 빛나는 효과
+    }
+
+    update() {
+        if (!this.active) return;
+
+        this.x += this.vx;
+        this.y += this.vy;
+        this.rotation += 0.3;  // 회전 효과
+        this.glowPhase += 0.2;
+
+        // 잔상 효과 추가
+        this.trail.push({ x: this.x, y: this.y, alpha: 1 });
+        if (this.trail.length > 8) {
+            this.trail.shift();
+        }
+        // 잔상 페이드 아웃
+        this.trail.forEach((t, i) => {
+            t.alpha = (i + 1) / this.trail.length * 0.5;
+        });
+
+        // 화면 벗어나면 비활성화
+        if (this.x < -100 || this.x > canvas.width + 100 ||
+            this.y < -100 || this.y > canvas.height + 100) {
+            this.active = false;
+            return;
+        }
+
+        // 몬스터와 충돌 체크
+        monsters.forEach((monster, index) => {
+            if (this.checkCollision(monster)) {
+                // 몬스터 제거
+                monsters.splice(index, 1);
+
+                // 파티클 효과 (보라색 계열)
+                for (let i = 0; i < 30; i++) {
+                    const colors = ['#BA55D3', '#FF69B4', '#FFD700', '#9370DB', '#DDA0DD'];
+                    particles.push(new Particle(
+                        monster.x + monster.width / 2,
+                        monster.y + monster.height / 2,
+                        colors[Math.floor(Math.random() * colors.length)],
+                        'star'
+                    ));
+                }
+
+                // 신검은 관통하므로 계속 날아감 (비활성화 안 함)
+            }
+        });
+    }
+
+    checkCollision(monster) {
+        // 간단한 원형 충돌 (검의 중심점 기준)
+        const dx = (this.x) - (monster.x + monster.width / 2);
+        const dy = (this.y) - (monster.y + monster.height / 2);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < (this.width / 2 + monster.width / 2);
+    }
+
+    draw() {
+        if (!this.active) return;
+
+        ctx.save();
+
+        // 잔상 효과 (뒤에서부터)
+        this.trail.forEach(t => {
+            ctx.save();
+            ctx.globalAlpha = t.alpha * 0.6;
+            ctx.translate(t.x, t.y);
+            ctx.rotate(this.angle + this.rotation);
+
+            // 잔상 검 (보라색 계열)
+            const gradient = ctx.createLinearGradient(-this.width / 2, 0, this.width / 2, 0);
+            gradient.addColorStop(0, 'rgba(255, 165, 0, 0)');       // 투명
+            gradient.addColorStop(0.3, 'rgba(216, 191, 216, 0.7)'); // 연보라
+            gradient.addColorStop(0.5, 'rgba(186, 85, 211, 0.9)');  // 미디엄 오키드
+            gradient.addColorStop(0.7, 'rgba(147, 112, 219, 0.7)'); // 미디엄 퍼플
+            gradient.addColorStop(1, 'rgba(138, 43, 226, 0)');      // 투명
+            ctx.fillStyle = gradient;
+            ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+
+            ctx.restore();
+        });
+
+        // 메인 검
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle + this.rotation);
+
+        // 글로우 효과 (펄싱) - 보라색 계열
+        const glowSize = 25 + Math.sin(this.glowPhase) * 5;
+        const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+        glowGradient.addColorStop(0, 'rgba(200, 150, 255, 0.8)');  // 연보라
+        glowGradient.addColorStop(0.3, 'rgba(147, 112, 219, 0.6)'); // 미디엄 퍼플
+        glowGradient.addColorStop(0.6, 'rgba(138, 43, 226, 0.4)');  // 블루 바이올렛
+        glowGradient.addColorStop(1, 'rgba(148, 0, 211, 0)');      // 다크 바이올렛
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(0, 0, glowSize, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 검 날 (보라색 그라데이션)
+        const bladeGradient = ctx.createLinearGradient(-this.width / 2, 0, this.width / 2, 0);
+        bladeGradient.addColorStop(0, 'rgba(255, 165, 0, 0)');    // 투명 (시작)
+        bladeGradient.addColorStop(0.1, '#FFA500');   // 주황색 (손잡이 쪽)
+        bladeGradient.addColorStop(0.2, '#FFD700');   // 금색
+        bladeGradient.addColorStop(0.35, '#D8BFD8');  // 연보라 (Thistle)
+        bladeGradient.addColorStop(0.5, '#BA55D3');   // 미디엄 오키드 (날 중앙)
+        bladeGradient.addColorStop(0.65, '#9370DB');  // 미디엄 퍼플
+        bladeGradient.addColorStop(0.8, '#8B008B');   // 진보라 (Dark Magenta)
+        bladeGradient.addColorStop(0.95, '#BA55D3');  // 밝은 보라 (끝)
+        bladeGradient.addColorStop(1, 'rgba(186, 85, 211, 0)');   // 투명
+
+        ctx.fillStyle = bladeGradient;
+        ctx.shadowColor = '#BA55D3';  // 보라색 그림자
+        ctx.shadowBlur = 15;
+
+        // 검 모양 (뾰족한 끝)
+        ctx.beginPath();
+        ctx.moveTo(-this.width / 2, 0);  // 손잡이 쪽
+        ctx.lineTo(this.width / 2 - 8, -this.height / 2);  // 위쪽 날
+        ctx.lineTo(this.width / 2, 0);  // 뾰족한 끝
+        ctx.lineTo(this.width / 2 - 8, this.height / 2);  // 아래쪽 날
+        ctx.closePath();
+        ctx.fill();
+
+        // 검 테두리 (금색)
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 검 중심선 (핑크색 포인트)
+        ctx.strokeStyle = 'rgba(255, 105, 180, 0.9)';  // 핫핑크
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-this.width / 2 + 5, 0);
+        ctx.lineTo(this.width / 2 - 5, 0);
+        ctx.stroke();
+
+        // 핑크색 장식 (다이아몬드 모양)
+        for (let i = 0; i < 3; i++) {
+            const starX = -this.width / 4 + i * this.width / 4;
+            ctx.fillStyle = 'rgba(255, 105, 180, 0.9)';  // 핫핑크
+            ctx.beginPath();
+            ctx.arc(starX, 0, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 핑크 글로우
+            ctx.fillStyle = 'rgba(255, 192, 203, 0.5)';  // 연핑크
+            ctx.beginPath();
+            ctx.arc(starX, 0, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
 
         ctx.restore();
     }
@@ -454,15 +728,18 @@ class Boss {
         );
         ctx.fill();
 
-        // 픽셀 스프라이트 그리기
+        // 픽셀 스프라이트 그리기 (이동 방향에 따라 뒤집기)
         const bossSprite = bossSprites[this.bossType];
         if (bossSprite && bossSprite.idle) {
+            // 왼쪽으로 이동 중이면 뒤집기
+            const shouldFlip = this.vx < 0;
             drawPixelSprite(
                 bossSprite.idle,
                 bossSprite.colorMap,
                 this.x,
                 this.y,
-                PIXEL_SCALE * 1.5  // 1.5배 크기로
+                PIXEL_SCALE * 1.5,  // 1.5배 크기로
+                shouldFlip  // 방향에 따라 뒤집기
             );
         }
 
@@ -872,13 +1149,23 @@ function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
     ctx.closePath();
 }
 
-function drawPixelSprite(sprite, colorMap, x, y, scale = PIXEL_SCALE) {
+function drawPixelSprite(sprite, colorMap, x, y, scale = PIXEL_SCALE, flipH = false) {
     for (let row = 0; row < sprite.length; row++) {
         for (let col = 0; col < sprite[row].length; col++) {
             const pixel = sprite[row][col];
             if (pixel !== 0 && colorMap[pixel]) {
                 ctx.fillStyle = colorMap[pixel];
-                ctx.fillRect(x + col * scale, y + row * scale, scale, scale);
+                if (flipH) {
+                    // 좌우 반전
+                    ctx.fillRect(
+                        x + (sprite[row].length - col - 1) * scale,
+                        y + row * scale,
+                        scale,
+                        scale
+                    );
+                } else {
+                    ctx.fillRect(x + col * scale, y + row * scale, scale, scale);
+                }
             }
         }
     }
@@ -933,6 +1220,12 @@ function startCollectingStage(stageNum) {
     monsters = [];
     potions = [];
     particles = [];
+    divineSwords = [];
+
+    // 쿨다운 초기화
+    swordCooldown = 0;
+    spacePressed = false;
+    swordBtnPressed = false;
 
     // 초기 오브젝트 생성 (알파벳은 1번만 호출해서 겹치지 않게)
     spawnNextLetter();
@@ -974,6 +1267,11 @@ function startQuizStage() {
     letters = [];
     monsters = [];
     potions = [];
+
+    // 쿨다운 초기화
+    swordCooldown = 0;
+    spacePressed = false;
+    ballBtnPressed = false;
 
     // UI 업데이트 (wordProgress 위치 변경)
     updateUI();
@@ -1127,6 +1425,11 @@ function startBossStage(stageNum) {
     potions = [];
     quizChoices = [];
 
+    // 쿨다운 초기화
+    swordCooldown = 0;
+    spacePressed = false;
+    ballBtnPressed = false;
+
     // UI 업데이트 (wordProgress 위치 변경)
     updateUI();
 
@@ -1238,6 +1541,40 @@ function spawnPotion(x = null) {
     // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정
     const spawnY = 150 + Math.random() * (canvas.height - 250);
     potions.push(new Potion(spawnX, spawnY));
+}
+
+// 신검 발사 (1시, 3시, 5시 방향으로 3개)
+function launchDivineSwords() {
+    // 지율이 현재 위치에서 발사
+    const jiyulX = player.x + player.width + 20;
+    const jiyulY = player.y + player.height / 2;
+
+    // 1시 방향: -30도 (위쪽)
+    const angle1 = -Math.PI / 6;
+    // 3시 방향: 0도 (오른쪽)
+    const angle3 = 0;
+    // 5시 방향: 30도 (아래쪽)
+    const angle5 = Math.PI / 6;
+
+    // 3개의 신검 생성
+    divineSwords.push(new DivineSword(jiyulX, jiyulY, angle1));
+    divineSwords.push(new DivineSword(jiyulX, jiyulY, angle3));
+    divineSwords.push(new DivineSword(jiyulX, jiyulY, angle5));
+
+    // 스매싱 모션 시작
+    jiyulSmashing = true;
+    smashTimer = 0;
+
+    // 파티클 효과 (보라색 신성한 빛)
+    for (let i = 0; i < 30; i++) {
+        const colors = ['#BA55D3', '#FF69B4', '#FFD700', '#9370DB'];  // 보라, 핑크, 금색
+        particles.push(new Particle(
+            jiyulX,
+            jiyulY,
+            colors[Math.floor(Math.random() * colors.length)],
+            'star'
+        ));
+    }
 }
 
 // 공 발사 (지율이 스매싱 모션)
@@ -1711,6 +2048,9 @@ function updateUI() {
         }
     }
 
+    // 모바일 버튼 업데이트
+    updateActionButtons();
+
     if (gameState.mode === GAME_MODE.COLLECTING) {
         wordDisplay.textContent = '목표: ' + currentStageData.word;
 
@@ -1758,14 +2098,11 @@ function manageSpawning() {
     }
 }
 
-// 게임 승리
+// 게임 승리 - 엔딩으로 연결!
 function gameWin() {
     gameState.isRunning = false;
-    const gameOverDiv = document.getElementById('gameOver');
-    gameOverDiv.classList.add('success');
-    gameOverDiv.querySelector('h2').textContent = '🎉 전체 클리어! 🎉';
-    document.getElementById('gameOverMessage').textContent = `20개 스테이지를 모두 클리어했습니다!`;
-    gameOverDiv.style.display = 'block';
+    // 엔딩 시퀀스 시작!
+    showEnding();
 }
 
 // 게임 오버
@@ -1791,8 +2128,30 @@ function gameLoop() {
         // 수집 모드
         if (!dialogueState.active) {
             updatePlayer();
+
+            // 신검 연속 발사 처리
+            if (swordCooldown > 0) {
+                swordCooldown--;
+            }
+
+            if ((spacePressed || swordBtnPressed) && swordCooldown <= 0) {
+                launchDivineSwords();
+                swordCooldown = SWORD_COOLDOWN_MAX;
+            }
         }
         drawPlayer();
+
+        // 신검 업데이트 및 그리기
+        if (!dialogueState.active) {
+            divineSwords = divineSwords.filter(sword => {
+                sword.update();
+                sword.draw();
+                return sword.active;
+            });
+        } else {
+            // 대화 중에도 신검 그리기
+            divineSwords.forEach(sword => sword.draw());
+        }
 
         if (!dialogueState.active) {
             letters = letters.filter(letter => {
@@ -1837,6 +2196,16 @@ function gameLoop() {
         // 지율이 위아래 이동
         if (!dialogueState.active) {
             updateJiyulQuiz();
+
+            // 탁구공 연속 발사 처리 (퀴즈 모드)
+            if (swordCooldown > 0) {
+                swordCooldown--;
+            }
+
+            if ((spacePressed || ballBtnPressed) && !ball.active && swordCooldown <= 0) {
+                launchBall();
+                swordCooldown = SWORD_COOLDOWN_MAX;
+            }
         }
 
         // 지율이가 라켓을 든 모습
@@ -1872,6 +2241,16 @@ function gameLoop() {
         // 플레이어 자유롭게 움직임
         if (!dialogueState.active) {
             updatePlayer();
+
+            // 탁구공 연속 발사 처리 (보스 모드)
+            if (swordCooldown > 0) {
+                swordCooldown--;
+            }
+
+            if ((spacePressed || ballBtnPressed) && swordCooldown <= 0) {
+                launchBall();
+                swordCooldown = SWORD_COOLDOWN_MAX;
+            }
         }
 
         // 지율이가 라켓을 든 모습
@@ -1926,12 +2305,87 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+// 타이틀 화면에서 시작 화면으로
+function showStartScreen() {
+    document.getElementById('titleScreen').style.display = 'none';
+    document.getElementById('startScreen').style.display = 'flex';
+}
+
+// 타이틀 화면에서 키보드 입력 처리
+window.addEventListener('DOMContentLoaded', () => {
+    const titleScreen = document.getElementById('titleScreen');
+
+    // 엔터키나 스페이스바로 시작
+    const handleTitleKeyPress = (e) => {
+        if (titleScreen && titleScreen.style.display !== 'none') {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                showStartScreen();
+                // 이벤트 리스너 제거
+                window.removeEventListener('keydown', handleTitleKeyPress);
+            }
+        }
+    };
+
+    window.addEventListener('keydown', handleTitleKeyPress);
+});
+
+// 오프닝 보여주기 (애니메이션)
+function showOpening() {
+    document.getElementById('startScreen').style.display = 'none';
+
+    // 캔버스 표시
+    const canvas = document.getElementById('gameCanvas');
+    canvas.style.display = 'block';
+
+    // 스토리 애니메이션 시작
+    if (storyScene) {
+        storyScene.startOpening(() => {
+            // 오프닝 끝나면 게임 시작
+            startGame();
+        });
+    } else {
+        // fallback: 텍스트 대화
+        startDialogue(OPENING_DIALOGUE, () => {
+            startGame();
+        });
+    }
+}
+
 // 게임 시작
 function startGame() {
     document.getElementById('startScreen').style.display = 'none';
     gameState.isRunning = true;
     initGame();
     gameLoop();
+}
+
+// 엔딩 보여주기 (애니메이션)
+function showEnding() {
+    gameState.isRunning = false;
+
+    // 스토리 애니메이션 시작
+    if (storyScene) {
+        storyScene.startEnding(() => {
+            // 엔딩 끝나면 해피엔딩 화면
+            const gameOverEl = document.getElementById('gameOver');
+            gameOverEl.className = 'success';
+            gameOverEl.querySelector('h2').textContent = '🎉 HAPPY ENDING! 🎉';
+            document.getElementById('gameOverMessage').textContent =
+                '🏆 축하합니다! 금메달 획득!\n🏓 지율이는 영어도 잘하고 탁구도 잘하는 선수가 되었습니다!\n영어 제국의 대마왕은 이제 최고의 탁구 코치!';
+            gameOverEl.style.display = 'block';
+        });
+    } else {
+        // fallback: 텍스트 대화
+        startDialogue(ENDING_DIALOGUE, () => {
+            const gameOverEl = document.getElementById('gameOver');
+            gameOverEl.className = 'success';
+            gameOverEl.querySelector('h2').textContent = '🎉 HAPPY ENDING! 🎉';
+            document.getElementById('gameOverMessage').textContent =
+                '🏆 축하합니다! 금메달 획득!\n🏓 지율이는 영어도 잘하고 탁구도 잘하는 선수가 되었습니다!\n영어 제국의 대마왕은 이제 최고의 탁구 코치!';
+            gameOverEl.style.display = 'block';
+        });
+    }
 }
 
 // 게임 재시작

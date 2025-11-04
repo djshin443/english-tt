@@ -2,8 +2,21 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>단어 러너 게임</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="full-screen" content="yes">
+    <meta name="x5-fullscreen" content="true">
+    <meta name="x5-page-mode" content="app">
+
+    <!-- 아이콘 -->
+    <link rel="apple-touch-icon" href="ico.png">
+    <link rel="icon" type="image/png" href="ico.png">
+
+    <title>잉글리쉬 탁구 헌터 J - English Ping Pong Hunter</title>
     <style>
         * {
             margin: 0;
@@ -12,18 +25,46 @@
             -webkit-tap-highlight-color: transparent;
             user-select: none;
             -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        html {
+            width: 100%;
+            height: 100%;
+            height: -webkit-fill-available;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
         }
 
         body {
             background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%);
             font-family: 'Arial', sans-serif;
             overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            min-height: 100dvh;
+            margin: 0;
+            padding: 0;
+            /* Safe Area Insets */
+            padding-top: env(safe-area-inset-top, 0);
+            padding-bottom: env(safe-area-inset-bottom, 0);
+            padding-left: env(safe-area-inset-left, 0);
+            padding-right: env(safe-area-inset-right, 0);
+            touch-action: none;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: none;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            width: 100vw;
-            touch-action: none;
         }
 
         #gameContainer {
@@ -31,28 +72,52 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 50%, #7BB8D1 100%);
-            border: 4px solid #4A5568;
-            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            aspect-ratio: 16 / 9;
         }
 
-        /* PC - 가로 화면 최적화 */
+        /* PC - 게임다운 전체화면 (16:9 비율 유지하면서 최대화) */
         @media (min-width: 801px) {
+            body {
+                background: #000;
+            }
+
             #gameContainer {
-                max-width: min(90vw, calc(90vh * 16 / 9));
-                max-height: min(90vh, calc(90vw * 9 / 16));
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 100vw;
+                height: 100vh;
+                max-width: calc(100vh * 16 / 9);
+                max-height: calc(100vw * 9 / 16);
+                border: none;
+                border-radius: 0;
+                box-shadow: 0 0 50px rgba(0,0,0,0.5);
             }
         }
 
-        /* 모바일 - 가로 화면 전용 */
-        @media (max-width: 800px) and (orientation: landscape) {
+        /* 모바일 - 완전 전체화면 */
+        @media (max-width: 800px) {
             #gameContainer {
-                max-width: 100vw;
-                max-height: 100vh;
-                border-radius: 0;
-                border: none;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                transform: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                /* Safe Area aware positioning */
+                padding-top: env(safe-area-inset-top, 0);
+                padding-bottom: env(safe-area-inset-bottom, 0);
+                padding-left: env(safe-area-inset-left, 0);
+                padding-right: env(safe-area-inset-right, 0);
             }
         }
 
@@ -157,33 +222,55 @@
             z-index: 10;
         }
 
-        /* 퀴즈/보스 모드 - wordProgress를 우측 상단 유지 (가로 모드에서는 문제없음) */
-        #wordProgress.quiz-mode {
-            position: fixed !important;
-            left: auto !important;
-            right: 10px !important;
-            top: 10px !important;
-            bottom: auto !important;
-            transform: none !important;
-            max-width: 300px !important;
-            text-align: left !important;
-            z-index: 5 !important;
-            font-size: 16px !important;
-            padding: 10px 15px !important;
-        }
-
+        /* 퀴즈/보스 모드 - 모바일에서는 상단 중앙에 작게 표시 */
+        #wordProgress.quiz-mode,
         #wordProgress.boss-mode {
             position: fixed !important;
-            left: auto !important;
-            right: 10px !important;
-            top: 10px !important;
-            bottom: auto !important;
-            transform: none !important;
-            max-width: 300px !important;
-            text-align: left !important;
             z-index: 5 !important;
-            font-size: 16px !important;
-            padding: 10px 15px !important;
+        }
+
+        /* PC에서는 우측 상단 유지 */
+        @media (min-width: 801px) {
+            #wordProgress.quiz-mode,
+            #wordProgress.boss-mode {
+                left: auto !important;
+                right: 10px !important;
+                top: 10px !important;
+                bottom: auto !important;
+                transform: none !important;
+                max-width: 300px !important;
+                text-align: left !important;
+                font-size: 16px !important;
+                padding: 10px 15px !important;
+            }
+        }
+
+        /* 모바일에서는 상단 중앙에 컴팩트하게 표시 */
+        @media (max-width: 800px) {
+            #wordProgress.quiz-mode,
+            #wordProgress.boss-mode {
+                left: 50% !important;
+                right: auto !important;
+                top: env(safe-area-inset-top, 5px) !important;
+                bottom: auto !important;
+                transform: translateX(-50%) !important;
+                max-width: 90% !important;
+                text-align: center !important;
+                font-size: 12px !important;
+                padding: 6px 10px !important;
+                background: rgba(0, 0, 0, 0.85) !important;
+                border: 2px solid #FFD700 !important;
+            }
+
+            /* 가로 모드 모바일에서 더 작게 */
+            @media (orientation: landscape) {
+                #wordProgress.quiz-mode,
+                #wordProgress.boss-mode {
+                    font-size: 11px !important;
+                    padding: 4px 8px !important;
+                    max-width: 250px !important;
+                }
+            }
         }
 
         #stageDisplay {
@@ -248,6 +335,485 @@
         #gameOver button:hover {
             background: #45a049;
             transform: scale(1.05);
+        }
+
+        /* 오프닝 타이틀 화면 */
+        #titleScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 300;
+            overflow: hidden;
+        }
+
+        #titleScreen::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 105, 180, 0.2) 0%, transparent 50%),
+                radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 50px 50px;
+            animation: moveBackground 20s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* 떠다니는 별 효과 */
+        #titleScreen::after {
+            content: '✨';
+            position: absolute;
+            font-size: 30px;
+            animation: floatingStar 5s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes floatingStar {
+            0%, 100% {
+                top: 10%;
+                left: 15%;
+                opacity: 0.5;
+                transform: scale(0.8) rotate(0deg);
+            }
+            25% {
+                top: 20%;
+                left: 25%;
+                opacity: 1;
+                transform: scale(1.2) rotate(90deg);
+            }
+            50% {
+                top: 15%;
+                left: 20%;
+                opacity: 0.7;
+                transform: scale(1) rotate(180deg);
+            }
+            75% {
+                top: 25%;
+                left: 10%;
+                opacity: 0.9;
+                transform: scale(1.1) rotate(270deg);
+            }
+        }
+
+        .title-container {
+            position: relative;
+            text-align: center;
+            z-index: 1;
+            animation: fadeInScale 1.5s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .title-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+        }
+
+        .main-title {
+            position: relative;
+            font-size: 72px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .title-eng {
+            font-size: clamp(20px, 5vw, 48px);
+            color: #FFD700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8),
+                         3px 3px 6px rgba(0, 0, 0, 0.8);
+            letter-spacing: clamp(3px, 1vw, 8px);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 3px 3px 6px rgba(0, 0, 0, 0.8); }
+            50% { text-shadow: 0 0 40px rgba(255, 215, 0, 1), 3px 3px 6px rgba(0, 0, 0, 0.8); }
+        }
+
+        .title-main {
+            font-size: clamp(36px, 8vw, 84px);
+            background: linear-gradient(45deg, #fff, #BA55D3, #FF69B4, #FFD700);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+            animation: gradientMove 3s ease infinite;
+            letter-spacing: clamp(2px, 0.6vw, 5px);
+        }
+
+        @keyframes gradientMove {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .title-j {
+            font-size: clamp(52px, 10vw, 120px);
+            color: #FF69B4;
+            text-shadow: 0 0 30px rgba(255, 105, 180, 0.8),
+                         5px 5px 10px rgba(0, 0, 0, 0.8);
+            animation: bounce 1.5s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .title-subtitle {
+            font-size: 28px;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 30px;
+            letter-spacing: 3px;
+        }
+
+        .title-sparkles {
+            font-size: 48px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .title-sparkles span {
+            display: inline-block;
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+
+        .title-sparkles span:nth-child(1) { animation-delay: 0s; }
+        .title-sparkles span:nth-child(2) { animation-delay: 0.2s; }
+        .title-sparkles span:nth-child(3) { animation-delay: 0.4s; }
+        .title-sparkles span:nth-child(4) { animation-delay: 0.6s; }
+
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.3) rotate(180deg); opacity: 0.7; }
+        }
+
+        .title-start-btn {
+            position: relative;
+            background: linear-gradient(45deg, #FF69B4, #BA55D3);
+            border: 4px solid #FFD700;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            padding: 20px 60px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6),
+                        0 8px 20px rgba(0, 0, 0, 0.5);
+            animation: buttonPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes buttonPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), 0 8px 20px rgba(0, 0, 0, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(255, 215, 0, 1), 0 12px 25px rgba(0, 0, 0, 0.6); }
+        }
+
+        .title-start-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 50px rgba(255, 215, 0, 1),
+                        0 12px 30px rgba(0, 0, 0, 0.7);
+        }
+
+        .title-start-btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-text {
+            position: relative;
+            z-index: 2;
+            letter-spacing: 3px;
+        }
+
+        .btn-glow {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            animation: slideGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes slideGlow {
+            0% { left: -100%; }
+            50%, 100% { left: 100%; }
+        }
+
+        .title-description {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            margin-bottom: 25px;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        .title-hint {
+            margin-top: 15px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .title-credit {
+            margin-top: 40px;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        /* 떠다니는 요소들 */
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .float-emoji {
+            position: absolute;
+            font-size: 40px;
+            opacity: 0.4;
+            animation: floatAround 8s ease-in-out infinite;
+        }
+
+        @keyframes floatAround {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+                opacity: 0.4;
+            }
+            25% {
+                transform: translate(20px, -30px) rotate(90deg) scale(1.2);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translate(-10px, -50px) rotate(180deg) scale(0.9);
+                opacity: 0.3;
+            }
+            75% {
+                transform: translate(-25px, -20px) rotate(270deg) scale(1.1);
+                opacity: 0.5;
+            }
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 800px) {
+            .title-container {
+                padding: 20px;
+                max-width: 100vw;
+            }
+
+            .main-title {
+                font-size: 36px;
+                gap: 5px;
+            }
+
+            .title-eng {
+                letter-spacing: 4px;
+            }
+
+            .title-main {
+                letter-spacing: 3px;
+            }
+
+            .title-j {
+                /* Font size handled by clamp() */
+            }
+
+            .title-subtitle {
+                font-size: 16px;
+                letter-spacing: 2px;
+                margin-bottom: 20px;
+            }
+
+            .title-sparkles {
+                font-size: 32px;
+                gap: 15px;
+                margin-bottom: 30px;
+            }
+
+            .title-start-btn {
+                font-size: 20px;
+                padding: 12px 35px;
+                border-width: 3px;
+            }
+
+            .title-credit {
+                font-size: 12px;
+                margin-top: 30px;
+            }
+
+            .title-glow {
+                width: 300px;
+                height: 300px;
+            }
+
+            .title-description {
+                font-size: 16px;
+                margin-bottom: 20px;
+            }
+
+            .title-hint {
+                font-size: 12px;
+                margin-top: 12px;
+            }
+
+            .float-emoji {
+                font-size: 30px;
+            }
+        }
+
+        /* 작은 모바일 (세로 모드) */
+        @media (max-width: 500px) {
+            .title-container {
+                padding: 15px;
+            }
+
+            .main-title {
+                font-size: 28px;
+                gap: 3px;
+            }
+
+            .title-eng {
+                letter-spacing: 3px;
+            }
+
+            .title-main {
+                letter-spacing: 2px;
+            }
+
+            .title-j {
+                /* Font size handled by clamp() */
+            }
+
+            .title-subtitle {
+                font-size: 14px;
+                letter-spacing: 1px;
+                margin-bottom: 15px;
+            }
+
+            .title-sparkles {
+                font-size: 28px;
+                gap: 12px;
+                margin-bottom: 25px;
+            }
+
+            .title-start-btn {
+                font-size: 18px;
+                padding: 10px 30px;
+                border-width: 2px;
+            }
+
+            .title-credit {
+                font-size: 11px;
+                margin-top: 25px;
+            }
+
+            .title-glow {
+                width: 200px;
+                height: 200px;
+            }
+
+            #titleScreen::after {
+                font-size: 20px;
+            }
+
+            .title-description {
+                font-size: 13px;
+                margin-bottom: 15px;
+            }
+
+            .title-hint {
+                font-size: 10px;
+                margin-top: 10px;
+            }
+
+            .float-emoji {
+                font-size: 24px;
+            }
+        }
+
+        /* 가로 모드 모바일 */
+        @media (max-width: 900px) and (orientation: landscape) {
+            .title-container {
+                padding: 10px;
+                transform: scale(0.85);
+            }
+
+            .main-title {
+                margin-bottom: 10px;
+            }
+
+            .title-subtitle {
+                margin-bottom: 15px;
+            }
+
+            .title-sparkles {
+                margin-bottom: 20px;
+            }
+
+            .title-credit {
+                margin-top: 20px;
+            }
+
+            .title-description {
+                font-size: 14px;
+                margin-bottom: 12px;
+            }
+
+            .title-hint {
+                font-size: 11px;
+                margin-top: 8px;
+            }
+
+            .float-emoji {
+                font-size: 26px;
+            }
         }
 
         #startScreen {
@@ -350,94 +916,178 @@
             transition: all 0.1s;
         }
 
-        /* 모바일 가로 화면 최적화 (16:9 전용) */
+        /* 모바일 액션 버튼 컨테이너 */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            pointer-events: all;
+        }
+
+        /* 액션 버튼 (신검, 탁구공) */
+        .action-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.8);
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .action-btn:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .action-btn .btn-label {
+            font-size: 10px;
+            color: white;
+            font-weight: bold;
+            margin-top: 2px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        /* 신검 버튼 */
+        #swordBtn {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.4), rgba(135, 206, 250, 0.4));
+            border-color: #FFD700;
+        }
+
+        /* 탁구공 버튼 */
+        #ballBtn {
+            background: linear-gradient(135deg, rgba(255, 165, 0, 0.4), rgba(255, 215, 0, 0.4));
+            border-color: #FFA500;
+        }
+
+        /* 버튼 숨김 상태 */
+        .action-btn.hidden {
+            display: none;
+        }
+
+        /* 모바일 가로 화면 최적화 - 전체화면 */
         @media (max-width: 800px) and (orientation: landscape) {
+            body {
+                padding: 0 !important;
+            }
+
+            #gameContainer {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                padding: 0 !important;
+                padding-left: env(safe-area-inset-left, 0) !important;
+                padding-right: env(safe-area-inset-right, 0) !important;
+            }
+
             #startScreen h1 {
-                font-size: 28px;
+                font-size: 24px;
             }
 
             #startScreen p {
-                font-size: 12px;
-                padding: 0 15px;
-                margin-bottom: 5px;
+                font-size: 11px;
+                padding: 0 10px;
+                margin-bottom: 3px;
             }
 
             #startScreen button {
-                padding: 12px 25px;
-                font-size: 18px;
-                margin-top: 15px;
-            }
-
-            .controls {
-                font-size: 12px;
+                padding: 10px 20px;
+                font-size: 16px;
                 margin-top: 10px;
             }
 
+            .controls {
+                font-size: 10px;
+                margin-top: 8px;
+            }
+
             #mobileControls {
-                bottom: 10px;
-                padding: 0 10px;
+                bottom: env(safe-area-inset-bottom, 10px);
+                padding: 0 env(safe-area-inset-left, 10px) 0 env(safe-area-inset-right, 10px);
             }
 
             .joystick-container {
-                width: 100px;
-                height: 100px;
+                width: 90px;
+                height: 90px;
             }
 
             .joystick-stick {
-                width: 40px;
-                height: 40px;
+                width: 35px;
+                height: 35px;
+            }
+
+            .action-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+
+            .action-btn .btn-label {
+                font-size: 8px;
+            }
+
+            .action-buttons {
+                gap: 10px;
             }
 
             #energyContainer {
-                padding: 4px;
-                gap: 3px;
+                padding: 3px;
+                gap: 2px;
+                margin-left: env(safe-area-inset-left, 0);
             }
 
             .energyHeart {
-                width: 20px;
-                height: 20px;
+                width: 18px;
+                height: 18px;
             }
 
             #wordProgress {
-                padding: 6px 10px;
-                font-size: 14px;
-            }
-
-            #wordProgress.quiz-mode,
-            #wordProgress.boss-mode {
-                font-size: 13px !important;
-                padding: 6px 10px !important;
-                max-width: 250px !important;
+                padding: 5px 8px;
+                font-size: 12px;
+                margin-right: env(safe-area-inset-right, 0);
             }
 
             #stageDisplay {
-                font-size: 14px !important;
-            }
-
-            #targetWord {
-                font-size: 13px !important;
-            }
-
-            #collectedLetters {
                 font-size: 12px !important;
             }
 
+            #targetWord {
+                font-size: 11px !important;
+            }
+
+            #collectedLetters {
+                font-size: 10px !important;
+            }
+
             #gameOver {
-                padding: 25px 20px;
+                padding: 20px 15px;
             }
 
             #gameOver h2 {
-                font-size: 26px;
+                font-size: 22px;
             }
 
             #gameOver p {
-                font-size: 15px;
-                margin-bottom: 20px;
+                font-size: 13px;
+                margin-bottom: 15px;
             }
 
             #gameOver button {
-                padding: 12px 25px;
-                font-size: 16px;
+                padding: 10px 20px;
+                font-size: 14px;
             }
         }
     </style>
@@ -463,6 +1113,9 @@
                 <div class="energyHeart"></div>
                 <div class="energyHeart"></div>
                 <div class="energyHeart"></div>
+                <div class="energyHeart"></div>
+                <div class="energyHeart"></div>
+                <div class="energyHeart"></div>
             </div>
         </div>
 
@@ -472,20 +1125,55 @@
             <div id="collectedLetters">수집: </div>
         </div>
 
-        <div id="startScreen">
-            <h1>🎮 지율이의 영어 모험 🎮</h1>
-            <p>🌟 총 20개 스테이지를 클리어하세요!</p>
-            <p>📝 알파벳을 모아 단어를 완성하세요!</p>
-            <p>🎯 단어의 뜻을 맞추면 스테이지 클리어!</p>
-            <p>🏆 5, 10, 15, 20 스테이지는 보스전!</p>
-            <p>🏓 탁구 라켓으로 공을 쳐서 보스를 물리치세요!</p>
-            <p>👾 몬스터를 피하고 포션을 먹으세요!</p>
+        <!-- 오프닝 타이틀 화면 -->
+        <div id="titleScreen">
+            <!-- 배경 떠다니는 요소들 -->
+            <div class="floating-elements">
+                <span class="float-emoji" style="top: 15%; left: 10%; animation-delay: 0s;">⚔️</span>
+                <span class="float-emoji" style="top: 25%; right: 15%; animation-delay: 1s;">🏓</span>
+                <span class="float-emoji" style="top: 60%; left: 8%; animation-delay: 2s;">✨</span>
+                <span class="float-emoji" style="top: 70%; right: 12%; animation-delay: 1.5s;">💫</span>
+                <span class="float-emoji" style="top: 40%; left: 5%; animation-delay: 2.5s;">🌟</span>
+                <span class="float-emoji" style="top: 50%; right: 8%; animation-delay: 0.5s;">⭐</span>
+            </div>
+
+            <div class="title-container">
+                <div class="title-glow"></div>
+                <h1 class="main-title">
+                    <span class="title-eng">English</span>
+                    <span class="title-main">탁구 헌터</span>
+                    <span class="title-j">J</span>
+                </h1>
+                <div class="title-subtitle">잉글리쉬 탁구 헌터 제이</div>
+                <div class="title-description">Learn English & Master Ping Pong!</div>
+                <div class="title-sparkles">
+                    <span>✨</span><span>⚔️</span><span>🏓</span><span>✨</span>
+                </div>
+                <button class="title-start-btn" onclick="showStartScreen()">
+                    <span class="btn-text">PRESS START</span>
+                    <span class="btn-glow"></span>
+                </button>
+                <div class="title-hint">Press ENTER or TAP to Start</div>
+                <div class="title-credit">Created with ❤️ for Jiyul</div>
+            </div>
+        </div>
+
+        <div id="startScreen" style="display: none;">
+            <h1>🏓 잉글리쉬 탁구 헌터 J 🏓</h1>
+            <p style="font-size: 16px; color: #FFD700; margin-bottom: 15px;">영어 제국을 막고 탁구 레슨을 지켜라!</p>
+            <p>📚 영어 학원 끝나고 탁구장 가는 길에...</p>
+            <p>👾 영어 제국 외계인들이 지구 침공!</p>
+            <p>⚔️ 제니스 영어학원 sunzero 선생님이 준 신검!</p>
+            <p>🏓 신검과 탁구공으로 악당을 무찌르자!</p>
+            <p>🎯 20개 스테이지 클리어하면 금메달 주인공!</p>
+            <p style="color: #FF69B4; font-size: 14px;">💕 난이도: 쉬움쉬움! 초2도 거뜬!</p>
             <div class="controls">
                 <p>🎮 방향키 또는 WASD로 이동</p>
-                <p>⚡ 스페이스로 탁구공 발사</p>
-                <p>📱 모바일: 화면 조이스틱 사용</p>
+                <p>⚔️ 스페이스로 신검 발사! (몬스터 처치)</p>
+                <p>🏓 퀴즈/보스전에선 탁구공 발사!</p>
+                <p>📱 모바일: 조이스틱 + 버튼 사용</p>
             </div>
-            <button onclick="startGame()">게임 시작</button>
+            <button onclick="showOpening()">🎬 스토리 시작!</button>
         </div>
 
         <div id="gameOver">
@@ -500,6 +1188,16 @@
                 <div class="joystick-base"></div>
                 <div class="joystick-stick" id="joystickStick"></div>
             </div>
+            <div class="action-buttons">
+                <button id="swordBtn" class="action-btn">
+                    <span>⚔️</span>
+                    <div class="btn-label">신검</div>
+                </button>
+                <button id="ballBtn" class="action-btn hidden">
+                    <span>🏓</span>
+                    <div class="btn-label">탁구공</div>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -508,6 +1206,7 @@
     <script src="characters-boss.js"></script>
     <script src="words.js"></script>
     <script src="backgrounds.js"></script>
+    <script src="story.js"></script>
     <script src="game.js"></script>
 </body>
 </html>
