@@ -9,11 +9,24 @@ function resizeCanvas() {
     const rect = container.getBoundingClientRect();
     canvas.width = rect.width;
     canvas.height = rect.height;
-}
 
-// 초기 캔버스 크기 설정
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
+    // 퀴즈 모드일 때 선택지 위치 재계산 (게임이 실행 중일 때만)
+    if (gameState && gameState.isRunning && gameState.mode === GAME_MODE.QUIZ &&
+        quizChoices && quizChoices.length > 0 && currentStageData) {
+        try {
+            createQuizChoices();
+            // 지율이 위치도 재계산 (첫 번째 선택지 기준)
+            const jiyulX = 100;
+            const jiyulY = quizChoices[jiyulQuizY].y + quizChoices[jiyulQuizY].height / 2;
+            if (ball) {
+                ball.x = jiyulX + player.width + 60;
+                ball.y = jiyulY;
+            }
+        } catch (e) {
+            console.warn('퀴즈 선택지 재계산 중 오류:', e);
+        }
+    }
+}
 
 // 게임 모드
 const GAME_MODE = {
@@ -87,6 +100,10 @@ let quizChoices = [];
 // 퀴즈/보스 모드에서 지율이 위치
 let jiyulQuizY = 0;  // 현재 선택한 선택지 인덱스 (0~3)
 
+// 초기 캔버스 크기 설정 (모든 변수 정의 후 호출)
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
 // 입력 처리
 const keys = {};
 let spacePressed = false;  // 스페이스바 눌림 상태 (연속 발사용)
@@ -124,6 +141,7 @@ window.addEventListener('keyup', (e) => {
 // 터치 조이스틱
 const joystick = {
     active: false,
+    touchId: null,  // 조이스틱 터치 ID 추적
     startX: 0,
     startY: 0,
     currentX: 0,
@@ -145,32 +163,57 @@ let maxDistance = 45;
 
 function handleTouchStart(e) {
     e.preventDefault();
-    const touch = e.touches[0];
-    const rect = joystickContainer.getBoundingClientRect();
-    maxDistance = getMaxDistance();  // 터치 시작 시 최대 거리 업데이트
-    joystick.active = true;
-    joystick.startX = rect.left + rect.width / 2;
-    joystick.startY = rect.top + rect.height / 2;
-    joystick.currentX = touch.clientX;
-    joystick.currentY = touch.clientY;
-    updateJoystick();
+    // 첫 번째 터치만 받아서 조이스틱에 할당
+    if (!joystick.active && e.touches.length > 0) {
+        const touch = e.touches[0];
+        joystick.touchId = touch.identifier;  // 이 터치의 고유 ID 저장
+        const rect = joystickContainer.getBoundingClientRect();
+        maxDistance = getMaxDistance();
+        joystick.active = true;
+        joystick.startX = rect.left + rect.width / 2;
+        joystick.startY = rect.top + rect.height / 2;
+        joystick.currentX = touch.clientX;
+        joystick.currentY = touch.clientY;
+        updateJoystick();
+    }
 }
 
 function handleTouchMove(e) {
     if (!joystick.active) return;
     e.preventDefault();
-    const touch = e.touches[0];
-    joystick.currentX = touch.clientX;
-    joystick.currentY = touch.clientY;
-    updateJoystick();
+
+    // 조이스틱의 터치 ID와 일치하는 터치만 추적
+    for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === joystick.touchId) {
+            const touch = e.touches[i];
+            joystick.currentX = touch.clientX;
+            joystick.currentY = touch.clientY;
+            updateJoystick();
+            break;
+        }
+    }
 }
 
 function handleTouchEnd(e) {
     e.preventDefault();
-    joystick.active = false;
-    joystick.deltaX = 0;
-    joystick.deltaY = 0;
-    joystickStick.style.transform = 'translate(-50%, -50%)';
+
+    // 조이스틱의 터치가 끝났는지 확인
+    let joystickTouchEnded = true;
+    for (let i = 0; i < e.touches.length; i++) {
+        if (e.touches[i].identifier === joystick.touchId) {
+            joystickTouchEnded = false;
+            break;
+        }
+    }
+
+    // 조이스틱 터치가 끝났으면 초기화
+    if (joystickTouchEnded) {
+        joystick.active = false;
+        joystick.touchId = null;
+        joystick.deltaX = 0;
+        joystick.deltaY = 0;
+        joystickStick.style.transform = 'translate(-50%, -50%)';
+    }
 }
 
 function updateJoystick() {
@@ -202,6 +245,8 @@ const swordBtn = document.getElementById('swordBtn');
 const ballBtn = document.getElementById('ballBtn');
 let swordBtnPressed = false;  // 신검 버튼 눌림 상태
 let ballBtnPressed = false;   // 탁구공 버튼 눌림 상태
+let swordBtnTouchId = null;   // 신검 버튼 터치 ID
+let ballBtnTouchId = null;    // 탁구공 버튼 터치 ID
 
 // 신검 버튼 - 누르고 있는 동안 연속 발사
 if (swordBtn) {
@@ -209,20 +254,50 @@ if (swordBtn) {
     swordBtn.addEventListener('touchstart', (e) => {
         e.preventDefault();
         e.stopPropagation(); // 이벤트 전파 방지 (조이스틱으로 전파 차단)
-        if (gameState.mode === GAME_MODE.COLLECTING && gameState.isRunning && !dialogueState.active) {
-            swordBtnPressed = true;
+        if (gameState.mode === GAME_MODE.COLLECTING && gameState.isRunning && !dialogueState.active && !swordBtnPressed) {
+            // 첫 번째 터치의 ID 저장
+            if (e.touches.length > 0) {
+                swordBtnTouchId = e.touches[0].identifier;
+                swordBtnPressed = true;
+            }
         }
     });
     // 터치 끝
     swordBtn.addEventListener('touchend', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        swordBtnPressed = false;
+
+        // 신검 버튼의 터치가 끝났는지 확인
+        let swordTouchEnded = true;
+        for (let i = 0; i < e.touches.length; i++) {
+            if (e.touches[i].identifier === swordBtnTouchId) {
+                swordTouchEnded = false;
+                break;
+            }
+        }
+
+        if (swordTouchEnded) {
+            swordBtnPressed = false;
+            swordBtnTouchId = null;
+        }
     });
     swordBtn.addEventListener('touchcancel', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        swordBtnPressed = false;
+
+        // 신검 버튼의 터치가 끝났는지 확인
+        let swordTouchEnded = true;
+        for (let i = 0; i < e.touches.length; i++) {
+            if (e.touches[i].identifier === swordBtnTouchId) {
+                swordTouchEnded = false;
+                break;
+            }
+        }
+
+        if (swordTouchEnded) {
+            swordBtnPressed = false;
+            swordBtnTouchId = null;
+        }
     });
 
     // 마우스 지원 (PC 테스트용)
@@ -250,20 +325,50 @@ if (ballBtn) {
     ballBtn.addEventListener('touchstart', (e) => {
         e.preventDefault();
         e.stopPropagation(); // 이벤트 전파 방지 (조이스틱으로 전파 차단)
-        if ((gameState.mode === GAME_MODE.QUIZ || gameState.mode === GAME_MODE.BOSS) && gameState.isRunning && !dialogueState.active) {
-            ballBtnPressed = true;
+        if ((gameState.mode === GAME_MODE.QUIZ || gameState.mode === GAME_MODE.BOSS) && gameState.isRunning && !dialogueState.active && !ballBtnPressed) {
+            // 첫 번째 터치의 ID 저장
+            if (e.touches.length > 0) {
+                ballBtnTouchId = e.touches[0].identifier;
+                ballBtnPressed = true;
+            }
         }
     });
     // 터치 끝
     ballBtn.addEventListener('touchend', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        ballBtnPressed = false;
+
+        // 탁구공 버튼의 터치가 끝났는지 확인
+        let ballTouchEnded = true;
+        for (let i = 0; i < e.touches.length; i++) {
+            if (e.touches[i].identifier === ballBtnTouchId) {
+                ballTouchEnded = false;
+                break;
+            }
+        }
+
+        if (ballTouchEnded) {
+            ballBtnPressed = false;
+            ballBtnTouchId = null;
+        }
     });
     ballBtn.addEventListener('touchcancel', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        ballBtnPressed = false;
+
+        // 탁구공 버튼의 터치가 끝났는지 확인
+        let ballTouchEnded = true;
+        for (let i = 0; i < e.touches.length; i++) {
+            if (e.touches[i].identifier === ballBtnTouchId) {
+                ballTouchEnded = false;
+                break;
+            }
+        }
+
+        if (ballTouchEnded) {
+            ballBtnPressed = false;
+            ballBtnTouchId = null;
+        }
     });
 
     // 마우스 지원 (PC 테스트용)
@@ -627,8 +732,17 @@ class QuizChoice {
         this.y = y;
         // 모바일에서는 더 작은 크기 사용
         const isMobile = window.innerWidth <= 800;
-        this.width = isMobile ? 160 : 220;
-        this.height = isMobile ? 65 : 90;
+        const isLandscape = window.innerWidth > window.innerHeight;
+
+        // 가로 모드 모바일: 더 작은 크기로 4개 박스가 모두 보이도록
+        if (isMobile && isLandscape) {
+            this.width = 160;
+            this.height = Math.min(60, (canvas.height - 80) / 5);  // 화면 높이에 맞게
+        } else {
+            this.width = isMobile ? 160 : 220;
+            this.height = isMobile ? 65 : 90;
+        }
+
         this.text = text;
         this.isCorrect = isCorrect;
         this.index = index;
@@ -678,7 +792,17 @@ class QuizChoice {
         ctx.fillStyle = '#FFFFFF';
         // 모바일에서는 더 작은 폰트 사용
         const isMobile = window.innerWidth <= 800;
-        ctx.font = isMobile ? 'bold 14px Arial' : 'bold 20px Arial';
+        const isLandscape = window.innerWidth > window.innerHeight;
+
+        // 가로 모드 모바일: 박스 크기에 맞게 폰트 크기 조정
+        let fontSize;
+        if (isMobile && isLandscape) {
+            fontSize = Math.min(12, this.height * 0.25);  // 박스 높이의 25%
+        } else {
+            fontSize = isMobile ? 14 : 20;
+        }
+        ctx.font = `bold ${fontSize}px Arial`;
+
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.shadowColor = '#000000';
@@ -1342,9 +1466,21 @@ function createQuizChoices() {
     // 선택지 배치 (오른쪽에 세로로)
     // 모바일에서는 더 작은 간격과 위치 사용
     const isMobile = window.innerWidth <= 800;
+    const isLandscape = window.innerWidth > window.innerHeight;
+
+    // 가로 모드 모바일: 화면 높이에 맞게 간격 자동 조정
+    let spacingY;
+    if (isMobile && isLandscape) {
+        // 4개 박스가 모두 들어가도록 화면 높이 기반 계산
+        spacingY = Math.min(70, (canvas.height - 80) / 4);
+    } else if (isMobile) {
+        spacingY = 80;
+    } else {
+        spacingY = 110;
+    }
+
     const startX = isMobile ? canvas.width - 180 : canvas.width - 280;
-    const startY = isMobile ? 20 : 50;
-    const spacingY = isMobile ? 80 : 110;  // 세로 간격
+    const startY = isMobile && isLandscape ? 10 : (isMobile ? 20 : 50);
 
     for (let i = 0; i < 4; i++) {
         const x = startX;
@@ -1667,8 +1803,10 @@ function handleQuizAnswer(choice) {
             particles.push(new Particle(choice.x + choice.width / 2, choice.y + choice.height / 2, '#FF0000', 'normal'));
         }
 
-        // 공 리셋
-        ball = new Ball(paddle.x + paddle.width / 2, paddle.y - 10);
+        // 공 리셋 (지율이 위치에서)
+        const jiyulX = 100;
+        const jiyulY = 50 + jiyulQuizY * 110 + 45;
+        ball = new Ball(jiyulX + player.width + 60, jiyulY);
     }
 }
 
