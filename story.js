@@ -783,14 +783,14 @@ class StoryScene {
                     // 대화 (하단에 위치하도록)
                     if (this.animationFrame < 150) {
                         this.drawDialogBox(
-                            '안녕~! 나는 ABC 대마왕!\n영어 친구들아 모여라! 헤헤!',
+                            '안녕~! 나는 ABC 대마왕!\n영어 친구들아 모여라! 크크크!',
                             this.canvas.width / 2,
                             this.canvas.height - 250,
                             'ABC 대마왕'
                         );
                     } else {
                         this.drawDialogBox(
-                            '영어로 노래하고 춤추자!\n탁구도 할 수 있어!',
+                            '이제부터 너희는 영어만 공부해야 해!\n탁구는 금지! 오직 영어 공부만! 하하하!',
                             this.canvas.width / 2,
                             this.canvas.height - 250,
                             'ABC 대마왕'
@@ -800,7 +800,7 @@ class StoryScene {
                     // 지율이 대사
                     if (this.animationFrame > 200) {
                         this.drawDialogBox(
-                            '안 돼! 탁구는 내 생명이야!',
+                            '뭐라고?! 탁구는 내 생명인데!\n절대 포기 못 해!',
                             this.canvas.width / 4,
                             this.canvas.height - 300,
                             '지율'
@@ -809,9 +809,8 @@ class StoryScene {
                 }
             },
 
-            // 씬 5: 제니스 영어학원 sunzero 선생님 등장!
+            // 씬 5-1: 제니스 영어학원 sunzero 선생님 등장! (지율이 놀람)
             {
-                duration: 300,
                 update: () => {
                     // 신비로운 보라색 하늘
                     this.drawSkyBackground('#9370DB', '#DDA0DD');
@@ -1009,36 +1008,304 @@ class StoryScene {
                         }
                     }
 
-                    // 대화 (화면 하단에 배치)
-                    if (this.animationFrame < 80) {
-                        this.drawDialogBox(
-                            '헉! 누구세요?!',
-                            this.canvas.width / 4,
-                            this.canvas.height - 120,
-                            '지율'
-                        );
-                    } else if (this.animationFrame < 160) {
-                        this.drawDialogBox(
-                            '안녕 지율아! 나는 제니스 영어학원의\nsunzero 선생님이야. 너를 도와주러 왔어!',
-                            this.canvas.width * 3 / 4,
-                            this.canvas.height - 150,
-                            'sunzero 선생님'
-                        );
-                    } else if (this.animationFrame < 240) {
-                        this.drawDialogBox(
-                            '이 신검을 받아! ABC 대마왕을 물리칠 수 있을 거야!\n1시, 3시, 5시 방향으로 3개가 날아가는 전설의 검이란다!',
-                            this.canvas.width / 2,
-                            this.canvas.height - 130,
-                            'sunzero 선생님'
-                        );
-                    } else {
-                        this.drawDialogBox(
-                            '와! 감사합니다 선생님!\n이걸로 ABC 대마왕을 무찌르고 탁구도 지킬게요!',
-                            this.canvas.width / 4,
-                            this.canvas.height - 140,
-                            '지율'
-                        );
+                    // 지율이 대사
+                    this.drawDialogBox(
+                        '헉! 누구세요?!',
+                        this.canvas.width / 4,
+                        this.canvas.height - 120,
+                        '지율'
+                    );
+                }
+            },
+
+            // 씬 5-2: sunzero 선생님 자기소개
+            {
+                update: () => {
+                    // 신비로운 보라색 하늘
+                    this.drawSkyBackground('#9370DB', '#DDA0DD');
+
+                    // 반짝이는 별들
+                    for (let i = 0; i < 20; i++) {
+                        const x = (i * 50 + this.animationFrame) % this.canvas.width;
+                        const y = 50 + Math.sin(this.animationFrame * 0.05 + i) * 30;
+                        this.ctx.fillStyle = '#FFD700';
+                        this.ctx.font = '20px Arial';
+                        this.ctx.fillText('✨', x, y);
                     }
+
+                    // 땅
+                    this.drawGround();
+
+                    // 제니스 영어학원 건물
+                    const buildingGlow = Math.sin(this.animationFrame * 0.1) * 0.3 + 0.7;
+                    this.ctx.fillStyle = `rgba(139, 115, 85, ${buildingGlow})`;
+                    this.ctx.fillRect(50, this.canvas.height - 280, 250, 180);
+
+                    // 건물 창문
+                    this.ctx.fillStyle = '#FFD700';
+                    for (let i = 0; i < 2; i++) {
+                        for (let j = 0; j < 3; j++) {
+                            this.ctx.fillRect(80 + j * 60, this.canvas.height - 250 + i * 60, 40, 50);
+                        }
+                    }
+
+                    // 간판
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                    this.ctx.fillRect(60, this.canvas.height - 300, 230, 40);
+                    this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
+                    this.ctx.font = 'bold 22px Arial';
+                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 80, this.canvas.height - 275);
+
+                    // 지율이
+                    this.drawJiyul(this.canvas.width / 2 - 100, this.canvas.height - 170, 'idle', 0, 4);
+
+                    // sunzero 선생님 그리기 (간단화)
+                    const sunzeroSprite = [
+                        [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+                        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+                        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                        [1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1],
+                        [1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1],
+                        [0,1,2,3,3,3,2,2,2,3,3,3,2,2,1,0],
+                        [0,1,2,3,4,4,2,2,2,3,4,4,2,2,1,0],
+                        [0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
+                        [0,0,2,9,2,2,5,5,5,2,2,9,2,0,0,0],
+                        [0,0,0,6,6,6,6,6,6,6,6,6,0,0,0,0],
+                        [0,0,6,6,6,7,6,6,7,6,6,6,6,0,0,0],
+                        [0,8,8,8,8,8,8,8,8,8,8,8,8,0,0,0],
+                        [0,8,8,8,8,8,8,8,8,8,8,8,8,0,0,0],
+                        [0,0,8,8,8,10,0,0,10,8,8,8,0,0,0,0],
+                        [0,0,2,2,2,0,0,0,0,2,2,2,0,0,0,0],
+                        [0,0,11,11,11,0,0,0,0,11,11,11,0,0,0,0]
+                    ];
+                    const sunzeroColorMap = {
+                        0: null, 1: '#2C1810', 2: '#FFE0BD', 3: '#FFFFFF', 4: '#000000',
+                        5: '#FF69B4', 6: '#D4A518', 7: '#C0C0C0', 8: '#1A1A1A',
+                        9: '#FFB6C1', 10: '#FFD700', 11: '#8B4513'
+                    };
+                    this.drawPixelSprite(sunzeroSprite, sunzeroColorMap,
+                        this.canvas.width / 2 + 70, this.canvas.height - 200, 4);
+
+                    // 선생님 대사
+                    this.drawDialogBox(
+                        '안녕 지율아! 나는 제니스 영어학원의\nsunzero 선생님이야. 너를 도와주러 왔어!',
+                        this.canvas.width * 3 / 4,
+                        this.canvas.height - 150,
+                        'sunzero 선생님'
+                    );
+                }
+            },
+
+            // 씬 5-3: 신검 설명
+            {
+                update: () => {
+                    // 신비로운 보라색 하늘
+                    this.drawSkyBackground('#9370DB', '#DDA0DD');
+
+                    // 반짝이는 별들
+                    for (let i = 0; i < 20; i++) {
+                        const x = (i * 50 + this.animationFrame) % this.canvas.width;
+                        const y = 50 + Math.sin(this.animationFrame * 0.05 + i) * 30;
+                        this.ctx.fillStyle = '#FFD700';
+                        this.ctx.font = '20px Arial';
+                        this.ctx.fillText('✨', x, y);
+                    }
+
+                    // 땅
+                    this.drawGround();
+
+                    // 제니스 영어학원 건물
+                    const buildingGlow = Math.sin(this.animationFrame * 0.1) * 0.3 + 0.7;
+                    this.ctx.fillStyle = `rgba(139, 115, 85, ${buildingGlow})`;
+                    this.ctx.fillRect(50, this.canvas.height - 280, 250, 180);
+
+                    // 건물 창문
+                    this.ctx.fillStyle = '#FFD700';
+                    for (let i = 0; i < 2; i++) {
+                        for (let j = 0; j < 3; j++) {
+                            this.ctx.fillRect(80 + j * 60, this.canvas.height - 250 + i * 60, 40, 50);
+                        }
+                    }
+
+                    // 간판
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                    this.ctx.fillRect(60, this.canvas.height - 300, 230, 40);
+                    this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
+                    this.ctx.font = 'bold 22px Arial';
+                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 80, this.canvas.height - 275);
+
+                    // 지율이
+                    this.drawJiyul(this.canvas.width / 2 - 100, this.canvas.height - 170, 'idle', 0, 4);
+
+                    // sunzero 선생님
+                    const sunzeroSprite = [
+                        [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+                        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+                        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                        [1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1],
+                        [1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1],
+                        [0,1,2,3,3,3,2,2,2,3,3,3,2,2,1,0],
+                        [0,1,2,3,4,4,2,2,2,3,4,4,2,2,1,0],
+                        [0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
+                        [0,0,2,9,2,2,5,5,5,2,2,9,2,0,0,0],
+                        [0,0,0,6,6,6,6,6,6,6,6,6,0,0,0,0],
+                        [0,0,6,6,6,7,6,6,7,6,6,6,6,0,0,0],
+                        [0,8,8,8,8,8,8,8,8,8,8,8,8,0,0,0],
+                        [0,8,8,8,8,8,8,8,8,8,8,8,8,0,0,0],
+                        [0,0,8,8,8,10,0,0,10,8,8,8,0,0,0,0],
+                        [0,0,2,2,2,0,0,0,0,2,2,2,0,0,0,0],
+                        [0,0,11,11,11,0,0,0,0,11,11,11,0,0,0,0]
+                    ];
+                    const sunzeroColorMap = {
+                        0: null, 1: '#2C1810', 2: '#FFE0BD', 3: '#FFFFFF', 4: '#000000',
+                        5: '#FF69B4', 6: '#D4A518', 7: '#C0C0C0', 8: '#1A1A1A',
+                        9: '#FFB6C1', 10: '#FFD700', 11: '#8B4513'
+                    };
+                    this.drawPixelSprite(sunzeroSprite, sunzeroColorMap,
+                        this.canvas.width / 2 + 70, this.canvas.height - 200, 4);
+
+                    // 신검 (떠있는 상태)
+                    const swordY = this.canvas.height / 2 + Math.sin(this.animationFrame * 0.1) * 10;
+                    const swordRotation = this.animationFrame * 0.05;
+
+                    this.ctx.save();
+                    this.ctx.translate(this.canvas.width / 2, swordY);
+                    this.ctx.rotate(swordRotation);
+
+                    // 신검 글로우
+                    const swordGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 60);
+                    swordGradient.addColorStop(0, 'rgba(186, 85, 211, 0.8)');
+                    swordGradient.addColorStop(0.5, 'rgba(255, 105, 180, 0.5)');
+                    swordGradient.addColorStop(1, 'rgba(186, 85, 211, 0)');
+                    this.ctx.fillStyle = swordGradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, 60, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // 신검 본체
+                    const gradient = this.ctx.createLinearGradient(-30, 0, 30, 0);
+                    gradient.addColorStop(0, '#FFA500');
+                    gradient.addColorStop(0.2, '#FFD700');
+                    gradient.addColorStop(0.4, '#D8BFD8');
+                    gradient.addColorStop(0.6, '#BA55D3');
+                    gradient.addColorStop(0.8, '#9370DB');
+                    gradient.addColorStop(1, '#8B008B');
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.fillRect(-30, -4, 60, 8);
+
+                    // 검 끝
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(30, -4);
+                    this.ctx.lineTo(35, 0);
+                    this.ctx.lineTo(30, 4);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+
+                    // 핑크 중심선
+                    this.ctx.strokeStyle = '#FF69B4';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(-25, 0);
+                    this.ctx.lineTo(30, 0);
+                    this.ctx.stroke();
+
+                    this.ctx.restore();
+
+                    // 신검 주위 반짝임
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (this.animationFrame * 0.05 + i * Math.PI / 4);
+                        const sparkX = this.canvas.width / 2 + Math.cos(angle) * 70;
+                        const sparkY = swordY + Math.sin(angle) * 70;
+                        this.ctx.fillStyle = ['#FFD700', '#FF69B4', '#BA55D3'][i % 3];
+                        this.ctx.font = '20px Arial';
+                        this.ctx.fillText('✨', sparkX, sparkY);
+                    }
+
+                    // 선생님 대사
+                    this.drawDialogBox(
+                        '이 신검을 받아! ABC 대마왕을 물리칠 수 있을 거야!\n1시, 3시, 5시 방향으로 3개가 날아가는 전설의 검이란다!',
+                        this.canvas.width / 2,
+                        this.canvas.height - 130,
+                        'sunzero 선생님'
+                    );
+                }
+            },
+
+            // 씬 5-4: 지율이 감사
+            {
+                update: () => {
+                    // 신비로운 보라색 하늘
+                    this.drawSkyBackground('#9370DB', '#DDA0DD');
+
+                    // 반짝이는 별들
+                    for (let i = 0; i < 20; i++) {
+                        const x = (i * 50 + this.animationFrame) % this.canvas.width;
+                        const y = 50 + Math.sin(this.animationFrame * 0.05 + i) * 30;
+                        this.ctx.fillStyle = '#FFD700';
+                        this.ctx.font = '20px Arial';
+                        this.ctx.fillText('✨', x, y);
+                    }
+
+                    // 땅
+                    this.drawGround();
+
+                    // 제니스 영어학원 건물
+                    const buildingGlow = Math.sin(this.animationFrame * 0.1) * 0.3 + 0.7;
+                    this.ctx.fillStyle = `rgba(139, 115, 85, ${buildingGlow})`;
+                    this.ctx.fillRect(50, this.canvas.height - 280, 250, 180);
+
+                    // 건물 창문
+                    this.ctx.fillStyle = '#FFD700';
+                    for (let i = 0; i < 2; i++) {
+                        for (let j = 0; j < 3; j++) {
+                            this.ctx.fillRect(80 + j * 60, this.canvas.height - 250 + i * 60, 40, 50);
+                        }
+                    }
+
+                    // 간판
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                    this.ctx.fillRect(60, this.canvas.height - 300, 230, 40);
+                    this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
+                    this.ctx.font = 'bold 22px Arial';
+                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 80, this.canvas.height - 275);
+
+                    // 지율이
+                    this.drawJiyul(this.canvas.width / 2 - 100, this.canvas.height - 170, 'jump', 0, 4);
+
+                    // sunzero 선생님
+                    const sunzeroSprite = [
+                        [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+                        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+                        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                        [1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1],
+                        [1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1],
+                        [0,1,2,3,3,3,2,2,2,3,3,3,2,2,1,0],
+                        [0,1,2,3,4,4,2,2,2,3,4,4,2,2,1,0],
+                        [0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
+                        [0,0,2,9,2,2,5,5,5,2,2,9,2,0,0,0],
+                        [0,0,0,6,6,6,6,6,6,6,6,6,0,0,0,0],
+                        [0,0,6,6,6,7,6,6,7,6,6,6,6,0,0,0],
+                        [0,8,8,8,8,8,8,8,8,8,8,8,8,0,0,0],
+                        [0,8,8,8,8,8,8,8,8,8,8,8,8,0,0,0],
+                        [0,0,8,8,8,10,0,0,10,8,8,8,0,0,0,0],
+                        [0,0,2,2,2,0,0,0,0,2,2,2,0,0,0,0],
+                        [0,0,11,11,11,0,0,0,0,11,11,11,0,0,0,0]
+                    ];
+                    const sunzeroColorMap = {
+                        0: null, 1: '#2C1810', 2: '#FFE0BD', 3: '#FFFFFF', 4: '#000000',
+                        5: '#FF69B4', 6: '#D4A518', 7: '#C0C0C0', 8: '#1A1A1A',
+                        9: '#FFB6C1', 10: '#FFD700', 11: '#8B4513'
+                    };
+                    this.drawPixelSprite(sunzeroSprite, sunzeroColorMap,
+                        this.canvas.width / 2 + 70, this.canvas.height - 200, 4);
+
+                    // 지율이 대사
+                    this.drawDialogBox(
+                        '와! 감사합니다 선생님!\nABC 대마왕을 무찌르고 탁구를 지킬게요!',
+                        this.canvas.width / 4,
+                        this.canvas.height - 140,
+                        '지율'
+                    );
                 }
             },
 
@@ -1188,7 +1455,7 @@ class StoryScene {
 
                     // 결의의 대사
                     this.drawDialogBox(
-                        '좋아! 신검과 탁구 라켓!\n이제 ABC 대마왕을 무찌르러 가자!!',
+                        '좋아! 신검과 탁구 라켓!\nABC 대마왕을 무찌르고 탁구를 지킬 거야!!',
                         this.canvas.width / 2,
                         this.canvas.height - 200,
                         '지율'
@@ -1557,8 +1824,8 @@ class StoryScene {
         // 프레임 증가 (애니메이션은 계속 진행하되, 씬 전환은 사용자 입력 대기)
         this.animationFrame++;
 
-        // 씬이 충분히 표시되었는지 확인 (최소 5초 - 텍스트를 천천히 읽을 시간)
-        const minDisplayTime = 300; // 5초 (60fps 기준)
+        // 씬이 충분히 표시되었는지 확인 (최소 2초 - 텍스트를 빠르게 읽을 수 있도록)
+        const minDisplayTime = 120; // 2초 (60fps 기준) - 빠르게 변경
         if (this.animationFrame >= minDisplayTime && !this.waitingForInput) {
             this.waitingForInput = true;
             this.canProceed = false;

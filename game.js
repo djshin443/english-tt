@@ -208,32 +208,46 @@ if (swordBtn) {
     // 터치 시작
     swordBtn.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        e.stopPropagation(); // 이벤트 전파 방지 (조이스틱으로 전파 차단)
         if (gameState.mode === GAME_MODE.COLLECTING && gameState.isRunning && !dialogueState.active) {
             swordBtnPressed = true;
+            // 조이스틱 비활성화 (신검 버튼 터치 시 이동 방지)
+            joystick.active = false;
+            joystick.deltaX = 0;
+            joystick.deltaY = 0;
         }
     });
     // 터치 끝
     swordBtn.addEventListener('touchend', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         swordBtnPressed = false;
     });
     swordBtn.addEventListener('touchcancel', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         swordBtnPressed = false;
     });
 
     // 마우스 지원 (PC 테스트용)
     swordBtn.addEventListener('mousedown', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         if (gameState.mode === GAME_MODE.COLLECTING && gameState.isRunning && !dialogueState.active) {
             swordBtnPressed = true;
+            // 조이스틱 비활성화
+            joystick.active = false;
+            joystick.deltaX = 0;
+            joystick.deltaY = 0;
         }
     });
     swordBtn.addEventListener('mouseup', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         swordBtnPressed = false;
     });
     swordBtn.addEventListener('mouseleave', (e) => {
+        e.stopPropagation();
         swordBtnPressed = false;
     });
 }
@@ -243,32 +257,46 @@ if (ballBtn) {
     // 터치 시작
     ballBtn.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        e.stopPropagation(); // 이벤트 전파 방지 (조이스틱으로 전파 차단)
         if ((gameState.mode === GAME_MODE.QUIZ || gameState.mode === GAME_MODE.BOSS) && gameState.isRunning && !dialogueState.active) {
             ballBtnPressed = true;
+            // 조이스틱 비활성화 (탁구공 버튼 터치 시 이동 방지)
+            joystick.active = false;
+            joystick.deltaX = 0;
+            joystick.deltaY = 0;
         }
     });
     // 터치 끝
     ballBtn.addEventListener('touchend', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         ballBtnPressed = false;
     });
     ballBtn.addEventListener('touchcancel', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         ballBtnPressed = false;
     });
 
     // 마우스 지원 (PC 테스트용)
     ballBtn.addEventListener('mousedown', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         if ((gameState.mode === GAME_MODE.QUIZ || gameState.mode === GAME_MODE.BOSS) && gameState.isRunning && !dialogueState.active) {
             ballBtnPressed = true;
+            // 조이스틱 비활성화
+            joystick.active = false;
+            joystick.deltaX = 0;
+            joystick.deltaY = 0;
         }
     });
     ballBtn.addEventListener('mouseup', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         ballBtnPressed = false;
     });
     ballBtn.addEventListener('mouseleave', (e) => {
+        e.stopPropagation();
         ballBtnPressed = false;
     });
 }
