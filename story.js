@@ -407,9 +407,8 @@ class StoryScene {
     // 오프닝 씬 정의
     getOpeningScenes() {
         return [
-            // 씬 1: 학원 앞
+            // 씬 1-1: 학원 앞 (배경만)
             {
-                duration: 180,
                 update: () => {
                     // 하늘 배경
                     this.drawSkyBackground('#87CEEB', '#E0F6FF');
@@ -439,23 +438,52 @@ class StoryScene {
                         4
                     );
 
-                    // 대화
-                    if (this.animationFrame > 60) {
-                        this.drawDialogBox(
-                            '휴~ 오늘도 영어 공부 끝!\n이제 탁구 레슨 가야지!',
-                            this.canvas.width / 2,
-                            this.canvas.height - 300,
-                            '지율'
-                        );
-                    }
-
                     this.bgScroll++;
                 }
             },
 
-            // 씬 2: 길거리 (탁구장으로 이동)
+            // 씬 1-2: 지율이 대사
             {
-                duration: 200,
+                update: () => {
+                    // 하늘 배경
+                    this.drawSkyBackground('#87CEEB', '#E0F6FF');
+
+                    // 구름들
+                    this.drawCloud(100, 50, 1.2);
+                    this.drawCloud(300, 80, 0.8);
+                    this.drawCloud(500, 40, 1.0);
+
+                    // 땅
+                    this.drawGround();
+
+                    // 건물 (학원)
+                    this.ctx.fillStyle = '#8B7355';
+                    this.ctx.fillRect(50, this.canvas.height - 250, 200, 150);
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.font = 'bold 20px Arial';
+                    this.ctx.fillText('영어학원', 100, this.canvas.height - 200);
+
+                    // 지율이
+                    this.drawJiyul(
+                        this.canvas.width / 2,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    // 대화
+                    this.drawDialogBox(
+                        '휴~ 오늘도 영어 공부 끝!\n이제 탁구 레슨 가야지!',
+                        this.canvas.width / 2,
+                        this.canvas.height - 300,
+                        '지율'
+                    );
+                }
+            },
+
+            // 씬 2-1: 길거리 (이동 중)
+            {
                 update: () => {
                     // 하늘
                     this.drawSkyBackground('#87CEEB', '#98D8E8');
@@ -512,16 +540,6 @@ class StoryScene {
                     this.ctx.fill();
                     this.ctx.restore();
 
-                    // 대화
-                    if (this.animationFrame > 50) {
-                        this.drawDialogBox(
-                            '오늘은 스매싱 기술 배운대!\n완전 기대된다!',
-                            this.canvas.width / 2,
-                            this.canvas.height - 300,
-                            '지율'
-                        );
-                    }
-
                     // 음표 효과
                     for (let i = 0; i < 3; i++) {
                         const noteY = this.canvas.height - 200 - Math.sin(this.animationFrame * 0.05 + i) * 20;
@@ -531,23 +549,56 @@ class StoryScene {
                 }
             },
 
-            // 씬 3: UFO 등장!
+            // 씬 2-2: 지율이 대사
             {
-                duration: 250,
                 update: () => {
-                    // 붉은 하늘 (위험!)
-                    const redAmount = Math.min(1, this.animationFrame / 50);
-                    this.drawSkyBackground(
-                        `rgb(${135 + redAmount * 120}, ${Math.max(0, 206 - redAmount * 206)}, ${Math.max(0, 235 - redAmount * 235)})`,
-                        `rgb(${224 + redAmount * 31}, ${Math.max(0, 246 - redAmount * 246)}, ${Math.max(0, 255 - redAmount * 255)})`
+                    // 하늘
+                    this.drawSkyBackground('#87CEEB', '#98D8E8');
+
+                    // 구름
+                    for (let i = 0; i < 3; i++) {
+                        this.drawCloud(i * 250, 50 + i * 30, 0.8 + i * 0.2);
+                    }
+
+                    // 땅
+                    this.drawGround();
+
+                    // 지율이
+                    this.drawJiyul(
+                        this.canvas.width / 2 - 50,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
                     );
 
-                    // 화면 흔들기
-                    if (this.animationFrame > 50) {
-                        this.ctx.save();
-                        const shake = Math.sin(this.animationFrame * 0.5) * 5;
-                        this.ctx.translate(shake, shake);
-                    }
+                    // 탁구 라켓
+                    this.ctx.save();
+                    this.ctx.translate(this.canvas.width / 2 + 20, this.canvas.height - 150);
+                    this.ctx.rotate(Math.sin(this.animationFrame * 0.1) * 0.2);
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.fillRect(-5, -30, 10, 30);
+                    this.ctx.fillStyle = '#9370DB';
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(0, -40, 20, 25, 0, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+
+                    // 대화
+                    this.drawDialogBox(
+                        '오늘은 스매싱 기술 배운대!\n완전 기대된다!',
+                        this.canvas.width / 2,
+                        this.canvas.height - 300,
+                        '지율'
+                    );
+                }
+            },
+
+            // 씬 3-1: UFO 등장 (지율이 놀람)
+            {
+                update: () => {
+                    // 붉은 하늘
+                    this.drawSkyBackground('#FF6B6B', '#FFB6C1');
 
                     // 땅
                     this.drawGround();
@@ -585,35 +636,54 @@ class StoryScene {
                         this.ctx.stroke();
                     }
 
-                    // 폭발 파티클
-                    if (this.animationFrame % 30 === 0) {
-                        this.createExplosion(
-                            Math.random() * this.canvas.width,
-                            Math.random() * this.canvas.height / 2
-                        );
-                    }
-                    this.updateParticles();
+                    // 대화
+                    this.drawDialogBox(
+                        '으악! 뭐야 저거?! UFO?!',
+                        this.canvas.width / 2,
+                        this.canvas.height - 300,
+                        '지율'
+                    );
+                }
+            },
+
+            // 씬 3-2: UFO 대사
+            {
+                update: () => {
+                    // 붉은 하늘
+                    this.drawSkyBackground('#FF6B6B', '#FFB6C1');
+
+                    // 땅
+                    this.drawGround();
+
+                    // 지율이
+                    this.drawJiyul(
+                        this.canvas.width / 2,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    // UFO들
+                    const ufoY = 100 + Math.sin(this.animationFrame * 0.05) * 20;
+                    this.drawPixelUFO(
+                        this.canvas.width / 2 - 100,
+                        ufoY,
+                        5
+                    );
+                    this.drawPixelUFO(
+                        this.canvas.width / 2 + 100,
+                        ufoY + 50,
+                        4
+                    );
 
                     // 대화
-                    if (this.animationFrame > 30 && this.animationFrame < 120) {
-                        this.drawDialogBox(
-                            '으악! 뭐야 저거?! UFO?!',
-                            this.canvas.width / 2,
-                            this.canvas.height - 300,
-                            '지율'
-                        );
-                    } else if (this.animationFrame >= 120) {
-                        this.drawDialogBox(
-                            '쿠하하하! 우리는 영어 제국에서 왔다!',
-                            this.canvas.width / 2,
-                            50,
-                            '???'
-                        );
-                    }
-
-                    if (this.animationFrame > 50) {
-                        this.ctx.restore();
-                    }
+                    this.drawDialogBox(
+                        '쿠하하하! 우리는 영어 제국에서 왔다!',
+                        this.canvas.width / 2,
+                        50,
+                        '???'
+                    );
                 }
             },
 
@@ -1484,11 +1554,11 @@ class StoryScene {
         // 스킵 안내 및 진행 버튼
         this.drawControls();
 
-        // 프레임 증가 (애니메이션은 계속 진행)
+        // 프레임 증가 (애니메이션은 계속 진행하되, 씬 전환은 사용자 입력 대기)
         this.animationFrame++;
 
-        // 씬이 충분히 표시되었는지 확인 (최소 1초)
-        const minDisplayTime = 60; // 1초 (60fps 기준)
+        // 씬이 충분히 표시되었는지 확인 (최소 5초 - 텍스트를 천천히 읽을 시간)
+        const minDisplayTime = 300; // 5초 (60fps 기준)
         if (this.animationFrame >= minDisplayTime && !this.waitingForInput) {
             this.waitingForInput = true;
             this.canProceed = false;
