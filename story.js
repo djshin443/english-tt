@@ -1823,8 +1823,14 @@ class StoryScene {
 
         const scene = this.scenes[this.currentScene];
 
-        // 전역 스케일 적용 - 모든 스토리 요소를 50% 크기로
+        // 전역 스케일 적용 - 모든 스토리 요소를 50% 크기로 (중앙 정렬)
         this.ctx.save();
+
+        // 스케일로 인한 오프셋 계산 (중앙 배치)
+        const offsetX = (this.canvas.width * (1 - this.GAME_SCALE)) / 2;
+        const offsetY = (this.canvas.height * (1 - this.GAME_SCALE)) / 2;
+
+        this.ctx.translate(offsetX, offsetY);
         this.ctx.scale(this.GAME_SCALE, this.GAME_SCALE);
 
         // 씬 업데이트 함수 호출
@@ -1835,8 +1841,9 @@ class StoryScene {
         // 스케일 복원
         this.ctx.restore();
 
-        // 스킵 안내 및 진행 버튼 (스케일 없이)
+        // 스킵 안내 및 진행 버튼 (중앙 정렬)
         this.ctx.save();
+        this.ctx.translate(offsetX, offsetY);
         this.ctx.scale(this.GAME_SCALE, this.GAME_SCALE);
         this.drawControls();
         this.ctx.restore();

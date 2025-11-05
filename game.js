@@ -1474,20 +1474,20 @@ function createQuizChoices() {
     const isLandscape = window.innerWidth > window.innerHeight;
 
     // 가로 모드 모바일: 화면 높이에 맞게 간격 자동 조정
-    // GAME_SCALE(0.5) 적용으로 실제 좌표는 2배 필요
+    // GAME_SCALE(0.5) + 중앙 정렬 적용으로 실제 좌표는 2배 필요
     let spacingY;
     if (isMobile && isLandscape) {
-        // 4개 박스가 모두 들어가도록 화면 높이 기반 계산
-        spacingY = Math.min(140, (canvas.height * 2 - 200) / 4);
+        // 4개 박스가 모두 들어가도록 화면 높이 기반 계산 (간격 축소)
+        spacingY = Math.min(110, (canvas.height * 2 - 300) / 4);
     } else if (isMobile) {
-        spacingY = 160;
+        spacingY = 120;
     } else {
-        spacingY = 220;
+        spacingY = 160;
     }
 
     const startX = isMobile ? canvas.width * 2 - 360 : canvas.width * 2 - 560;
-    // UI 겹침 방지를 위해 시작 위치를 아래로 이동 (스케일 0.5 고려)
-    const startY = isMobile && isLandscape ? 180 : (isMobile ? 200 : 180);
+    // UI 겹침 방지를 위해 시작 위치 조정 (중앙 정렬 고려)
+    const startY = isMobile && isLandscape ? 120 : (isMobile ? 140 : 120);
 
     for (let i = 0; i < 4; i++) {
         const x = startX;
@@ -2312,8 +2312,14 @@ function gameLoop() {
     // 배경 그리기 (스케일 적용 전 - 전체 화면 유지)
     drawBackground();
 
-    // 전역 스케일 적용 - 모든 게임 요소를 50% 크기로 축소
+    // 전역 스케일 적용 - 모든 게임 요소를 50% 크기로 축소 (중앙 정렬)
     ctx.save();
+
+    // 스케일로 인한 오프셋 계산 (중앙 배치)
+    const offsetX = (canvas.width * (1 - GAME_SCALE)) / 2;
+    const offsetY = (canvas.height * (1 - GAME_SCALE)) / 2;
+
+    ctx.translate(offsetX, offsetY);
     ctx.scale(GAME_SCALE, GAME_SCALE);
 
     if (gameState.mode === GAME_MODE.COLLECTING) {
