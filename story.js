@@ -12,8 +12,7 @@ class StoryScene {
         // 픽셀 스케일
         this.PIXEL_SCALE = 4;
 
-        // 게임 스케일 (모든 요소를 50% 크기로)
-        this.GAME_SCALE = 0.5;
+        // 오프닝/엔딩 시퀀스는 스케일 없이 전체 화면 사용 (게임과 달리 100% 크기)
 
         // 애니메이션 속도
         this.frameDelay = 0;
@@ -143,9 +142,9 @@ class StoryScene {
 
     // 배경 그리기 (하늘)
     drawSkyBackground(color1 = '#87CEEB', color2 = '#E0F6FF') {
-        // GAME_SCALE을 고려한 실제 캔버스 크기
-        const canvasWidth = this.canvas.width / this.GAME_SCALE;
-        const canvasHeight = this.canvas.height / this.GAME_SCALE;
+        // 전체 캔버스 크기 사용 (스케일 없음)
+        const canvasWidth = this.canvas.width;
+        const canvasHeight = this.canvas.height;
         const gradient = this.ctx.createLinearGradient(0, 0, 0, canvasHeight);
         gradient.addColorStop(0, color1);
         gradient.addColorStop(1, color2);
@@ -168,9 +167,9 @@ class StoryScene {
 
     // 땅 그리기
     drawGround() {
-        // GAME_SCALE을 고려한 실제 캔버스 크기
-        const canvasWidth = this.canvas.width / this.GAME_SCALE;
-        const canvasHeight = this.canvas.height / this.GAME_SCALE;
+        // 전체 캔버스 크기 사용 (스케일 없음)
+        const canvasWidth = this.canvas.width;
+        const canvasHeight = this.canvas.height;
 
         // 잔디
         this.ctx.fillStyle = '#228B22';
@@ -1823,30 +1822,13 @@ class StoryScene {
 
         const scene = this.scenes[this.currentScene];
 
-        // 전역 스케일 적용 - 모든 스토리 요소를 50% 크기로 (중앙 정렬)
-        this.ctx.save();
-
-        // 스케일로 인한 오프셋 계산 (중앙 배치)
-        const offsetX = (this.canvas.width * (1 - this.GAME_SCALE)) / 2;
-        const offsetY = (this.canvas.height * (1 - this.GAME_SCALE)) / 2;
-
-        this.ctx.translate(offsetX, offsetY);
-        this.ctx.scale(this.GAME_SCALE, this.GAME_SCALE);
-
-        // 씬 업데이트 함수 호출
+        // 씬 업데이트 함수 호출 (스케일 없이 전체 화면 사용)
         if (scene.update) {
             scene.update();
         }
 
-        // 스케일 복원
-        this.ctx.restore();
-
-        // 스킵 안내 및 진행 버튼 (중앙 정렬)
-        this.ctx.save();
-        this.ctx.translate(offsetX, offsetY);
-        this.ctx.scale(this.GAME_SCALE, this.GAME_SCALE);
+        // 스킵 안내 및 진행 버튼
         this.drawControls();
-        this.ctx.restore();
 
         // 프레임 증가 (애니메이션은 계속 진행하되, 씬 전환은 사용자 입력 대기)
         this.animationFrame++;
@@ -1874,9 +1856,9 @@ class StoryScene {
     drawControls() {
         // 진행 버튼 그리기 (입력 대기 중일 때만)
         if (this.waitingForInput) {
-            // 버튼 배경 (스케일 적용 고려)
-            const canvasWidth = this.canvas.width / this.GAME_SCALE;
-            const canvasHeight = this.canvas.height / this.GAME_SCALE;
+            // 버튼 배경 (전체 화면 크기 사용)
+            const canvasWidth = this.canvas.width;
+            const canvasHeight = this.canvas.height;
             const btnWidth = 180;
             const btnHeight = 50;
             const btnX = canvasWidth - btnWidth - 30;
