@@ -627,6 +627,9 @@ class DivineSword {
                 // 몬스터 제거
                 monsters.splice(index, 1);
 
+                // 점수 추가
+                addScore(10); // 몬스터 처치 +10점
+
                 // 파티클 효과 (보라색 계열)
                 for (let i = 0; i < 30; i++) {
                     const colors = ['#BA55D3', '#FF69B4', '#FFD700', '#9370DB', '#DDA0DD'];
@@ -1391,6 +1394,12 @@ function startStage(stageNum) {
 function startCollectingStage(stageNum) {
     gameState.mode = GAME_MODE.COLLECTING;
 
+    // UI 다시 보이기 (퀴즈/보스 모드에서 숨겼다가 수집 모드로 돌아올 때)
+    const ui = document.getElementById('ui');
+    if (ui) {
+        ui.style.display = 'block';
+    }
+
     // 스테이지 단어 설정
     const wordIndex = stageNum - 1;
     currentStageData.wordData = gameState.stageWords[wordIndex];
@@ -1439,6 +1448,12 @@ function startCollectingStage(stageNum) {
 // 퀴즈 스테이지 시작
 function startQuizStage() {
     gameState.mode = GAME_MODE.QUIZ;
+
+    // UI 숨기기 (HP바와 점수 박스가 캐릭터를 가리지 않도록)
+    const ui = document.getElementById('ui');
+    if (ui) {
+        ui.style.display = 'none';
+    }
 
     // 지율이 위치 초기화 (첫 번째 선택지)
     jiyulQuizY = 0;
@@ -2214,6 +2229,7 @@ function checkCollisions() {
                     // 정답! (아직 이 알파벳을 더 수집해야 함)
                     letter.collected = true;
                     currentStageData.collectedLetters.push(letter.letter);
+                    addScore(20); // 알파벳 수집 +20점
 
                     for (let i = 0; i < 30; i++) {
                         const colors = ['#FFD700', '#FFA500', '#FF69B4'];
@@ -2274,6 +2290,7 @@ function checkCollisions() {
         if (!potion.collected && potion.checkCollision(player.x, player.y, player.width, player.height)) {
             potion.collected = true;
             gainEnergy();
+            addScore(30); // 포션 수집 +30점
 
             const colors = ['#FF69B4', '#FFB6C1', '#FF1493'];
             for (let i = 0; i < 30; i++) {
