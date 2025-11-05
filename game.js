@@ -168,11 +168,13 @@ let maxDistance = 45;
 
 function handleTouchStart(e) {
     e.preventDefault();
-    // 첫 번째 터치만 받아서 조이스틱에 할당
-    if (!joystick.active && e.touches.length > 0) {
-        const touch = e.touches[0];
-        joystick.touchId = touch.identifier;  // 이 터치의 고유 ID 저장
+    // 조이스틱이 활성화되지 않았을 때만 새 터치 처리
+    // changedTouches 사용 - 이번 이벤트로 새로 추가된 터치만 확인
+    if (!joystick.active && e.changedTouches.length > 0) {
+        const touch = e.changedTouches[0];
         const rect = joystickContainer.getBoundingClientRect();
+
+        joystick.touchId = touch.identifier;
         maxDistance = getMaxDistance();
         joystick.active = true;
         joystick.startX = rect.left + rect.width / 2;
@@ -200,7 +202,8 @@ function handleTouchMove(e) {
 }
 
 function handleTouchEnd(e) {
-    e.preventDefault();
+    // 조이스틱이 활성화되지 않았으면 무시 (다른 터치 이벤트 방해 안함)
+    if (!joystick.active) return;
 
     // 조이스틱의 터치가 끝났는지 확인
     let joystickTouchEnded = true;
@@ -213,6 +216,7 @@ function handleTouchEnd(e) {
 
     // 조이스틱 터치가 끝났으면 초기화
     if (joystickTouchEnded) {
+        e.preventDefault(); // 조이스틱 관련 터치만 preventDefault
         joystick.active = false;
         joystick.touchId = null;
         joystick.deltaX = 0;
@@ -240,10 +244,12 @@ function updateJoystick() {
     joystickStick.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`;
 }
 
+// touchstart는 조이스틱 컨테이너에서만 (영역 내 시작)
 joystickContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
-joystickContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
-joystickContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
-joystickContainer.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+// touchmove, touchend, touchcancel은 document 레벨에서 처리 (영역 밖 드래그 대응)
+document.addEventListener('touchmove', handleTouchMove, { passive: false });
+document.addEventListener('touchend', handleTouchEnd, { passive: false });
+document.addEventListener('touchcancel', handleTouchEnd, { passive: false });
 
 // 모바일 액션 버튼
 const swordBtn = document.getElementById('swordBtn');
@@ -260,9 +266,9 @@ if (swordBtn) {
         e.preventDefault();
         e.stopPropagation(); // 이벤트 전파 방지 (조이스틱으로 전파 차단)
         if (gameState.mode === GAME_MODE.COLLECTING && gameState.isRunning && !dialogueState.active && !swordBtnPressed) {
-            // 첫 번째 터치의 ID 저장
-            if (e.touches.length > 0) {
-                swordBtnTouchId = e.touches[0].identifier;
+            // changedTouches에서 이 버튼을 터치한 것의 ID 저장
+            if (e.changedTouches.length > 0) {
+                swordBtnTouchId = e.changedTouches[0].identifier;
                 swordBtnPressed = true;
             }
         }
@@ -331,9 +337,9 @@ if (ballBtn) {
         e.preventDefault();
         e.stopPropagation(); // 이벤트 전파 방지 (조이스틱으로 전파 차단)
         if ((gameState.mode === GAME_MODE.QUIZ || gameState.mode === GAME_MODE.BOSS) && gameState.isRunning && !dialogueState.active && !ballBtnPressed) {
-            // 첫 번째 터치의 ID 저장
-            if (e.touches.length > 0) {
-                ballBtnTouchId = e.touches[0].identifier;
+            // changedTouches에서 이 버튼을 터치한 것의 ID 저장
+            if (e.changedTouches.length > 0) {
+                ballBtnTouchId = e.changedTouches[0].identifier;
                 ballBtnPressed = true;
             }
         }
@@ -1474,20 +1480,20 @@ function createQuizChoices() {
     const isLandscape = window.innerWidth > window.innerHeight;
 
     // 가로 모드 모바일: 화면 높이에 맞게 간격 자동 조정
-    // GAME_SCALE(0.5) 적용으로 실제 좌표는 2배 필요
+    // GAME_SCALE(0.5) + 중앙 정렬 적용으로 실제 좌표는 2배 필요
     let spacingY;
     if (isMobile && isLandscape) {
-        // 4개 박스가 모두 들어가도록 화면 높이 기반 계산
-        spacingY = Math.min(140, (canvas.height * 2 - 200) / 4);
+        // 4개 박스가 모두 들어가도록 화면 높이 기반 계산 (간격 축소)
+        spacingY = Math.min(110, (canvas.height * 2 - 300) / 4);
     } else if (isMobile) {
-        spacingY = 160;
+        spacingY = 120;
     } else {
-        spacingY = 220;
+        spacingY = 160;
     }
 
     const startX = isMobile ? canvas.width * 2 - 360 : canvas.width * 2 - 560;
-    // UI 겹침 방지를 위해 시작 위치를 아래로 이동 (스케일 0.5 고려)
-    const startY = isMobile && isLandscape ? 180 : (isMobile ? 200 : 180);
+    // UI 겹침 방지를 위해 시작 위치 조정 (중앙 정렬 고려)
+    const startY = isMobile && isLandscape ? 120 : (isMobile ? 140 : 120);
 
     for (let i = 0; i < 4; i++) {
         const x = startX;
@@ -2312,8 +2318,14 @@ function gameLoop() {
     // 배경 그리기 (스케일 적용 전 - 전체 화면 유지)
     drawBackground();
 
-    // 전역 스케일 적용 - 모든 게임 요소를 50% 크기로 축소
+    // 전역 스케일 적용 - 모든 게임 요소를 50% 크기로 축소 (중앙 정렬)
     ctx.save();
+
+    // 스케일로 인한 오프셋 계산 (중앙 배치)
+    const offsetX = (canvas.width * (1 - GAME_SCALE)) / 2;
+    const offsetY = (canvas.height * (1 - GAME_SCALE)) / 2;
+
+    ctx.translate(offsetX, offsetY);
     ctx.scale(GAME_SCALE, GAME_SCALE);
 
     if (gameState.mode === GAME_MODE.COLLECTING) {
