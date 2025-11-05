@@ -504,7 +504,9 @@ class StoryScene {
                     this.ctx.fillRect(50, this.canvas.height - 250, 200, 150);
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
-                    this.ctx.fillText('영어학원', 100, this.canvas.height - 200);
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('영어학원', 150, this.canvas.height - 200);
+                    this.ctx.textAlign = 'left';
 
                     // 지율이 (걸어나오는 애니메이션)
                     const jiyulX = Math.min(this.canvas.width / 2, 100 + this.animationFrame * 3);
@@ -539,7 +541,9 @@ class StoryScene {
                     this.ctx.fillRect(50, this.canvas.height - 250, 200, 150);
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
-                    this.ctx.fillText('영어학원', 100, this.canvas.height - 200);
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('영어학원', 150, this.canvas.height - 200);
+                    this.ctx.textAlign = 'left';
 
                     // 지율이
                     this.drawJiyul(
@@ -1098,7 +1102,9 @@ class StoryScene {
                     this.ctx.fillRect(60, this.canvas.height - 300, 230, 40);
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
-                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 80, this.canvas.height - 275);
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275);
+                    this.ctx.textAlign = 'left';
 
                     // 지율이 (놀란 모습)
                     this.drawJiyul(
@@ -2103,8 +2109,8 @@ class StoryScene {
             // 버튼 배경 (전체 화면 크기 사용)
             const canvasWidth = this.canvas.width;
             const canvasHeight = this.canvas.height;
-            const btnWidth = 180;
-            const btnHeight = 50;
+            const btnWidth = 100;  // 작게 축소
+            const btnHeight = 40;  // 작게 축소
             const btnX = canvasWidth - btnWidth - 30;
             const btnY = canvasHeight - btnHeight - 30;
 
@@ -2124,15 +2130,8 @@ class StoryScene {
             this.ctx.fillStyle = '#000000';
             this.ctx.font = 'bold 18px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('클릭하여 계속 →', btnX + btnWidth/2, btnY + btnHeight/2 + 6);
-
-            // 모바일 안내
-            const isMobile = window.matchMedia('(max-width: 800px)').matches;
-            if (isMobile) {
-                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                this.ctx.font = '14px Arial';
-                this.ctx.fillText('화면을 터치하세요', btnX + btnWidth/2, btnY - 10);
-            }
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText('Click', btnX + btnWidth/2, btnY + btnHeight/2);
         }
 
         // SKIP 버튼 그리기 (오른쪽 상단)

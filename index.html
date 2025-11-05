@@ -200,20 +200,31 @@
             padding: 10px;
             border-radius: 8px;
             display: flex;
-            gap: 5px;
+            gap: 10px;
             align-items: center;
         }
 
-        .energyHeart {
-            width: 30px;
+        #hpBarBackground {
+            width: 200px;
             height: 30px;
-            background: #FF0000;
-            clip-path: polygon(50% 15%, 61% 6%, 75% 0%, 86% 6%, 95% 19%, 95% 35%, 50% 90%, 5% 35%, 5% 19%, 14% 6%, 25% 0%, 39% 6%);
-            transition: all 0.3s;
+            background: #444;
+            border: 2px solid #FFD700;
+            border-radius: 5px;
+            overflow: hidden;
         }
 
-        .energyHeart.empty {
-            background: #444;
+        #hpBarFill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        #hpText {
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            min-width: 80px;
         }
 
         #wordProgress {
@@ -1172,16 +1183,10 @@
         
         <div id="ui">
             <div id="energyContainer">
-                <div class="energyHeart"></div>
-                <div class="energyHeart"></div>
-                <div class="energyHeart"></div>
-                <div class="energyHeart"></div>
-                <div class="energyHeart"></div>
-                <div class="energyHeart"></div>
-                <div class="energyHeart"></div>
-                <div class="energyHeart"></div>
-                <div class="energyHeart"></div>
-                <div class="energyHeart"></div>
+                <div id="hpBarBackground">
+                    <div id="hpBarFill"></div>
+                </div>
+                <div id="hpText">HP: 10/10</div>
             </div>
         </div>
 

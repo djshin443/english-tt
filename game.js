@@ -1616,13 +1616,31 @@ function drawDialogue() {
         ctx.fillText(line, padding * 2, y);
     }
 
-    // 스페이스바/터치 안내 (PC에서만 스페이스바 표시)
-    const isMobile = window.innerWidth <= 800;
-    ctx.fillStyle = '#00FF00';
-    ctx.font = `${Math.max(12, fontSize - 4)}px Arial`;
-    ctx.textAlign = 'right';
-    const continueText = isMobile ? '화면을 터치하여 계속...' : '스페이스바를 눌러 계속...';
-    ctx.fillText(continueText, canvas.width - padding * 2, canvas.height - padding * 2);
+    // 클릭 버튼 그리기 (오프닝 시퀀스 스타일)
+    const btnWidth = 100;
+    const btnHeight = 40;
+    const btnX = canvas.width - btnWidth - padding * 3;
+    const btnY = canvas.height - btnHeight - padding * 2;
+
+    // 애니메이션 효과 (깜빡임)
+    const time = Date.now() * 0.002;
+    const alpha = 0.7 + Math.sin(time) * 0.3;
+
+    // 버튼 배경 (골드)
+    ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+    ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
+
+    // 버튼 테두리 (흰색)
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
+
+    // 버튼 텍스트 (검정색)
+    ctx.fillStyle = '#000000';
+    ctx.font = `bold ${Math.max(16, fontSize)}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Click', btnX + btnWidth / 2, btnY + btnHeight / 2);
 }
 
 // 보스 스테이지 시작
@@ -2276,14 +2294,24 @@ function gainEnergy() {
 
 // 에너지 표시 업데이트
 function updateEnergyDisplay() {
-    const hearts = document.querySelectorAll('.energyHeart');
-    hearts.forEach((heart, index) => {
-        if (index < gameState.energy) {
-            heart.classList.remove('empty');
-        } else {
-            heart.classList.add('empty');
-        }
-    });
+    const hpBarFill = document.getElementById('hpBarFill');
+    const hpText = document.getElementById('hpText');
+
+    if (!hpBarFill || !hpText) return;
+
+    const percentage = (gameState.energy / gameState.maxEnergy) * 100;
+    hpBarFill.style.width = percentage + '%';
+
+    // HP에 따라 색상 변경
+    if (percentage > 50) {
+        hpBarFill.style.background = 'linear-gradient(to right, #4CAF50, #8BC34A)'; // Green
+    } else if (percentage > 25) {
+        hpBarFill.style.background = 'linear-gradient(to right, #FFA500, #FFD700)'; // Orange
+    } else {
+        hpBarFill.style.background = 'linear-gradient(to right, #FF0000, #FF6B6B)'; // Red
+    }
+
+    hpText.textContent = `HP: ${gameState.energy}/${gameState.maxEnergy}`;
 }
 
 // UI 업데이트
