@@ -1474,30 +1474,45 @@ function createQuizChoices() {
         [allChoices[i], allChoices[j]] = [allChoices[j], allChoices[i]];
     }
 
-    // 선택지 배치 (오른쪽에 세로로)
-    // 모바일에서는 더 작은 간격과 위치 사용
+    // 선택지 배치 (화면 중앙에 세로로)
     const isMobile = window.innerWidth <= 800;
     const isLandscape = window.innerWidth > window.innerHeight;
 
-    // 가로 모드 모바일: 화면 높이에 맞게 간격 자동 조정
-    // GAME_SCALE(0.5) + 중앙 정렬 적용으로 실제 좌표는 2배 필요
-    let spacingY;
+    // GAME_SCALE(0.5)로 인한 가상 캔버스 크기
+    const virtualWidth = canvas.width / GAME_SCALE;
+    const virtualHeight = canvas.height / GAME_SCALE;
+
+    // 박스 크기 결정 (QuizChoice 생성자와 동일한 로직)
+    let boxWidth, boxHeight;
     if (isMobile && isLandscape) {
-        // 4개 박스가 모두 들어가도록 화면 높이 기반 계산 (간격 축소)
-        spacingY = Math.min(110, (canvas.height * 2 - 300) / 4);
-    } else if (isMobile) {
-        spacingY = 120;
+        boxWidth = 160;
+        boxHeight = Math.min(60, (canvas.height * 2 - 80) / 5);
     } else {
-        spacingY = 160;
+        boxWidth = isMobile ? 160 : 220;
+        boxHeight = isMobile ? 65 : 90;
     }
 
-    const startX = isMobile ? canvas.width * 2 - 360 : canvas.width * 2 - 560;
-    // UI 겹침 방지를 위해 시작 위치 조정 (중앙 정렬 고려)
-    const startY = isMobile && isLandscape ? 120 : (isMobile ? 140 : 120);
+    // 박스 간격
+    let spacingY;
+    if (isMobile && isLandscape) {
+        spacingY = Math.min(80, (virtualHeight - 200) / 5);
+    } else if (isMobile) {
+        spacingY = 100;
+    } else {
+        spacingY = 120;
+    }
+
+    // 중앙 정렬 계산
+    // 가로: 박스를 화면 중앙에 배치
+    const startX = (virtualWidth - boxWidth) / 2;
+
+    // 세로: 4개 박스 전체 높이를 계산해서 중앙 정렬
+    const totalHeight = boxHeight * 4 + spacingY * 3;
+    const startY = (virtualHeight - totalHeight) / 2;
 
     for (let i = 0; i < 4; i++) {
         const x = startX;
-        const y = startY + i * spacingY;
+        const y = startY + i * (boxHeight + spacingY);
         const isCorrect = allChoices[i] === correctMeaning;
         quizChoices.push(new QuizChoice(x, y, allChoices[i], isCorrect, i));
     }
@@ -1686,9 +1701,12 @@ function spawnNextLetter() {
         if (!usedLetters.includes(letter)) {
             usedLetters.push(letter);  // 사용한 알파벳 추가
 
-            const x = canvas.width + 200 + i * 500;  // 간격을 500px으로 매우 넓게 설정
+            // GAME_SCALE(0.5)로 인한 가상 캔버스 크기 고려
+            const virtualWidth = canvas.width / GAME_SCALE;
+            const virtualHeight = canvas.height / GAME_SCALE;
+            const x = virtualWidth + 200 + i * 500;  // 간격을 500px으로 매우 넓게 설정
             // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정
-            const y = 150 + Math.random() * (canvas.height - 300);
+            const y = 150 + Math.random() * (virtualHeight - 300);
             letters.push(new LetterCard(x, y, letter));
         }
     }
@@ -1716,17 +1734,23 @@ function spawnMonster(x = null) {
     }
 
     const letter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
-    const spawnX = x !== null ? x : canvas.width + 50;
+    // GAME_SCALE(0.5)로 인한 가상 캔버스 크기 고려
+    const virtualWidth = canvas.width / GAME_SCALE;
+    const virtualHeight = canvas.height / GAME_SCALE;
+    const spawnX = x !== null ? x : virtualWidth + 50;
     // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정
-    const spawnY = 150 + Math.random() * (canvas.height - 250);
+    const spawnY = 150 + Math.random() * (virtualHeight - 250);
     monsters.push(new AlphabetMonster(spawnX, spawnY, letter));
 }
 
 // 포션 생성
 function spawnPotion(x = null) {
-    const spawnX = x !== null ? x : canvas.width + 50;
+    // GAME_SCALE(0.5)로 인한 가상 캔버스 크기 고려
+    const virtualWidth = canvas.width / GAME_SCALE;
+    const virtualHeight = canvas.height / GAME_SCALE;
+    const spawnX = x !== null ? x : virtualWidth + 50;
     // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정
-    const spawnY = 150 + Math.random() * (canvas.height - 250);
+    const spawnY = 150 + Math.random() * (virtualHeight - 250);
     potions.push(new Potion(spawnX, spawnY));
 }
 
@@ -1906,10 +1930,14 @@ function updatePlayer() {
     player.x += player.vx;
     player.y += player.vy;
 
+    // GAME_SCALE(0.5)로 인한 가상 캔버스 크기 고려
+    const virtualWidth = canvas.width / GAME_SCALE;
+    const virtualHeight = canvas.height / GAME_SCALE;
+
     if (player.x < 0) player.x = 0;
-    if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
+    if (player.x > virtualWidth - player.width) player.x = virtualWidth - player.width;
     if (player.y < 50) player.y = 50;
-    if (player.y > canvas.height - player.height - 50) player.y = canvas.height - player.height - 50;
+    if (player.y > virtualHeight - player.height - 50) player.y = virtualHeight - player.height - 50;
 }
 
 // 퀴즈 모드 지율이 업데이트 (위아래로 선택지 이동)
