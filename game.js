@@ -1120,14 +1120,17 @@ class AlphabetMonster {
         this.x += this.vx;
         this.y += this.vy;
 
-        // Y 경계 체크 (실제 캔버스 크기 기준)
+        // Y 경계 체크 (GAME_SCALE과 offset 고려)
+        const offsetY = (canvas.height * (1 - GAME_SCALE)) / 2;
+        const maxY = (canvas.height - offsetY) / GAME_SCALE - this.height;
+
         // 위쪽만 50px 여백, 아래쪽은 끝까지 허용
         if (this.y <= 50) {
             this.y = 50;
             this.vy = Math.abs(this.vy);
         }
-        if (this.y >= canvas.height - this.height) {
-            this.y = canvas.height - this.height;
+        if (this.y >= maxY) {
+            this.y = maxY;
             this.vy = -Math.abs(this.vy);
         }
 
@@ -1752,19 +1755,32 @@ function spawnMonster(x = null) {
     }
 
     const letter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
-    // 화면 오른쪽 밖에서 생성 (실제 캔버스 크기 기준)
-    const spawnX = x !== null ? x : canvas.width + 50;
+
+    // GAME_SCALE과 offset을 고려한 좌표 계산
+    const offsetX = (canvas.width * (1 - GAME_SCALE)) / 2;
+    const offsetY = (canvas.height * (1 - GAME_SCALE)) / 2;
+    const maxX = (canvas.width - offsetX) / GAME_SCALE;
+    const maxY = (canvas.height - offsetY) / GAME_SCALE;
+
+    // 화면 오른쪽 밖에서 생성
+    const spawnX = x !== null ? x : maxX + 50;
     // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정, 아래는 끝까지
-    const spawnY = 150 + Math.random() * (canvas.height - 150 - 50);
+    const spawnY = 150 + Math.random() * (maxY - 150 - 50);
     monsters.push(new AlphabetMonster(spawnX, spawnY, letter));
 }
 
 // 포션 생성
 function spawnPotion(x = null) {
-    // 화면 오른쪽 밖에서 생성 (실제 캔버스 크기 기준)
-    const spawnX = x !== null ? x : canvas.width + 50;
+    // GAME_SCALE과 offset을 고려한 좌표 계산
+    const offsetX = (canvas.width * (1 - GAME_SCALE)) / 2;
+    const offsetY = (canvas.height * (1 - GAME_SCALE)) / 2;
+    const maxX = (canvas.width - offsetX) / GAME_SCALE;
+    const maxY = (canvas.height - offsetY) / GAME_SCALE;
+
+    // 화면 오른쪽 밖에서 생성
+    const spawnX = x !== null ? x : maxX + 50;
     // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정, 아래는 끝까지
-    const spawnY = 150 + Math.random() * (canvas.height - 150 - 50);
+    const spawnY = 150 + Math.random() * (maxY - 150 - 50);
     potions.push(new Potion(spawnX, spawnY));
 }
 
@@ -1945,12 +1961,26 @@ function updatePlayer() {
     player.x += player.vx;
     player.y += player.vy;
 
-    // 경계 체크: 실제 캔버스 크기 기준 (렌더링 영역 내로 제한)
-    // 위쪽만 50px 여백 (상단 UI), 아래쪽은 끝까지 허용
+    // 경계 체크: GAME_SCALE과 offset을 고려한 실제 렌더링 영역
+    // offsetY = (canvas.height * (1 - GAME_SCALE)) / 2
+    // 렌더링 위치 = offsetY + (player.y * GAME_SCALE)
+    // 하단 경계: offsetY + (player.y + player.height) * GAME_SCALE = canvas.height
+    // => player.y = (canvas.height - offsetY) / GAME_SCALE - player.height
+
+    const offsetX = (canvas.width * (1 - GAME_SCALE)) / 2;
+    const offsetY = (canvas.height * (1 - GAME_SCALE)) / 2;
+
+    // X 경계
     if (player.x < 0) player.x = 0;
-    if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
+    if (player.x > (canvas.width - offsetX) / GAME_SCALE - player.width) {
+        player.x = (canvas.width - offsetX) / GAME_SCALE - player.width;
+    }
+
+    // Y 경계 (위쪽 50px 여백, 아래쪽 끝까지)
     if (player.y < 50) player.y = 50;
-    if (player.y > canvas.height - player.height) player.y = canvas.height - player.height;
+    if (player.y > (canvas.height - offsetY) / GAME_SCALE - player.height) {
+        player.y = (canvas.height - offsetY) / GAME_SCALE - player.height;
+    }
 }
 
 // 퀴즈 모드 지율이 업데이트 (위아래로 선택지 이동)
@@ -2609,17 +2639,20 @@ function showOpening() {
     // 모바일 컨트롤 숨기기 (오프닝 중에는 안 보이게)
     hideMobileControls();
 
-    // 스토리 애니메이션 시작
-    if (storyScene) {
-        storyScene.startOpening(() => {
-            // 오프닝 끝나면 게임 시작
-            startGame();
-        });
+    // opening.js의 타이틀 화면과 오프닝 시퀀스 시작
+    if (typeof showTitleScreen === 'function') {
+        showTitleScreen();
     } else {
-        // fallback: 텍스트 대화
-        startDialogue(OPENING_DIALOGUE, () => {
-            startGame();
-        });
+        // fallback: 기존 스토리
+        if (storyScene) {
+            storyScene.startOpening(() => {
+                startGame();
+            });
+        } else {
+            startDialogue(OPENING_DIALOGUE, () => {
+                startGame();
+            });
+        }
     }
 }
 

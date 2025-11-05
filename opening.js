@@ -428,12 +428,12 @@ function startOpeningSequence() {
         document.getElementById('controls').style.display = 'none';
 
         startOpening(canvas, ctx, function() {
-            // 오프닝 완료 후 메뉴 표시
+            // 오프닝 완료 후 게임 시작
             if (typeof hasSeenOpening !== 'undefined') {
                 hasSeenOpening = true;
             }
-            if (typeof showMenu === 'function') {
-                showMenu();
+            if (typeof startGame === 'function') {
+                startGame();
             }
         });
     }
