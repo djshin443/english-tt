@@ -168,18 +168,29 @@ let maxDistance = 45;
 
 function handleTouchStart(e) {
     e.preventDefault();
-    // 첫 번째 터치만 받아서 조이스틱에 할당
-    if (!joystick.active && e.touches.length > 0) {
-        const touch = e.touches[0];
-        joystick.touchId = touch.identifier;  // 이 터치의 고유 ID 저장
+    // 조이스틱이 활성화되지 않았을 때만 새 터치 처리
+    if (!joystick.active) {
         const rect = joystickContainer.getBoundingClientRect();
-        maxDistance = getMaxDistance();
-        joystick.active = true;
-        joystick.startX = rect.left + rect.width / 2;
-        joystick.startY = rect.top + rect.height / 2;
-        joystick.currentX = touch.clientX;
-        joystick.currentY = touch.clientY;
-        updateJoystick();
+
+        // changedTouches에서 조이스틱 영역 내의 터치 찾기
+        for (let i = 0; i < e.changedTouches.length; i++) {
+            const touch = e.changedTouches[i];
+
+            // 터치가 조이스틱 영역 내에 있는지 확인
+            if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+
+                joystick.touchId = touch.identifier;
+                maxDistance = getMaxDistance();
+                joystick.active = true;
+                joystick.startX = rect.left + rect.width / 2;
+                joystick.startY = rect.top + rect.height / 2;
+                joystick.currentX = touch.clientX;
+                joystick.currentY = touch.clientY;
+                updateJoystick();
+                break;
+            }
+        }
     }
 }
 
@@ -260,9 +271,9 @@ if (swordBtn) {
         e.preventDefault();
         e.stopPropagation(); // 이벤트 전파 방지 (조이스틱으로 전파 차단)
         if (gameState.mode === GAME_MODE.COLLECTING && gameState.isRunning && !dialogueState.active && !swordBtnPressed) {
-            // 첫 번째 터치의 ID 저장
-            if (e.touches.length > 0) {
-                swordBtnTouchId = e.touches[0].identifier;
+            // changedTouches에서 이 버튼을 터치한 것의 ID 저장
+            if (e.changedTouches.length > 0) {
+                swordBtnTouchId = e.changedTouches[0].identifier;
                 swordBtnPressed = true;
             }
         }
@@ -331,9 +342,9 @@ if (ballBtn) {
         e.preventDefault();
         e.stopPropagation(); // 이벤트 전파 방지 (조이스틱으로 전파 차단)
         if ((gameState.mode === GAME_MODE.QUIZ || gameState.mode === GAME_MODE.BOSS) && gameState.isRunning && !dialogueState.active && !ballBtnPressed) {
-            // 첫 번째 터치의 ID 저장
-            if (e.touches.length > 0) {
-                ballBtnTouchId = e.touches[0].identifier;
+            // changedTouches에서 이 버튼을 터치한 것의 ID 저장
+            if (e.changedTouches.length > 0) {
+                ballBtnTouchId = e.changedTouches[0].identifier;
                 ballBtnPressed = true;
             }
         }
