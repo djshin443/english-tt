@@ -433,7 +433,6 @@
             height: 500px;
             background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
             animation: pulse 3s ease-in-out infinite;
-            pointer-events: none;
         }
 
         @keyframes pulse {
@@ -569,7 +568,6 @@
             position: relative;
             z-index: 2;
             letter-spacing: 3px;
-            pointer-events: none;
         }
 
         .btn-glow {
@@ -580,7 +578,6 @@
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
             animation: slideGlow 3s ease-in-out infinite;
-            pointer-events: none;
         }
 
         @keyframes slideGlow {
@@ -1202,7 +1199,7 @@
                 <div class="title-sparkles">
                     <span>✨</span><span>⚔️</span><span>🏓</span><span>✨</span>
                 </div>
-                <button class="title-start-btn">
+                <button class="title-start-btn" onclick="showStartScreen()">
                     <span class="btn-text">PRESS START</span>
                     <span class="btn-glow"></span>
                 </button>
