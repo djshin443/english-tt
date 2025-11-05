@@ -1121,12 +1121,13 @@ class AlphabetMonster {
         this.y += this.vy;
 
         // Y 경계 체크 (실제 캔버스 크기 기준)
+        // 위쪽만 50px 여백, 아래쪽은 끝까지 허용
         if (this.y <= 50) {
             this.y = 50;
             this.vy = Math.abs(this.vy);
         }
-        if (this.y >= canvas.height - this.height - 50) {
-            this.y = canvas.height - this.height - 50;
+        if (this.y >= canvas.height - this.height) {
+            this.y = canvas.height - this.height;
             this.vy = -Math.abs(this.vy);
         }
 
@@ -1753,8 +1754,8 @@ function spawnMonster(x = null) {
     const letter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
     // 화면 오른쪽 밖에서 생성 (실제 캔버스 크기 기준)
     const spawnX = x !== null ? x : canvas.width + 50;
-    // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정
-    const spawnY = 150 + Math.random() * (canvas.height - 250);
+    // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정, 아래는 끝까지
+    const spawnY = 150 + Math.random() * (canvas.height - 150 - 50);
     monsters.push(new AlphabetMonster(spawnX, spawnY, letter));
 }
 
@@ -1762,8 +1763,8 @@ function spawnMonster(x = null) {
 function spawnPotion(x = null) {
     // 화면 오른쪽 밖에서 생성 (실제 캔버스 크기 기준)
     const spawnX = x !== null ? x : canvas.width + 50;
-    // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정
-    const spawnY = 150 + Math.random() * (canvas.height - 250);
+    // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정, 아래는 끝까지
+    const spawnY = 150 + Math.random() * (canvas.height - 150 - 50);
     potions.push(new Potion(spawnX, spawnY));
 }
 
@@ -1945,11 +1946,11 @@ function updatePlayer() {
     player.y += player.vy;
 
     // 경계 체크: 실제 캔버스 크기 기준 (렌더링 영역 내로 제한)
-    // GAME_SCALE로 축소되어 렌더링되지만, 좌표는 실제 캔버스 기준
+    // 위쪽만 50px 여백 (상단 UI), 아래쪽은 끝까지 허용
     if (player.x < 0) player.x = 0;
     if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
     if (player.y < 50) player.y = 50;
-    if (player.y > canvas.height - player.height - 50) player.y = canvas.height - player.height - 50;
+    if (player.y > canvas.height - player.height) player.y = canvas.height - player.height;
 }
 
 // 퀴즈 모드 지율이 업데이트 (위아래로 선택지 이동)
