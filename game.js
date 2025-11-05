@@ -483,13 +483,15 @@ class Ball {
         this.x += this.vx;
         this.y += this.vy;
 
-        // 위아래 벽 충돌
-        if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
+        // 위아래 벽 충돌 (가상 캔버스 크기 사용)
+        const virtualHeight = canvas.height / GAME_SCALE;
+        if (this.y - this.radius < 0 || this.y + this.radius > virtualHeight) {
             this.vy *= -1;
         }
 
-        // 오른쪽 벗어남
-        if (this.x > canvas.width + 50) {
+        // 오른쪽 벗어남 (가상 캔버스 크기 사용)
+        const virtualWidth = canvas.width / GAME_SCALE;
+        if (this.x > virtualWidth + 50) {
             this.active = false;
             return;
         }
@@ -601,9 +603,11 @@ class DivineSword {
             t.alpha = (i + 1) / this.trail.length * 0.5;
         });
 
-        // 화면 벗어나면 비활성화
-        if (this.x < -100 || this.x > canvas.width + 100 ||
-            this.y < -100 || this.y > canvas.height + 100) {
+        // 화면 벗어나면 비활성화 (가상 캔버스 크기 사용)
+        const virtualWidth = canvas.width / GAME_SCALE;
+        const virtualHeight = canvas.height / GAME_SCALE;
+        if (this.x < -100 || this.x > virtualWidth + 100 ||
+            this.y < -100 || this.y > virtualHeight + 100) {
             this.active = false;
             return;
         }
@@ -838,7 +842,9 @@ class Boss {
 
         this.width = 16 * PIXEL_SCALE * 1.5;  // 픽셀 스프라이트 크기 (1.5배)
         this.height = 16 * PIXEL_SCALE * 1.5;
-        this.x = canvas.width / 2 - this.width / 2;
+        // GAME_SCALE로 인한 가상 캔버스 크기 사용
+        const virtualWidth = canvas.width / GAME_SCALE;
+        this.x = virtualWidth / 2 - this.width / 2;
         this.y = 100;
         this.vx = this.speed;
 
@@ -852,7 +858,9 @@ class Boss {
         // 좌우 이동
         this.x += this.vx;
 
-        if (this.x <= 0 || this.x >= canvas.width - this.width) {
+        // GAME_SCALE로 인한 가상 캔버스 크기 사용
+        const virtualWidth = canvas.width / GAME_SCALE;
+        if (this.x <= 0 || this.x >= virtualWidth - this.width) {
             this.vx *= -1;
         }
 
@@ -960,8 +968,9 @@ class BossBall {
         this.x += this.vx;
         this.y += this.vy;
 
-        // 위아래 벽 충돌
-        if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
+        // 위아래 벽 충돌 (가상 캔버스 크기 사용)
+        const virtualHeight = canvas.height / GAME_SCALE;
+        if (this.y - this.radius < 0 || this.y + this.radius > virtualHeight) {
             this.vy *= -1;
         }
 
@@ -1106,12 +1115,15 @@ class AlphabetMonster {
         this.x += this.vx;
         this.y += this.vy;
 
+        // 가상 캔버스 크기 사용
+        const virtualHeight = canvas.height / GAME_SCALE;
+
         if (this.y <= 50) {
             this.y = 50;
             this.vy = Math.abs(this.vy);
         }
-        if (this.y >= canvas.height - this.height - 50) {
-            this.y = canvas.height - this.height - 50;
+        if (this.y >= virtualHeight - this.height - 50) {
+            this.y = virtualHeight - this.height - 50;
             this.vy = -Math.abs(this.vy);
         }
 
