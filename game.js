@@ -2491,11 +2491,11 @@ function gameLoop() {
         });
     }
 
-    // 대화 그리기 (최상위)
-    drawDialogue();
-
     // 전역 스케일 복원
     ctx.restore();
+
+    // 대화 그리기 (최상위, 스케일 밖에서 - 전체 화면 너비)
+    drawDialogue();
 
     requestAnimationFrame(gameLoop);
 }
