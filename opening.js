@@ -421,13 +421,17 @@ function startOpeningSequence() {
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // 모든 UI 요소 숨기기
-    document.getElementById('characterSelectMenu').style.display = 'none';
-    document.getElementById('unitSelectMenu').style.display = 'none';
-    document.getElementById('ui').style.display = 'none';
-    document.getElementById('questionPanel').style.display = 'none';
-    document.getElementById('fullscreenBtn').style.display = 'none';
-    document.getElementById('controls').style.display = 'none';
+    // 캔버스 표시
+    canvas.style.display = 'block';
+
+    // 모든 UI 요소 숨기기 (존재하는 것만)
+    const elementsToHide = ['characterSelectMenu', 'unitSelectMenu', 'ui', 'questionPanel', 'fullscreenBtn', 'controls'];
+    elementsToHide.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.style.display = 'none';
+        }
+    });
 
     startOpening(canvas, ctx, function() {
         // 오프닝 완료 후 게임 시작

@@ -2584,32 +2584,15 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// 타이틀 화면에서 시작 화면으로
-function showStartScreen() {
-    document.getElementById('titleScreen').style.display = 'none';
-    document.getElementById('startScreen').style.display = 'flex';
-}
-
-// 타이틀 화면에서 키보드 입력 처리
+// 페이지 로드 시 오프닝 타이틀 화면 표시
 window.addEventListener('DOMContentLoaded', () => {
-    const titleScreen = document.getElementById('titleScreen');
-
-    // 타이틀 화면에서는 모바일 컨트롤 숨기기
+    // 모바일 컨트롤 숨기기
     hideMobileControls();
 
-    // 엔터키나 스페이스바로 시작
-    const handleTitleKeyPress = (e) => {
-        if (titleScreen && titleScreen.style.display !== 'none') {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                showStartScreen();
-                // 이벤트 리스너 제거
-                window.removeEventListener('keydown', handleTitleKeyPress);
-            }
-        }
-    };
-
-    window.addEventListener('keydown', handleTitleKeyPress);
+    // opening.js의 타이틀 화면 표시
+    if (typeof showTitleScreen === 'function') {
+        showTitleScreen();
+    }
 
     // 캔버스 터치/클릭 이벤트로 대화 진행 (모바일 지원)
     canvas.addEventListener('touchstart', (e) => {
@@ -2628,10 +2611,8 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// 오프닝 보여주기 (애니메이션)
+// 오프닝 보여주기 (애니메이션) - 더 이상 사용하지 않음 (opening.js에서 직접 처리)
 function showOpening() {
-    document.getElementById('startScreen').style.display = 'none';
-
     // 캔버스 표시
     const canvas = document.getElementById('gameCanvas');
     canvas.style.display = 'block';
@@ -2639,26 +2620,20 @@ function showOpening() {
     // 모바일 컨트롤 숨기기 (오프닝 중에는 안 보이게)
     hideMobileControls();
 
-    // opening.js의 타이틀 화면 표시
-    if (typeof showTitleScreen === 'function') {
-        showTitleScreen();
+    // fallback: 스토리 애니메이션
+    if (storyScene) {
+        storyScene.startOpening(() => {
+            startGame();
+        });
     } else {
-        // fallback: 스토리 애니메이션
-        if (storyScene) {
-            storyScene.startOpening(() => {
-                startGame();
-            });
-        } else {
-            startDialogue(OPENING_DIALOGUE, () => {
-                startGame();
-            });
-        }
+        startDialogue(OPENING_DIALOGUE, () => {
+            startGame();
+        });
     }
 }
 
 // 게임 시작
 function startGame() {
-    document.getElementById('startScreen').style.display = 'none';
     gameState.isRunning = true;
 
     // 모바일 컨트롤 보이기 (게임 플레이 중에는 보이게)
