@@ -2033,6 +2033,161 @@ class StoryScene {
                     this.drawJiyul(50, this.canvas.height - 100, 'walk', Math.floor(this.animationFrame / 8), 3);
                     this.drawBossSprite('boss20', this.canvas.width - 150, this.canvas.height - 120, 3);
                 }
+            },
+
+            // 씬 6: sunzero 선생님의 정체 - 수호천사
+            {
+                duration: 400,
+                update: () => {
+                    // 신비로운 은하수 배경
+                    const gradient = this.ctx.createRadialGradient(
+                        this.canvas.width / 2,
+                        this.canvas.height / 2,
+                        0,
+                        this.canvas.width / 2,
+                        this.canvas.height / 2,
+                        this.canvas.width
+                    );
+                    gradient.addColorStop(0, '#1a0033');
+                    gradient.addColorStop(0.5, '#2d0054');
+                    gradient.addColorStop(1, '#000000');
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    // 반짝이는 별들
+                    for (let i = 0; i < 100; i++) {
+                        const x = (i * 137.5) % this.canvas.width;
+                        const y = (i * 217.3) % this.canvas.height;
+                        const brightness = Math.sin(this.animationFrame * 0.05 + i) * 0.5 + 0.5;
+                        this.ctx.fillStyle = `rgba(255, 255, 255, ${brightness})`;
+                        this.ctx.fillRect(x, y, 2, 2);
+                    }
+
+                    // sunzero 선생님 등장 (천사 모습)
+                    const centerX = this.canvas.width / 2;
+                    const centerY = this.canvas.height / 2 - 50;
+
+                    // 빛나는 후광
+                    const haloGlow = Math.sin(this.animationFrame * 0.05) * 20 + 80;
+                    const haloGradient = this.ctx.createRadialGradient(
+                        centerX, centerY - 80, 0,
+                        centerX, centerY - 80, haloGlow
+                    );
+                    haloGradient.addColorStop(0, 'rgba(255, 215, 0, 0.8)');
+                    haloGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.4)');
+                    haloGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+                    this.ctx.fillStyle = haloGradient;
+                    this.ctx.fillRect(centerX - haloGlow, centerY - 80 - haloGlow, haloGlow * 2, haloGlow * 2);
+
+                    // 후광 링
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = 4;
+                    this.ctx.beginPath();
+                    this.ctx.arc(centerX, centerY - 80, 40, 0, Math.PI * 2);
+                    this.ctx.stroke();
+
+                    // sunzero 선생님 몸 (간단한 천사 형상)
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.fillRect(centerX - 25, centerY - 40, 50, 70);
+
+                    // 얼굴
+                    this.ctx.fillStyle = '#FFE0BD';
+                    this.ctx.beginPath();
+                    this.ctx.arc(centerX, centerY - 50, 25, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // 눈
+                    this.ctx.fillStyle = '#000000';
+                    this.ctx.beginPath();
+                    this.ctx.arc(centerX - 8, centerY - 55, 3, 0, Math.PI * 2);
+                    this.ctx.arc(centerX + 8, centerY - 55, 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // 미소
+                    this.ctx.strokeStyle = '#000000';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.arc(centerX, centerY - 48, 8, 0, Math.PI, false);
+                    this.ctx.stroke();
+
+                    // 천사 날개 (부드러운 애니메이션)
+                    const wingFlap = Math.sin(this.animationFrame * 0.1) * 10;
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+
+                    // 왼쪽 날개
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(centerX - 40, centerY - 10, 35, 50 + wingFlap, -Math.PI / 6, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // 오른쪽 날개
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(centerX + 40, centerY - 10, 35, 50 + wingFlap, Math.PI / 6, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // 빛 입자 효과
+                    for (let i = 0; i < 20; i++) {
+                        const angle = (this.animationFrame * 0.02 + i * Math.PI * 2 / 20);
+                        const radius = 100 + Math.sin(this.animationFrame * 0.05 + i) * 20;
+                        const px = centerX + Math.cos(angle) * radius;
+                        const py = centerY + Math.sin(angle) * radius;
+                        const alpha = Math.sin(this.animationFrame * 0.05 + i) * 0.5 + 0.5;
+                        this.ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+                        this.ctx.beginPath();
+                        this.ctx.arc(px, py, 3, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+
+                    // 대사 표시 (단계별)
+                    const phase = Math.floor(this.animationFrame / 100);
+
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.font = 'bold 24px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.shadowColor = '#000000';
+                    this.ctx.shadowBlur = 5;
+
+                    if (phase === 0) {
+                        this.ctx.fillStyle = '#FFD700';
+                        this.ctx.font = 'bold 28px Arial';
+                        this.ctx.fillText('나는 너의 수호천사, sunzero...', centerX, this.canvas.height - 150);
+                    } else if (phase === 1) {
+                        this.ctx.fillText('지율아, 넌 이제 영어를 마스터했어.', centerX, this.canvas.height - 180);
+                        this.ctx.fillText('하지만 이것은 시작에 불과하지...', centerX, this.canvas.height - 140);
+                    } else if (phase === 2) {
+                        this.ctx.fillStyle = '#FF6B6B';
+                        this.ctx.font = 'bold 26px Arial';
+                        this.ctx.fillText('곧... AI가 세상을 지배하게 될 거야.', centerX, this.canvas.height - 180);
+                        this.ctx.fillStyle = '#FFFFFF';
+                        this.ctx.font = 'bold 22px Arial';
+                        this.ctx.fillText('그때가 오면, 진짜 싸움이 시작되는 거지...', centerX, this.canvas.height - 140);
+                    } else {
+                        // To be continued
+                        const scale = 1 + Math.sin(this.animationFrame * 0.08) * 0.15;
+                        this.ctx.save();
+                        this.ctx.translate(centerX, this.canvas.height - 100);
+                        this.ctx.scale(scale, scale);
+
+                        this.ctx.fillStyle = '#00FFFF';
+                        this.ctx.strokeStyle = '#000000';
+                        this.ctx.lineWidth = 4;
+                        this.ctx.font = 'bold 50px Arial';
+                        this.ctx.strokeText('To be continued...', 0, 0);
+                        this.ctx.fillText('To be continued...', 0, 0);
+
+                        this.ctx.restore();
+
+                        // 물음표들이 떠다님
+                        for (let i = 0; i < 5; i++) {
+                            const qx = centerX - 200 + i * 100;
+                            const qy = 150 + Math.sin(this.animationFrame * 0.1 + i) * 30;
+                            this.ctx.fillStyle = `rgba(255, 255, 255, ${0.3 + Math.sin(this.animationFrame * 0.05 + i) * 0.3})`;
+                            this.ctx.font = 'bold 40px Arial';
+                            this.ctx.fillText('?', qx, qy);
+                        }
+                    }
+
+                    this.ctx.shadowBlur = 0;
+                }
             }
         ];
     }
