@@ -58,7 +58,8 @@ let gameState = {
     scrollSpeed: 1.5,  // 2 -> 1.5로 느리게!
     mode: GAME_MODE.COLLECTING,
     stageWords: [],  // 20개 스테이지 단어들
-    clearedStages: 0
+    clearedStages: 0,
+    score: 0  // 점수 추가
 };
 
 // 현재 스테이지 데이터
@@ -1363,11 +1364,13 @@ function initGame() {
     gameState.currentStage = 1;
     gameState.clearedStages = 0;
     gameState.energy = gameState.maxEnergy;
+    gameState.score = 0;
 
     // 첫 스테이지 시작
     startStage(1);
 
     updateEnergyDisplay();
+    updateScoreDisplay();
 }
 
 // 스테이지 시작
@@ -1873,6 +1876,7 @@ function launchBall() {
 function handleQuizAnswer(choice) {
     if (choice.isCorrect) {
         // 정답!
+        addScore(100); // 퀴즈 정답 +100점
         for (let i = 0; i < 50; i++) {
             const colors = ['#FFD700', '#00FF00', '#FF69B4', '#87CEEB'];
             particles.push(new Particle(choice.x + choice.width / 2, choice.y + choice.height / 2, colors[Math.floor(Math.random() * colors.length)], 'star'));
@@ -1899,6 +1903,7 @@ function handleQuizAnswer(choice) {
 // 보스 맞추기
 function hitBoss() {
     boss.health--;
+    addScore(50); // 보스 타격 +50점
 
     // 파티클 효과
     for (let i = 0; i < 30; i++) {
@@ -1931,6 +1936,7 @@ function hitBoss() {
 // 스테이지 클리어
 function stageCleared() {
     gameState.clearedStages++;
+    addScore(200); // 스테이지 클리어 +200점
 
     if (gameState.currentStage >= gameState.maxStage) {
         // 게임 클리어!
@@ -1944,6 +1950,7 @@ function stageCleared() {
 // 보스 스테이지 클리어
 function bossClearedStage() {
     gameState.clearedStages++;
+    addScore(500); // 보스 스테이지 클리어 +500점
     bossBalls = [];
 
     if (gameState.currentStage >= gameState.maxStage) {
@@ -2312,6 +2319,20 @@ function updateEnergyDisplay() {
     }
 
     hpText.textContent = `HP: ${gameState.energy}/${gameState.maxEnergy}`;
+}
+
+// 점수 업데이트
+function updateScoreDisplay() {
+    const scoreElement = document.getElementById('playerScore');
+    if (scoreElement) {
+        scoreElement.textContent = `⭐ 점수: ${gameState.score}`;
+    }
+}
+
+// 점수 추가
+function addScore(points) {
+    gameState.score += points;
+    updateScoreDisplay();
 }
 
 // UI 업데이트

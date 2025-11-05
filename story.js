@@ -1313,7 +1313,9 @@ class StoryScene {
                     this.ctx.fillRect(60, this.canvas.height - 300, 230, 40);
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
-                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 80, this.canvas.height - 275);
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275);
+                    this.ctx.textAlign = 'left';
 
                     // 지율이
                     this.drawJiyul(this.canvas.width / 2 - 100, this.canvas.height - 170, 'idle', 0, 4);
@@ -1391,7 +1393,9 @@ class StoryScene {
                     this.ctx.fillRect(60, this.canvas.height - 300, 230, 40);
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
-                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 80, this.canvas.height - 275);
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275);
+                    this.ctx.textAlign = 'left';
 
                     // 지율이
                     this.drawJiyul(this.canvas.width / 2 - 100, this.canvas.height - 170, 'idle', 0, 4);
@@ -1526,7 +1530,9 @@ class StoryScene {
                     this.ctx.fillRect(60, this.canvas.height - 300, 230, 40);
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
-                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 80, this.canvas.height - 275);
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275);
+                    this.ctx.textAlign = 'left';
 
                     // 지율이
                     this.drawJiyul(this.canvas.width / 2 - 100, this.canvas.height - 170, 'jump', 0, 4);
