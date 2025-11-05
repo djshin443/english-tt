@@ -16,8 +16,8 @@ function resizeCanvas() {
         quizChoices && quizChoices.length > 0 && currentStageData) {
         try {
             createQuizChoices();
-            // 지율이 위치도 재계산 (첫 번째 선택지 기준)
-            const jiyulX = 100;
+            // 공 위치도 재계산 (지율이 위치 기준)
+            const jiyulX = window.quizJiyulX || 100;
             const jiyulY = quizChoices[jiyulQuizY].y + quizChoices[jiyulQuizY].height / 2;
             if (ball) {
                 ball.x = jiyulX + player.width + 60;
@@ -483,13 +483,15 @@ class Ball {
         this.x += this.vx;
         this.y += this.vy;
 
-        // 위아래 벽 충돌
-        if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
+        // 위아래 벽 충돌 (가상 캔버스 크기 사용)
+        const virtualHeight = canvas.height / GAME_SCALE;
+        if (this.y - this.radius < 0 || this.y + this.radius > virtualHeight) {
             this.vy *= -1;
         }
 
-        // 오른쪽 벗어남
-        if (this.x > canvas.width + 50) {
+        // 오른쪽 벗어남 (가상 캔버스 크기 사용)
+        const virtualWidth = canvas.width / GAME_SCALE;
+        if (this.x > virtualWidth + 50) {
             this.active = false;
             return;
         }
@@ -601,9 +603,12 @@ class DivineSword {
             t.alpha = (i + 1) / this.trail.length * 0.5;
         });
 
-        // 화면 벗어나면 비활성화
-        if (this.x < -100 || this.x > canvas.width + 100 ||
-            this.y < -100 || this.y > canvas.height + 100) {
+        // 화면 벗어나면 비활성화 (가상 캔버스 크기 사용, 여유있게 설정)
+        const virtualWidth = canvas.width / GAME_SCALE;
+        const virtualHeight = canvas.height / GAME_SCALE;
+        // 신검이 화면 밖 몬스터까지 맞출 수 있도록 충분한 범위 제공
+        if (this.x < -500 || this.x > virtualWidth + 500 ||
+            this.y < -500 || this.y > virtualHeight + 500) {
             this.active = false;
             return;
         }
@@ -838,7 +843,9 @@ class Boss {
 
         this.width = 16 * PIXEL_SCALE * 1.5;  // 픽셀 스프라이트 크기 (1.5배)
         this.height = 16 * PIXEL_SCALE * 1.5;
-        this.x = canvas.width / 2 - this.width / 2;
+        // GAME_SCALE로 인한 가상 캔버스 크기 사용
+        const virtualWidth = canvas.width / GAME_SCALE;
+        this.x = virtualWidth / 2 - this.width / 2;
         this.y = 100;
         this.vx = this.speed;
 
@@ -852,7 +859,9 @@ class Boss {
         // 좌우 이동
         this.x += this.vx;
 
-        if (this.x <= 0 || this.x >= canvas.width - this.width) {
+        // GAME_SCALE로 인한 가상 캔버스 크기 사용
+        const virtualWidth = canvas.width / GAME_SCALE;
+        if (this.x <= 0 || this.x >= virtualWidth - this.width) {
             this.vx *= -1;
         }
 
@@ -960,8 +969,9 @@ class BossBall {
         this.x += this.vx;
         this.y += this.vy;
 
-        // 위아래 벽 충돌
-        if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
+        // 위아래 벽 충돌 (가상 캔버스 크기 사용)
+        const virtualHeight = canvas.height / GAME_SCALE;
+        if (this.y - this.radius < 0 || this.y + this.radius > virtualHeight) {
             this.vy *= -1;
         }
 
@@ -1106,12 +1116,15 @@ class AlphabetMonster {
         this.x += this.vx;
         this.y += this.vy;
 
+        // 가상 캔버스 크기 사용
+        const virtualHeight = canvas.height / GAME_SCALE;
+
         if (this.y <= 50) {
             this.y = 50;
             this.vy = Math.abs(this.vy);
         }
-        if (this.y >= canvas.height - this.height - 50) {
-            this.y = canvas.height - this.height - 50;
+        if (this.y >= virtualHeight - this.height - 50) {
+            this.y = virtualHeight - this.height - 50;
             this.vy = -Math.abs(this.vy);
         }
 
@@ -1502,13 +1515,21 @@ function createQuizChoices() {
         spacingY = 120;
     }
 
-    // 중앙 정렬 계산
-    // 가로: 박스를 화면 중앙에 배치
-    const startX = (virtualWidth - boxWidth) / 2;
+    // 중앙 정렬 계산: 지율이와 박스를 하나의 그룹으로 중앙 배치
+    const jiyulWidth = player.width;
+    const gap = isMobile ? 100 : 150; // 지율이와 박스 사이 간격
+    const totalWidth = jiyulWidth + gap + boxWidth;
+    const groupStartX = (virtualWidth - totalWidth) / 2;
+
+    // 박스 X 위치 (지율이 오른쪽에 배치)
+    const startX = groupStartX + jiyulWidth + gap;
 
     // 세로: 4개 박스 전체 높이를 계산해서 중앙 정렬
     const totalHeight = boxHeight * 4 + spacingY * 3;
     const startY = (virtualHeight - totalHeight) / 2;
+
+    // 지율이 X 위치를 전역 변수에 저장 (drawJiyulWithPaddle에서 사용)
+    window.quizJiyulX = groupStartX;
 
     for (let i = 0; i < 4; i++) {
         const x = startX;
@@ -1793,14 +1814,15 @@ function launchBall() {
     if (!ball || ball.active) return;
 
     // 지율이 현재 위치에서 발사
-    const jiyulX = 100;
-    let jiyulY;
+    let jiyulX, jiyulY;
 
     if (gameState.mode === GAME_MODE.QUIZ) {
-        // 퀴즈 모드: 선택지 위치에 맞춰 발사
+        // 퀴즈 모드: 중앙 정렬된 위치에서 발사
+        jiyulX = window.quizJiyulX || 100;
         jiyulY = quizChoices[jiyulQuizY].y + quizChoices[jiyulQuizY].height / 2;
     } else {
         // 보스 모드: 플레이어 실제 위치에서 발사
+        jiyulX = 100;
         jiyulY = player.y + player.height / 2;
     }
 
@@ -1987,14 +2009,15 @@ function drawJiyulWithPaddle() {
     }
 
     // 지율이 위치 (위아래 이동 가능)
-    const jiyulX = 100;
-    let jiyulY;
+    let jiyulX, jiyulY;
 
     if (gameState.mode === GAME_MODE.QUIZ) {
-        // 퀴즈 모드: 선택지에 맞춰 이동
+        // 퀴즈 모드: 선택지 왼쪽에 중앙 정렬되어 배치
+        jiyulX = window.quizJiyulX || 100; // 저장된 위치 사용 (없으면 기본값)
         jiyulY = quizChoices[jiyulQuizY].y + quizChoices[jiyulQuizY].height / 2 - player.height / 2;
     } else {
         // 보스 모드: 플레이어 실제 위치 사용
+        jiyulX = 100;
         jiyulY = player.y;
     }
 
