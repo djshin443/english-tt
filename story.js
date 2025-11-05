@@ -33,8 +33,24 @@ class StoryScene {
         this.waitingForInput = false;
         this.canProceed = false;
 
+        // SKIP 버튼 설정
+        this.skipButton = {
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 40,
+            hovered: false
+        };
+        this.updateSkipButtonPosition();
+
         // 이벤트 리스너 추가
         this.setupEventListeners();
+    }
+
+    // SKIP 버튼 위치 업데이트
+    updateSkipButtonPosition() {
+        this.skipButton.x = this.canvas.width - this.skipButton.width - 20;
+        this.skipButton.y = 20;
     }
 
     // 이벤트 리스너 설정
@@ -45,12 +61,16 @@ class StoryScene {
             e.preventDefault(); // 기본 터치 동작 방지
             this.handleInput(e);
         };
+        this.boundHandleMove = (e) => this.handleMouseMove(e);
 
         // 클릭 이벤트 (PC)
         this.canvas.addEventListener('click', this.boundHandleClick);
 
         // 터치 이벤트 (모바일)
         this.canvas.addEventListener('touchstart', this.boundHandleTouch);
+
+        // 마우스 이동 이벤트 (호버 효과)
+        this.canvas.addEventListener('mousemove', this.boundHandleMove);
     }
 
     // 이벤트 리스너 정리
@@ -61,12 +81,61 @@ class StoryScene {
         if (this.boundHandleTouch) {
             this.canvas.removeEventListener('touchstart', this.boundHandleTouch);
         }
+        if (this.boundHandleMove) {
+            this.canvas.removeEventListener('mousemove', this.boundHandleMove);
+        }
+    }
+
+    // 마우스 이동 처리 (호버 효과)
+    handleMouseMove(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        // SKIP 버튼 호버 체크
+        this.skipButton.hovered = (
+            x >= this.skipButton.x &&
+            x <= this.skipButton.x + this.skipButton.width &&
+            y >= this.skipButton.y &&
+            y <= this.skipButton.y + this.skipButton.height
+        );
     }
 
     // 입력 처리
     handleInput(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        let x, y;
+
+        if (e.type === 'touchstart') {
+            const touch = e.touches[0] || e.changedTouches[0];
+            x = touch.clientX - rect.left;
+            y = touch.clientY - rect.top;
+        } else {
+            x = e.clientX - rect.left;
+            y = e.clientY - rect.top;
+        }
+
+        // SKIP 버튼 클릭 체크
+        if (x >= this.skipButton.x &&
+            x <= this.skipButton.x + this.skipButton.width &&
+            y >= this.skipButton.y &&
+            y <= this.skipButton.y + this.skipButton.height) {
+            // 모든 씬 건너뛰고 완료
+            this.skipToEnd();
+            return;
+        }
+
+        // 일반 클릭 - 다음 씬으로
         if (this.waitingForInput) {
             this.canProceed = true;
+        }
+    }
+
+    // 오프닝 건너뛰기
+    skipToEnd() {
+        this.cleanupEventListeners();
+        if (this.onComplete) {
+            this.onComplete();
         }
     }
 
@@ -1890,6 +1959,52 @@ class StoryScene {
                 this.ctx.fillText('화면을 터치하세요', btnX + btnWidth/2, btnY - 10);
             }
         }
+
+        // SKIP 버튼 그리기 (오른쪽 상단)
+        const skipBtnGradient = this.ctx.createLinearGradient(
+            this.skipButton.x,
+            this.skipButton.y,
+            this.skipButton.x + this.skipButton.width,
+            this.skipButton.y + this.skipButton.height
+        );
+
+        if (this.skipButton.hovered) {
+            skipBtnGradient.addColorStop(0, 'rgba(200, 100, 250, 0.9)');
+            skipBtnGradient.addColorStop(1, 'rgba(250, 150, 250, 0.9)');
+        } else {
+            skipBtnGradient.addColorStop(0, 'rgba(147, 112, 219, 0.8)');
+            skipBtnGradient.addColorStop(1, 'rgba(221, 160, 221, 0.8)');
+        }
+
+        // 버튼 배경
+        this.ctx.fillStyle = skipBtnGradient;
+        this.ctx.fillRect(
+            this.skipButton.x,
+            this.skipButton.y,
+            this.skipButton.width,
+            this.skipButton.height
+        );
+
+        // 버튼 테두리
+        this.ctx.strokeStyle = '#FFFFFF';
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeRect(
+            this.skipButton.x,
+            this.skipButton.y,
+            this.skipButton.width,
+            this.skipButton.height
+        );
+
+        // 버튼 텍스트
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.font = 'bold 16px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(
+            'SKIP ⏭',
+            this.skipButton.x + this.skipButton.width / 2,
+            this.skipButton.y + this.skipButton.height / 2
+        );
 
         // 스킵 안내 (좌측 하단) - PC에서만 스페이스바 표시
         const isMobileSkip = window.matchMedia('(max-width: 800px)').matches;
