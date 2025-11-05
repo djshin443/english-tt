@@ -12,6 +12,9 @@ class StoryScene {
         // 픽셀 스케일
         this.PIXEL_SCALE = 4;
 
+        // 게임 스케일 (모든 요소를 50% 크기로)
+        this.GAME_SCALE = 0.5;
+
         // 애니메이션 속도
         this.frameDelay = 0;
         this.maxFrameDelay = 5;
@@ -1813,13 +1816,23 @@ class StoryScene {
 
         const scene = this.scenes[this.currentScene];
 
+        // 전역 스케일 적용 - 모든 스토리 요소를 50% 크기로
+        this.ctx.save();
+        this.ctx.scale(this.GAME_SCALE, this.GAME_SCALE);
+
         // 씬 업데이트 함수 호출
         if (scene.update) {
             scene.update();
         }
 
-        // 스킵 안내 및 진행 버튼
+        // 스케일 복원
+        this.ctx.restore();
+
+        // 스킵 안내 및 진행 버튼 (스케일 없이)
+        this.ctx.save();
+        this.ctx.scale(this.GAME_SCALE, this.GAME_SCALE);
         this.drawControls();
+        this.ctx.restore();
 
         // 프레임 증가 (애니메이션은 계속 진행하되, 씬 전환은 사용자 입력 대기)
         this.animationFrame++;
@@ -1847,11 +1860,13 @@ class StoryScene {
     drawControls() {
         // 진행 버튼 그리기 (입력 대기 중일 때만)
         if (this.waitingForInput) {
-            // 버튼 배경
+            // 버튼 배경 (스케일 적용 고려)
+            const canvasWidth = this.canvas.width / this.GAME_SCALE;
+            const canvasHeight = this.canvas.height / this.GAME_SCALE;
             const btnWidth = 180;
             const btnHeight = 50;
-            const btnX = this.canvas.width - btnWidth - 30;
-            const btnY = this.canvas.height - btnHeight - 30;
+            const btnX = canvasWidth - btnWidth - 30;
+            const btnY = canvasHeight - btnHeight - 30;
 
             // 애니메이션 효과 (깜빡임)
             const alpha = 0.7 + Math.sin(this.animationFrame * 0.1) * 0.3;
