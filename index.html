@@ -227,6 +227,27 @@
             min-width: 80px;
         }
 
+        #playerInfo {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 10px;
+            border-radius: 8px;
+            margin-top: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        #playerName {
+            color: #FFD700;
+        }
+
+        #playerScore {
+            color: #00FF00;
+        }
+
         #wordProgress {
             position: absolute;
             top: 10px;
@@ -1187,6 +1208,10 @@
                     <div id="hpBarFill"></div>
                 </div>
                 <div id="hpText">HP: 10/10</div>
+            </div>
+            <div id="playerInfo">
+                <div id="playerName">👤 지율</div>
+                <div id="playerScore">⭐ 점수: 0</div>
             </div>
         </div>
 
