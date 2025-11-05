@@ -215,6 +215,8 @@ function showTitleScreen() {
         max-width: ${isMobilePortrait ? '100%' : '90%'};
         box-sizing: border-box;
         ${isMobilePortrait ? 'margin-top: 20px;' : ''}
+        position: relative;
+        z-index: 100;
     `;
 
     // 메인 타이틀 컨테이너
@@ -317,6 +319,9 @@ function showTitleScreen() {
         margin-top: ${isMobilePortrait ? '20px' : '30px'};
         box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
         white-space: nowrap;
+        position: relative;
+        z-index: 1000;
+        pointer-events: auto;
     `;
 
     startButton.onmouseover = () => {
@@ -330,6 +335,8 @@ function showTitleScreen() {
     };
 
     startButton.onclick = () => {
+        console.log('🚀 Start button clicked!');
+
         // 화면 전체 폭죽 효과
         const fireworkCount = isMobilePortrait ? 15 : 30;
         for (let i = 0; i < fireworkCount; i++) {
@@ -376,6 +383,8 @@ function showTitleScreen() {
             titleScreen.remove();
             const styleTag = document.getElementById('titleScreenStyles');
             if (styleTag) styleTag.remove();
+
+            console.log('🎬 Starting opening sequence...');
             startOpeningSequence();
         }, 800);
     };
@@ -418,8 +427,17 @@ function showTitleScreen() {
 
 // 오프닝 시퀀스를 시작하는 함수
 function startOpeningSequence() {
+    console.log('📽️ startOpeningSequence called');
+
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+
+    if (!canvas || !ctx) {
+        console.error('❌ Canvas or context not found!');
+        return;
+    }
+
+    console.log('✅ Canvas found:', canvas);
 
     // 캔버스 표시
     canvas.style.display = 'block';
@@ -433,10 +451,16 @@ function startOpeningSequence() {
         }
     });
 
+    console.log('🎭 Calling startOpening...');
+
     startOpening(canvas, ctx, function() {
+        console.log('✨ Opening sequence completed!');
         // 오프닝 완료 후 게임 시작
         if (typeof startGame === 'function') {
+            console.log('🎮 Starting game...');
             startGame();
+        } else {
+            console.error('❌ startGame function not found!');
         }
     });
 }
