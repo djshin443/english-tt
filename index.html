@@ -163,10 +163,20 @@
 
         @media (max-width: 800px) and (orientation: portrait) {
             #gameContainer {
-                display: none;
+                display: none !important;
             }
             #rotatePrompt {
                 display: flex !important;
+            }
+        }
+
+        /* 모바일 가로 모드에서는 게임 컨테이너 보이기 */
+        @media (max-width: 800px) and (orientation: landscape) {
+            #gameContainer {
+                display: block !important;
+            }
+            #rotatePrompt {
+                display: none !important;
             }
         }
 
@@ -295,7 +305,7 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%) scale(0.5);
             background: rgba(0, 0, 0, 0.9);
             padding: 40px;
             border-radius: 15px;
@@ -416,11 +426,11 @@
         @keyframes fadeInScale {
             0% {
                 opacity: 0;
-                transform: scale(0.8);
+                transform: scale(0.4);
             }
             100% {
                 opacity: 1;
-                transform: scale(1);
+                transform: scale(0.5);
             }
         }
 
@@ -429,8 +439,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 500px;
-            height: 500px;
+            width: 250px;
+            height: 250px;
             background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
             animation: pulse 3s ease-in-out infinite;
         }
@@ -710,8 +720,8 @@
             }
 
             .title-glow {
-                width: 250px;
-                height: 250px;
+                width: 125px;
+                height: 125px;
             }
 
             .title-description {
@@ -738,7 +748,7 @@
 
             .title-container {
                 padding: 5px;
-                transform: scale(0.9);
+                transform: scale(0.45);
             }
 
             .main-title {
@@ -785,8 +795,8 @@
             }
 
             .title-glow {
-                width: 150px;
-                height: 150px;
+                width: 75px;
+                height: 75px;
             }
 
             #titleScreen::after {
@@ -813,7 +823,7 @@
         @media (max-width: 900px) and (orientation: landscape) {
             .title-container {
                 padding: 10px;
-                transform: scale(0.85);
+                transform: scale(0.425);
             }
 
             .main-title {
@@ -866,28 +876,28 @@
         }
 
         #startScreen h1 {
-            font-size: clamp(24px, 5vw, 48px);
-            margin-bottom: 20px;
+            font-size: clamp(12px, 2.5vw, 24px);
+            margin-bottom: 10px;
             color: #FFD700;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            text-shadow: 1.5px 1.5px 3px rgba(0,0,0,0.5);
         }
 
         #startScreen p {
-            font-size: clamp(14px, 2.5vw, 18px);
-            margin-bottom: 10px;
+            font-size: clamp(7px, 1.25vw, 9px);
+            margin-bottom: 5px;
             text-align: center;
             max-width: 90%;
         }
 
         #startScreen button {
-            margin-top: 30px;
-            margin-bottom: 30px;
+            margin-top: 15px;
+            margin-bottom: 15px;
             background: #4CAF50;
             color: white;
             border: none;
-            padding: clamp(12px, 2vw, 20px) clamp(25px, 4vw, 40px);
-            font-size: clamp(18px, 3vw, 24px);
-            border-radius: 8px;
+            padding: clamp(6px, 1vw, 10px) clamp(12.5px, 2vw, 20px);
+            font-size: clamp(9px, 1.5vw, 12px);
+            border-radius: 4px;
             cursor: pointer;
             transition: all 0.3s;
         }
@@ -898,8 +908,8 @@
         }
 
         .controls {
-            margin-top: 20px;
-            font-size: clamp(12px, 2vw, 16px);
+            margin-top: 10px;
+            font-size: clamp(6px, 1vw, 8px);
             color: #FFD700;
             max-width: 90%;
         }
@@ -1044,24 +1054,24 @@
             }
 
             #startScreen h1 {
-                font-size: 24px;
+                font-size: 12px;
             }
 
             #startScreen p {
-                font-size: 11px;
-                padding: 0 10px;
-                margin-bottom: 3px;
+                font-size: 5.5px;
+                padding: 0 5px;
+                margin-bottom: 1.5px;
             }
 
             #startScreen button {
-                padding: 10px 20px;
-                font-size: 16px;
-                margin-top: 10px;
+                padding: 5px 10px;
+                font-size: 8px;
+                margin-top: 5px;
             }
 
             .controls {
-                font-size: 10px;
-                margin-top: 8px;
+                font-size: 5px;
+                margin-top: 4px;
             }
 
             #mobileControls {
@@ -1124,6 +1134,7 @@
 
             #gameOver {
                 padding: 20px 15px;
+                transform: translate(-50%, -50%) scale(0.5);
             }
 
             #gameOver h2 {
