@@ -734,13 +734,13 @@ class QuizChoice {
         const isMobile = window.innerWidth <= 800;
         const isLandscape = window.innerWidth > window.innerHeight;
 
-        // 가로 모드 모바일: 더 작은 크기로 4개 박스가 모두 보이도록
+        // 가로 모드 모바일: 더 작은 크기로 4개 박스가 모두 보이도록 - 70% 크기로 조정
         if (isMobile && isLandscape) {
-            this.width = 160;
-            this.height = Math.min(60, (canvas.height - 80) / 5);  // 화면 높이에 맞게
+            this.width = 112;
+            this.height = Math.min(42, (canvas.height - 56) / 5);  // 화면 높이에 맞게
         } else {
-            this.width = isMobile ? 160 : 220;
-            this.height = isMobile ? 65 : 90;
+            this.width = isMobile ? 112 : 154;
+            this.height = isMobile ? 46 : 63;
         }
 
         this.text = text;
@@ -794,12 +794,12 @@ class QuizChoice {
         const isMobile = window.innerWidth <= 800;
         const isLandscape = window.innerWidth > window.innerHeight;
 
-        // 가로 모드 모바일: 박스 크기에 맞게 폰트 크기 조정
+        // 가로 모드 모바일: 박스 크기에 맞게 폰트 크기 조정 - 70% 크기로 조정
         let fontSize;
         if (isMobile && isLandscape) {
-            fontSize = Math.min(12, this.height * 0.25);  // 박스 높이의 25%
+            fontSize = Math.min(8, this.height * 0.25);  // 박스 높이의 25%
         } else {
-            fontSize = isMobile ? 14 : 20;
+            fontSize = isMobile ? 10 : 14;
         }
         ctx.font = `bold ${fontSize}px Arial`;
 
@@ -901,9 +901,9 @@ class Boss {
         // 체력 바
         this.drawHealthBar();
 
-        // 이름
+        // 이름 - 70% 크기로 조정
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 18px Arial';
+        ctx.font = 'bold 13px Arial';  // 70% 크기 (18 * 0.7 ≈ 13)
         ctx.textAlign = 'center';
         ctx.shadowColor = '#000000';
         ctx.shadowBlur = 5;
@@ -913,8 +913,8 @@ class Boss {
     }
 
     drawHealthBar() {
-        const barWidth = 100;
-        const barHeight = 10;
+        const barWidth = 70;  // 70% 크기로 조정 (100 * 0.7)
+        const barHeight = 7;  // 70% 크기로 조정 (10 * 0.7)
         const barX = this.x + this.width / 2 - barWidth / 2;
         const barY = this.y - 15;
 
@@ -1006,8 +1006,8 @@ class LetterCard {
         this.x = x;
         this.y = y;
         this.letter = letter;
-        this.width = 40;
-        this.height = 50;
+        this.width = 28;  // 70% 크기로 조정 (40 * 0.7)
+        this.height = 35;  // 70% 크기로 조정 (50 * 0.7)
         this.collected = false;
         this.pulseScale = 1;
         this.pulseDirection = 0.02;
@@ -1057,7 +1057,7 @@ class LetterCard {
         ctx.shadowBlur = 3;
         ctx.shadowOffsetY = 2;
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 32px Arial';
+        ctx.font = 'bold 22px Arial';  // 70% 크기로 조정 (32 * 0.7 ≈ 22)
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(this.letter, 0, 0);
@@ -1518,11 +1518,11 @@ function drawDialogue() {
 
     const dialogue = dialogueState.dialogues[dialogueState.currentIndex];
 
-    // 대화창 높이를 화면 크기에 맞게 조정 (모바일: 작게, PC: 크게)
-    const dialogueHeight = Math.min(150, canvas.height * 0.25);
-    const padding = Math.max(10, canvas.width * 0.0125);
-    const fontSize = Math.max(14, Math.min(18, canvas.width * 0.0225));
-    const speakerFontSize = Math.max(16, Math.min(20, canvas.width * 0.025));
+    // 대화창 높이를 화면 크기에 맞게 조정 (모바일: 작게, PC: 크게) - 70% 크기로 조정
+    const dialogueHeight = Math.min(105, canvas.height * 0.175);
+    const padding = Math.max(7, canvas.width * 0.00875);
+    const fontSize = Math.max(10, Math.min(13, canvas.width * 0.015775));
+    const speakerFontSize = Math.max(11, Math.min(14, canvas.width * 0.0175));
 
     // 반투명 배경
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
