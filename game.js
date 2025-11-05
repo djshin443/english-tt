@@ -169,28 +169,19 @@ let maxDistance = 45;
 function handleTouchStart(e) {
     e.preventDefault();
     // 조이스틱이 활성화되지 않았을 때만 새 터치 처리
-    if (!joystick.active) {
+    // changedTouches 사용 - 이번 이벤트로 새로 추가된 터치만 확인
+    if (!joystick.active && e.changedTouches.length > 0) {
+        const touch = e.changedTouches[0];
         const rect = joystickContainer.getBoundingClientRect();
 
-        // changedTouches에서 조이스틱 영역 내의 터치 찾기
-        for (let i = 0; i < e.changedTouches.length; i++) {
-            const touch = e.changedTouches[i];
-
-            // 터치가 조이스틱 영역 내에 있는지 확인
-            if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
-                touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-
-                joystick.touchId = touch.identifier;
-                maxDistance = getMaxDistance();
-                joystick.active = true;
-                joystick.startX = rect.left + rect.width / 2;
-                joystick.startY = rect.top + rect.height / 2;
-                joystick.currentX = touch.clientX;
-                joystick.currentY = touch.clientY;
-                updateJoystick();
-                break;
-            }
-        }
+        joystick.touchId = touch.identifier;
+        maxDistance = getMaxDistance();
+        joystick.active = true;
+        joystick.startX = rect.left + rect.width / 2;
+        joystick.startY = rect.top + rect.height / 2;
+        joystick.currentX = touch.clientX;
+        joystick.currentY = touch.clientY;
+        updateJoystick();
     }
 }
 
