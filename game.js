@@ -2639,17 +2639,20 @@ function showOpening() {
     // 모바일 컨트롤 숨기기 (오프닝 중에는 안 보이게)
     hideMobileControls();
 
-    // 스토리 애니메이션 시작
-    if (storyScene) {
-        storyScene.startOpening(() => {
-            // 오프닝 끝나면 게임 시작
-            startGame();
-        });
+    // opening.js의 타이틀 화면 표시
+    if (typeof showTitleScreen === 'function') {
+        showTitleScreen();
     } else {
-        // fallback: 텍스트 대화
-        startDialogue(OPENING_DIALOGUE, () => {
-            startGame();
-        });
+        // fallback: 스토리 애니메이션
+        if (storyScene) {
+            storyScene.startOpening(() => {
+                startGame();
+            });
+        } else {
+            startDialogue(OPENING_DIALOGUE, () => {
+                startGame();
+            });
+        }
     }
 }
 

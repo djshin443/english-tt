@@ -1,0 +1,11 @@
+사용자님의 제공 코드는 다음을 포함합니다:
+1. showTitleScreen() - 타이틀 화면 (이미 추가됨)
+2. startOpeningSequence() - 오프닝 시퀀스 시작 (이미 추가됨)
+3. OpeningSequence 클래스 - 캔버스 기반 오프닝 애니메이션
+4. startOpening() 함수 - OpeningSequence 실행
+
+제공된 코드에서 drawDialogue() 메서드를 보면:
+- 대화 박스가 canvas.height - boxHeight - 10 (하단)에 위치
+- 가로모드: boxHeight=60, 세로모드: boxHeight=100
+
+이것이 핵심입니다!

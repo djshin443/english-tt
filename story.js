@@ -352,9 +352,9 @@ class StoryScene {
         const textHeight = lines.length * lineHeight;
         const boxHeight = nameHeight + textHeight + padding * 2;
 
-        // 박스 위치 (중앙 정렬)
+        // 박스 위치 - 항상 화면 하단에 배치 (y 파라미터 무시)
         const boxX = x - boxWidth / 2;
-        const boxY = y;  // y는 이제 박스의 상단 위치
+        const boxY = this.canvas.height - boxHeight - 10;  // 화면 하단에서 10px 여백
 
         // 화면 밖으로 나가지 않도록 조정
         const finalBoxX = Math.max(10, Math.min(boxX, this.canvas.width - boxWidth - 10));
