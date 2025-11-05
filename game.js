@@ -1439,9 +1439,9 @@ function startCollectingStage(stageNum) {
         wordProgress.style.right = '10px';
         wordProgress.style.top = '10px';
         wordProgress.style.bottom = 'auto';
-        wordProgress.style.maxWidth = '400px';
+        wordProgress.style.width = '320px';
         wordProgress.style.fontSize = '18px';
-        wordProgress.style.padding = '10px 15px';
+        wordProgress.style.padding = '10px';
     }
 }
 
@@ -1487,9 +1487,9 @@ function startQuizStage() {
         wordProgress.style.right = '10px';
         wordProgress.style.top = '10px';
         wordProgress.style.bottom = 'auto';
-        wordProgress.style.maxWidth = '300px';
+        wordProgress.style.width = '320px';
         wordProgress.style.fontSize = '16px';
-        wordProgress.style.padding = '10px 15px';
+        wordProgress.style.padding = '10px';
     }
 }
 
@@ -1702,9 +1702,9 @@ function startBossStage(stageNum) {
         wordProgress.style.right = '10px';
         wordProgress.style.top = '10px';
         wordProgress.style.bottom = 'auto';
-        wordProgress.style.maxWidth = '300px';
+        wordProgress.style.width = '320px';
         wordProgress.style.fontSize = '16px';
-        wordProgress.style.padding = '10px 15px';
+        wordProgress.style.padding = '10px';
     }
 
     // 보스 전투 전 대화 시작
