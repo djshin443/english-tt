@@ -2670,6 +2670,12 @@ function startGame() {
         wordProgress.style.display = 'flex';
     }
 
+    // HP 바 (energyContainer) 보이기
+    const ui = document.getElementById('ui');
+    if (ui) {
+        ui.style.display = 'block';
+    }
+
     // 모바일 컨트롤 보이기 (게임 플레이 중에는 보이게)
     showMobileControls();
 
