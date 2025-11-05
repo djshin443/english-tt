@@ -2103,8 +2103,8 @@ class StoryScene {
             // 버튼 배경 (전체 화면 크기 사용)
             const canvasWidth = this.canvas.width;
             const canvasHeight = this.canvas.height;
-            const btnWidth = 180;
-            const btnHeight = 50;
+            const btnWidth = 100;  // 작게 축소
+            const btnHeight = 40;  // 작게 축소
             const btnX = canvasWidth - btnWidth - 30;
             const btnY = canvasHeight - btnHeight - 30;
 
@@ -2124,15 +2124,8 @@ class StoryScene {
             this.ctx.fillStyle = '#000000';
             this.ctx.font = 'bold 18px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('클릭하여 계속 →', btnX + btnWidth/2, btnY + btnHeight/2 + 6);
-
-            // 모바일 안내
-            const isMobile = window.matchMedia('(max-width: 800px)').matches;
-            if (isMobile) {
-                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                this.ctx.font = '14px Arial';
-                this.ctx.fillText('화면을 터치하세요', btnX + btnWidth/2, btnY - 10);
-            }
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText('Click', btnX + btnWidth/2, btnY + btnHeight/2);
         }
 
         // SKIP 버튼 그리기 (오른쪽 상단)
