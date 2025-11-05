@@ -7,9 +7,20 @@ const GAME_SCALE = 0.5; // 모든 게임 요소를 50% 크기로 축소
 // 캔버스 크기 조정
 function resizeCanvas() {
     const container = document.getElementById('gameContainer');
+
+    // 컨테이너가 숨겨져 있으면 (세로 모드) resize하지 않음
+    if (container.style.display === 'none' ||
+        window.getComputedStyle(container).display === 'none') {
+        return;
+    }
+
     const rect = container.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
+
+    // 유효한 크기일 때만 canvas 크기 변경
+    if (rect.width > 0 && rect.height > 0) {
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+    }
 
     // 퀴즈 모드일 때 선택지 위치 재계산 (게임이 실행 중일 때만)
     if (gameState && gameState.isRunning && gameState.mode === GAME_MODE.QUIZ &&
@@ -483,15 +494,13 @@ class Ball {
         this.x += this.vx;
         this.y += this.vy;
 
-        // 위아래 벽 충돌 (가상 캔버스 크기 사용)
-        const virtualHeight = canvas.height / GAME_SCALE;
-        if (this.y - this.radius < 0 || this.y + this.radius > virtualHeight) {
+        // 위아래 벽 충돌 (실제 캔버스 크기 기준)
+        if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
             this.vy *= -1;
         }
 
-        // 오른쪽 벗어남 (가상 캔버스 크기 사용)
-        const virtualWidth = canvas.width / GAME_SCALE;
-        if (this.x > virtualWidth + 50) {
+        // 오른쪽 벗어남 (실제 캔버스 크기 기준)
+        if (this.x > canvas.width + 50) {
             this.active = false;
             return;
         }
@@ -603,12 +612,10 @@ class DivineSword {
             t.alpha = (i + 1) / this.trail.length * 0.5;
         });
 
-        // 화면 벗어나면 비활성화 (가상 캔버스 크기 사용, 여유있게 설정)
-        const virtualWidth = canvas.width / GAME_SCALE;
-        const virtualHeight = canvas.height / GAME_SCALE;
+        // 화면 벗어나면 비활성화 (실제 캔버스 크기 기준, 여유있게 설정)
         // 신검이 화면 밖 몬스터까지 맞출 수 있도록 충분한 범위 제공
-        if (this.x < -500 || this.x > virtualWidth + 500 ||
-            this.y < -500 || this.y > virtualHeight + 500) {
+        if (this.x < -500 || this.x > canvas.width + 500 ||
+            this.y < -500 || this.y > canvas.height + 500) {
             this.active = false;
             return;
         }
@@ -843,9 +850,8 @@ class Boss {
 
         this.width = 16 * PIXEL_SCALE * 1.5;  // 픽셀 스프라이트 크기 (1.5배)
         this.height = 16 * PIXEL_SCALE * 1.5;
-        // GAME_SCALE로 인한 가상 캔버스 크기 사용
-        const virtualWidth = canvas.width / GAME_SCALE;
-        this.x = virtualWidth / 2 - this.width / 2;
+        // 화면 중앙에 배치 (실제 캔버스 크기 기준)
+        this.x = canvas.width / 2 - this.width / 2;
         this.y = 100;
         this.vx = this.speed;
 
@@ -859,9 +865,8 @@ class Boss {
         // 좌우 이동
         this.x += this.vx;
 
-        // GAME_SCALE로 인한 가상 캔버스 크기 사용
-        const virtualWidth = canvas.width / GAME_SCALE;
-        if (this.x <= 0 || this.x >= virtualWidth - this.width) {
+        // X 경계 체크 (실제 캔버스 크기 기준)
+        if (this.x <= 0 || this.x >= canvas.width - this.width) {
             this.vx *= -1;
         }
 
@@ -969,9 +974,8 @@ class BossBall {
         this.x += this.vx;
         this.y += this.vy;
 
-        // 위아래 벽 충돌 (가상 캔버스 크기 사용)
-        const virtualHeight = canvas.height / GAME_SCALE;
-        if (this.y - this.radius < 0 || this.y + this.radius > virtualHeight) {
+        // 위아래 벽 충돌 (실제 캔버스 크기 기준)
+        if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
             this.vy *= -1;
         }
 
@@ -1116,15 +1120,13 @@ class AlphabetMonster {
         this.x += this.vx;
         this.y += this.vy;
 
-        // 가상 캔버스 크기 사용
-        const virtualHeight = canvas.height / GAME_SCALE;
-
+        // Y 경계 체크 (실제 캔버스 크기 기준)
         if (this.y <= 50) {
             this.y = 50;
             this.vy = Math.abs(this.vy);
         }
-        if (this.y >= virtualHeight - this.height - 50) {
-            this.y = virtualHeight - this.height - 50;
+        if (this.y >= canvas.height - this.height - 50) {
+            this.y = canvas.height - this.height - 50;
             this.vy = -Math.abs(this.vy);
         }
 
@@ -1491,10 +1493,6 @@ function createQuizChoices() {
     const isMobile = window.innerWidth <= 800;
     const isLandscape = window.innerWidth > window.innerHeight;
 
-    // GAME_SCALE(0.5)로 인한 가상 캔버스 크기
-    const virtualWidth = canvas.width / GAME_SCALE;
-    const virtualHeight = canvas.height / GAME_SCALE;
-
     // 박스 크기 결정 (QuizChoice 생성자와 동일한 로직)
     let boxWidth, boxHeight;
     if (isMobile && isLandscape) {
@@ -1508,25 +1506,25 @@ function createQuizChoices() {
     // 박스 간격
     let spacingY;
     if (isMobile && isLandscape) {
-        spacingY = Math.min(80, (virtualHeight - 200) / 5);
+        spacingY = Math.min(80, (canvas.height - 200) / 5);
     } else if (isMobile) {
         spacingY = 100;
     } else {
         spacingY = 120;
     }
 
-    // 중앙 정렬 계산: 지율이와 박스를 하나의 그룹으로 중앙 배치
+    // 중앙 정렬 계산: 지율이와 박스를 하나의 그룹으로 중앙 배치 (실제 캔버스 크기 기준)
     const jiyulWidth = player.width;
     const gap = isMobile ? 100 : 150; // 지율이와 박스 사이 간격
     const totalWidth = jiyulWidth + gap + boxWidth;
-    const groupStartX = (virtualWidth - totalWidth) / 2;
+    const groupStartX = (canvas.width - totalWidth) / 2;
 
     // 박스 X 위치 (지율이 오른쪽에 배치)
     const startX = groupStartX + jiyulWidth + gap;
 
     // 세로: 4개 박스 전체 높이를 계산해서 중앙 정렬
     const totalHeight = boxHeight * 4 + spacingY * 3;
-    const startY = (virtualHeight - totalHeight) / 2;
+    const startY = (canvas.height - totalHeight) / 2;
 
     // 지율이 X 위치를 전역 변수에 저장 (drawJiyulWithPaddle에서 사용)
     window.quizJiyulX = groupStartX;
@@ -1722,12 +1720,10 @@ function spawnNextLetter() {
         if (!usedLetters.includes(letter)) {
             usedLetters.push(letter);  // 사용한 알파벳 추가
 
-            // GAME_SCALE(0.5)로 인한 가상 캔버스 크기 고려
-            const virtualWidth = canvas.width / GAME_SCALE;
-            const virtualHeight = canvas.height / GAME_SCALE;
-            const x = virtualWidth + 200 + i * 500;  // 간격을 500px으로 매우 넓게 설정
+            // 화면 오른쪽 밖에서 생성 (실제 캔버스 크기 기준)
+            const x = canvas.width + 200 + i * 500;  // 간격을 500px으로 매우 넓게 설정
             // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정
-            const y = 150 + Math.random() * (virtualHeight - 300);
+            const y = 150 + Math.random() * (canvas.height - 300);
             letters.push(new LetterCard(x, y, letter));
         }
     }
@@ -1755,23 +1751,19 @@ function spawnMonster(x = null) {
     }
 
     const letter = availableLetters[Math.floor(Math.random() * availableLetters.length)];
-    // GAME_SCALE(0.5)로 인한 가상 캔버스 크기 고려
-    const virtualWidth = canvas.width / GAME_SCALE;
-    const virtualHeight = canvas.height / GAME_SCALE;
-    const spawnX = x !== null ? x : virtualWidth + 50;
+    // 화면 오른쪽 밖에서 생성 (실제 캔버스 크기 기준)
+    const spawnX = x !== null ? x : canvas.width + 50;
     // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정
-    const spawnY = 150 + Math.random() * (virtualHeight - 250);
+    const spawnY = 150 + Math.random() * (canvas.height - 250);
     monsters.push(new AlphabetMonster(spawnX, spawnY, letter));
 }
 
 // 포션 생성
 function spawnPotion(x = null) {
-    // GAME_SCALE(0.5)로 인한 가상 캔버스 크기 고려
-    const virtualWidth = canvas.width / GAME_SCALE;
-    const virtualHeight = canvas.height / GAME_SCALE;
-    const spawnX = x !== null ? x : virtualWidth + 50;
+    // 화면 오른쪽 밖에서 생성 (실제 캔버스 크기 기준)
+    const spawnX = x !== null ? x : canvas.width + 50;
     // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정
-    const spawnY = 150 + Math.random() * (virtualHeight - 250);
+    const spawnY = 150 + Math.random() * (canvas.height - 250);
     potions.push(new Potion(spawnX, spawnY));
 }
 
@@ -1952,14 +1944,12 @@ function updatePlayer() {
     player.x += player.vx;
     player.y += player.vy;
 
-    // GAME_SCALE(0.5)로 인한 가상 캔버스 크기 고려
-    const virtualWidth = canvas.width / GAME_SCALE;
-    const virtualHeight = canvas.height / GAME_SCALE;
-
+    // 경계 체크: 실제 캔버스 크기 기준 (렌더링 영역 내로 제한)
+    // GAME_SCALE로 축소되어 렌더링되지만, 좌표는 실제 캔버스 기준
     if (player.x < 0) player.x = 0;
-    if (player.x > virtualWidth - player.width) player.x = virtualWidth - player.width;
+    if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
     if (player.y < 50) player.y = 50;
-    if (player.y > virtualHeight - player.height - 50) player.y = virtualHeight - player.height - 50;
+    if (player.y > canvas.height - player.height - 50) player.y = canvas.height - player.height - 50;
 }
 
 // 퀴즈 모드 지율이 업데이트 (위아래로 선택지 이동)
