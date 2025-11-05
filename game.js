@@ -1,14 +1,7 @@
 // 게임 설정
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
-// PIXEL_SCALE을 화면 크기에 따라 동적으로 조정
-function getPixelScale() {
-    const isMobile = window.innerWidth <= 800;
-    return isMobile ? 2 : 3;  // 모바일: 2, PC: 3
-}
-
-let PIXEL_SCALE = getPixelScale();
+const PIXEL_SCALE = 3;
 
 // 캔버스 크기 조정
 function resizeCanvas() {
@@ -16,9 +9,6 @@ function resizeCanvas() {
     const rect = container.getBoundingClientRect();
     canvas.width = rect.width;
     canvas.height = rect.height;
-
-    // PIXEL_SCALE 업데이트
-    PIXEL_SCALE = getPixelScale();
 
     // 퀴즈 모드일 때 선택지 위치 재계산 (게임이 실행 중일 때만)
     if (gameState && gameState.isRunning && gameState.mode === GAME_MODE.QUIZ &&
@@ -746,15 +736,11 @@ class QuizChoice {
 
         // 가로 모드 모바일: 더 작은 크기로 4개 박스가 모두 보이도록
         if (isMobile && isLandscape) {
-            this.width = 140;
-            this.height = Math.min(50, (canvas.height - 60) / 4.8);  // 4개 박스가 모두 보이도록
-        } else if (isMobile) {
-            // 세로 모드 모바일도 작게
-            this.width = 140;
-            this.height = 50;
+            this.width = 160;
+            this.height = Math.min(60, (canvas.height - 80) / 5);  // 화면 높이에 맞게
         } else {
-            this.width = 220;
-            this.height = 90;
+            this.width = isMobile ? 160 : 220;
+            this.height = isMobile ? 65 : 90;
         }
 
         this.text = text;
@@ -811,11 +797,9 @@ class QuizChoice {
         // 가로 모드 모바일: 박스 크기에 맞게 폰트 크기 조정
         let fontSize;
         if (isMobile && isLandscape) {
-            fontSize = Math.min(11, this.height * 0.3);  // 박스 높이에 맞게
-        } else if (isMobile) {
-            fontSize = 11;  // 세로 모드도 작게
+            fontSize = Math.min(12, this.height * 0.25);  // 박스 높이의 25%
         } else {
-            fontSize = 20;
+            fontSize = isMobile ? 14 : 20;
         }
         ctx.font = `bold ${fontSize}px Arial`;
 
@@ -1488,16 +1472,15 @@ function createQuizChoices() {
     let spacingY;
     if (isMobile && isLandscape) {
         // 4개 박스가 모두 들어가도록 화면 높이 기반 계산
-        spacingY = Math.min(58, (canvas.height - 40) / 4.5);
+        spacingY = Math.min(70, (canvas.height - 80) / 4);
     } else if (isMobile) {
-        // 세로 모드도 간격 축소
-        spacingY = 60;
+        spacingY = 80;
     } else {
         spacingY = 110;
     }
 
-    const startX = isMobile ? canvas.width - 160 : canvas.width - 280;
-    const startY = isMobile && isLandscape ? 5 : (isMobile ? 10 : 50);
+    const startX = isMobile ? canvas.width - 180 : canvas.width - 280;
+    const startY = isMobile && isLandscape ? 10 : (isMobile ? 20 : 50);
 
     for (let i = 0; i < 4; i++) {
         const x = startX;
@@ -1536,11 +1519,10 @@ function drawDialogue() {
     const dialogue = dialogueState.dialogues[dialogueState.currentIndex];
 
     // 대화창 높이를 화면 크기에 맞게 조정 (모바일: 작게, PC: 크게)
-    const isMobile = window.innerWidth <= 800;
-    const dialogueHeight = isMobile ? Math.min(120, canvas.height * 0.22) : Math.min(150, canvas.height * 0.25);
-    const padding = Math.max(8, canvas.width * 0.0125);
-    const fontSize = isMobile ? Math.max(11, Math.min(14, canvas.width * 0.02)) : Math.max(14, Math.min(18, canvas.width * 0.0225));
-    const speakerFontSize = isMobile ? Math.max(13, Math.min(16, canvas.width * 0.022)) : Math.max(16, Math.min(20, canvas.width * 0.025));
+    const dialogueHeight = Math.min(150, canvas.height * 0.25);
+    const padding = Math.max(10, canvas.width * 0.0125);
+    const fontSize = Math.max(14, Math.min(18, canvas.width * 0.0225));
+    const speakerFontSize = Math.max(16, Math.min(20, canvas.width * 0.025));
 
     // 반투명 배경
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
@@ -2513,30 +2495,9 @@ function showStartScreen() {
 // 타이틀 화면에서 키보드 입력 처리
 window.addEventListener('DOMContentLoaded', () => {
     const titleScreen = document.getElementById('titleScreen');
-    const titleStartBtn = document.querySelector('.title-start-btn');
 
     // 타이틀 화면에서는 모바일 컨트롤 숨기기
     hideMobileControls();
-
-    // 시작 버튼 터치 이벤트 (모바일 지원)
-    if (titleStartBtn) {
-        titleStartBtn.addEventListener('touchstart', (e) => {
-            if (titleScreen && titleScreen.style.display !== 'none') {
-                e.preventDefault();
-                e.stopPropagation();
-                showStartScreen();
-            }
-        }, { passive: false });
-
-        // 시작 버튼 클릭 이벤트 (PC 및 일부 모바일)
-        titleStartBtn.addEventListener('click', (e) => {
-            if (titleScreen && titleScreen.style.display !== 'none') {
-                e.preventDefault();
-                e.stopPropagation();
-                showStartScreen();
-            }
-        });
-    }
 
     // 엔터키나 스페이스바로 시작
     const handleTitleKeyPress = (e) => {
