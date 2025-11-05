@@ -388,18 +388,6 @@ class StoryScene {
             );
         });
 
-        // 말풍선 꼬리 (선택적)
-        if (y < this.canvas.height / 2) {
-            // 위쪽 대화면 아래 꼬리
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
-            this.ctx.beginPath();
-            this.ctx.moveTo(x - 20, y);
-            this.ctx.lineTo(x + 20, y);
-            this.ctx.lineTo(x, y + 20);
-            this.ctx.closePath();
-            this.ctx.fill();
-        }
-
         // 컨텍스트 상태 복원
         this.ctx.restore();
     }
