@@ -504,7 +504,9 @@ class StoryScene {
                     this.ctx.fillRect(50, this.canvas.height - 250, 200, 150);
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
-                    this.ctx.fillText('영어학원', 100, this.canvas.height - 200);
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('영어학원', 150, this.canvas.height - 200);
+                    this.ctx.textAlign = 'left';
 
                     // 지율이 (걸어나오는 애니메이션)
                     const jiyulX = Math.min(this.canvas.width / 2, 100 + this.animationFrame * 3);
@@ -539,7 +541,9 @@ class StoryScene {
                     this.ctx.fillRect(50, this.canvas.height - 250, 200, 150);
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
-                    this.ctx.fillText('영어학원', 100, this.canvas.height - 200);
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('영어학원', 150, this.canvas.height - 200);
+                    this.ctx.textAlign = 'left';
 
                     // 지율이
                     this.drawJiyul(
@@ -1098,7 +1102,9 @@ class StoryScene {
                     this.ctx.fillRect(60, this.canvas.height - 300, 230, 40);
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
-                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 80, this.canvas.height - 275);
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275);
+                    this.ctx.textAlign = 'left';
 
                     // 지율이 (놀란 모습)
                     this.drawJiyul(
