@@ -2513,9 +2513,30 @@ function showStartScreen() {
 // 타이틀 화면에서 키보드 입력 처리
 window.addEventListener('DOMContentLoaded', () => {
     const titleScreen = document.getElementById('titleScreen');
+    const titleStartBtn = document.querySelector('.title-start-btn');
 
     // 타이틀 화면에서는 모바일 컨트롤 숨기기
     hideMobileControls();
+
+    // 시작 버튼 터치 이벤트 (모바일 지원)
+    if (titleStartBtn) {
+        titleStartBtn.addEventListener('touchstart', (e) => {
+            if (titleScreen && titleScreen.style.display !== 'none') {
+                e.preventDefault();
+                e.stopPropagation();
+                showStartScreen();
+            }
+        }, { passive: false });
+
+        // 시작 버튼 클릭 이벤트 (PC 및 일부 모바일)
+        titleStartBtn.addEventListener('click', (e) => {
+            if (titleScreen && titleScreen.style.display !== 'none') {
+                e.preventDefault();
+                e.stopPropagation();
+                showStartScreen();
+            }
+        });
+    }
 
     // 엔터키나 스페이스바로 시작
     const handleTitleKeyPress = (e) => {
