@@ -1411,13 +1411,13 @@ function startQuizStage() {
     // 지율이 위치 초기화 (첫 번째 선택지)
     jiyulQuizY = 0;
 
-    // 공 초기화 (지율이 위치에서 발사)
-    const jiyulX = 100;
-    const jiyulY = 50 + jiyulQuizY * 110 + 45;  // 선택지 중앙에 맞춤
-    ball = new Ball(jiyulX + player.width + 60, jiyulY);
-
-    // 퀴즈 선택지 생성
+    // 퀴즈 선택지 먼저 생성
     createQuizChoices();
+
+    // 공 초기화 (지율이 위치에서 발사, 선택지 위치 기준)
+    const jiyulX = 100;
+    const jiyulY = quizChoices[jiyulQuizY].y + quizChoices[jiyulQuizY].height / 2;
+    ball = new Ball(jiyulX + player.width + 60, jiyulY);
 
     // 오브젝트 클리어
     letters = [];
@@ -1470,18 +1470,20 @@ function createQuizChoices() {
     const isLandscape = window.innerWidth > window.innerHeight;
 
     // 가로 모드 모바일: 화면 높이에 맞게 간격 자동 조정
+    // GAME_SCALE(0.5) 적용으로 실제 좌표는 2배 필요
     let spacingY;
     if (isMobile && isLandscape) {
         // 4개 박스가 모두 들어가도록 화면 높이 기반 계산
-        spacingY = Math.min(70, (canvas.height - 80) / 4);
+        spacingY = Math.min(140, (canvas.height * 2 - 200) / 4);
     } else if (isMobile) {
-        spacingY = 80;
+        spacingY = 160;
     } else {
-        spacingY = 110;
+        spacingY = 220;
     }
 
-    const startX = isMobile ? canvas.width - 180 : canvas.width - 280;
-    const startY = isMobile && isLandscape ? 10 : (isMobile ? 20 : 50);
+    const startX = isMobile ? canvas.width * 2 - 360 : canvas.width * 2 - 560;
+    // UI 겹침 방지를 위해 시작 위치를 아래로 이동 (스케일 0.5 고려)
+    const startY = isMobile && isLandscape ? 180 : (isMobile ? 200 : 180);
 
     for (let i = 0; i < 4; i++) {
         const x = startX;
@@ -1762,7 +1764,7 @@ function launchBall() {
 
     if (gameState.mode === GAME_MODE.QUIZ) {
         // 퀴즈 모드: 선택지 위치에 맞춰 발사
-        jiyulY = 50 + jiyulQuizY * 110 + 45;
+        jiyulY = quizChoices[jiyulQuizY].y + quizChoices[jiyulQuizY].height / 2;
     } else {
         // 보스 모드: 플레이어 실제 위치에서 발사
         jiyulY = player.y + player.height / 2;
@@ -1806,7 +1808,7 @@ function handleQuizAnswer(choice) {
 
         // 공 리셋 (지율이 위치에서)
         const jiyulX = 100;
-        const jiyulY = 50 + jiyulQuizY * 110 + 45;
+        const jiyulY = quizChoices[jiyulQuizY].y + quizChoices[jiyulQuizY].height / 2;
         ball = new Ball(jiyulX + player.width + 60, jiyulY);
     }
 }
@@ -1952,7 +1954,7 @@ function drawJiyulWithPaddle() {
 
     if (gameState.mode === GAME_MODE.QUIZ) {
         // 퀴즈 모드: 선택지에 맞춰 이동
-        jiyulY = 50 + jiyulQuizY * 110 + 45 - player.height / 2;
+        jiyulY = quizChoices[jiyulQuizY].y + quizChoices[jiyulQuizY].height / 2 - player.height / 2;
     } else {
         // 보스 모드: 플레이어 실제 위치 사용
         jiyulY = player.y;
