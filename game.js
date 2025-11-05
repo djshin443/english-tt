@@ -2,6 +2,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const PIXEL_SCALE = 3;
+const GAME_SCALE = 0.5; // 모든 게임 요소를 50% 크기로 축소
 
 // 캔버스 크기 조정
 function resizeCanvas() {
@@ -2302,8 +2303,12 @@ function gameLoop() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 배경 그리기
+    // 배경 그리기 (스케일 적용 전 - 전체 화면 유지)
     drawBackground();
+
+    // 전역 스케일 적용 - 모든 게임 요소를 50% 크기로 축소
+    ctx.save();
+    ctx.scale(GAME_SCALE, GAME_SCALE);
 
     if (gameState.mode === GAME_MODE.COLLECTING) {
         // 수집 모드
@@ -2482,6 +2487,9 @@ function gameLoop() {
 
     // 대화 그리기 (최상위)
     drawDialogue();
+
+    // 전역 스케일 복원
+    ctx.restore();
 
     requestAnimationFrame(gameLoop);
 }
