@@ -202,7 +202,8 @@ function handleTouchMove(e) {
 }
 
 function handleTouchEnd(e) {
-    e.preventDefault();
+    // 조이스틱이 활성화되지 않았으면 무시 (다른 터치 이벤트 방해 안함)
+    if (!joystick.active) return;
 
     // 조이스틱의 터치가 끝났는지 확인
     let joystickTouchEnded = true;
@@ -215,6 +216,7 @@ function handleTouchEnd(e) {
 
     // 조이스틱 터치가 끝났으면 초기화
     if (joystickTouchEnded) {
+        e.preventDefault(); // 조이스틱 관련 터치만 preventDefault
         joystick.active = false;
         joystick.touchId = null;
         joystick.deltaX = 0;
@@ -242,10 +244,12 @@ function updateJoystick() {
     joystickStick.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`;
 }
 
+// touchstart는 조이스틱 컨테이너에서만 (영역 내 시작)
 joystickContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
-joystickContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
-joystickContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
-joystickContainer.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+// touchmove, touchend, touchcancel은 document 레벨에서 처리 (영역 밖 드래그 대응)
+document.addEventListener('touchmove', handleTouchMove, { passive: false });
+document.addEventListener('touchend', handleTouchEnd, { passive: false });
+document.addEventListener('touchcancel', handleTouchEnd, { passive: false });
 
 // 모바일 액션 버튼
 const swordBtn = document.getElementById('swordBtn');
