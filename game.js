@@ -2639,20 +2639,17 @@ function showOpening() {
     // 모바일 컨트롤 숨기기 (오프닝 중에는 안 보이게)
     hideMobileControls();
 
-    // opening.js의 타이틀 화면과 오프닝 시퀀스 시작
-    if (typeof showTitleScreen === 'function') {
-        showTitleScreen();
+    // 스토리 애니메이션 시작
+    if (storyScene) {
+        storyScene.startOpening(() => {
+            // 오프닝 끝나면 게임 시작
+            startGame();
+        });
     } else {
-        // fallback: 기존 스토리
-        if (storyScene) {
-            storyScene.startOpening(() => {
-                startGame();
-            });
-        } else {
-            startDialogue(OPENING_DIALOGUE, () => {
-                startGame();
-            });
-        }
+        // fallback: 텍스트 대화
+        startDialogue(OPENING_DIALOGUE, () => {
+            startGame();
+        });
     }
 }
 
