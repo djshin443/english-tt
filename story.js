@@ -2180,15 +2180,6 @@ class StoryScene {
             this.skipButton.x + this.skipButton.width / 2,
             this.skipButton.y + this.skipButton.height / 2
         );
-
-        // 스킵 안내 (좌측 하단) - PC에서만 스페이스바 표시
-        const isMobileSkip = window.matchMedia('(max-width: 800px)').matches;
-        if (!isMobileSkip) {
-            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            this.ctx.font = '14px Arial';
-            this.ctx.textAlign = 'left';
-            this.ctx.fillText('스페이스바: 전체 스킵', 20, this.canvas.height - 20);
-        }
     }
 
     // 스킵
