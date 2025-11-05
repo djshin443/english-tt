@@ -765,9 +765,8 @@ class StoryScene {
                 }
             },
 
-            // 씬 4: ABC 대마왕 등장
+            // 씬 4-1: ABC 대마왕 등장 - 첫 번째 대사
             {
-                duration: 300,
                 update: () => {
                     // 보라색 하늘
                     this.drawSkyBackground('#8B008B', '#4B0082');
@@ -796,26 +795,23 @@ class StoryScene {
 
                     // 알파벳 아우라 (A~Z가 빙글빙글 회전)
                     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                    const auraRadius = 120;  // 아우라 반지름
-                    const rotationSpeed = 0.02;  // 회전 속도
+                    const auraRadius = 120;
+                    const rotationSpeed = 0.02;
 
                     for (let i = 0; i < alphabet.length; i++) {
                         const angle = (this.animationFrame * rotationSpeed) + (i * (Math.PI * 2) / alphabet.length);
                         const x = bossCenterX + Math.cos(angle) * auraRadius;
                         const y = bossCenterY + Math.sin(angle) * auraRadius;
 
-                        // 알파벳 크기 애니메이션 (파도 효과)
                         const sizeWave = 1 + Math.sin(this.animationFrame * 0.1 + i * 0.5) * 0.2;
                         const fontSize = 20 * sizeWave;
 
-                        // 알파벳 색상 (무지개 효과)
                         const hue = (i * 360 / alphabet.length + this.animationFrame) % 360;
                         this.ctx.fillStyle = `hsl(${hue}, 80%, 60%)`;
                         this.ctx.font = `bold ${fontSize}px Arial`;
                         this.ctx.textAlign = 'center';
                         this.ctx.textBaseline = 'middle';
 
-                        // 글로우 효과
                         this.ctx.shadowColor = this.ctx.fillStyle;
                         this.ctx.shadowBlur = 10;
                         this.ctx.fillText(alphabet[i], x, y);
@@ -827,7 +823,7 @@ class StoryScene {
                         this.canvas.width / 2 - bossScale * 8,
                         bossY,
                         bossScale,
-                        true  // 좌우 반전 (왼쪽을 바라보도록)
+                        true
                     );
 
                     // 왕관 반짝임
@@ -858,32 +854,211 @@ class StoryScene {
                         this.drawAlphabetSprite(letters[i], letterX, letterY, 3);
                     }
 
-                    // 대화 (하단에 위치하도록)
-                    if (this.animationFrame < 150) {
-                        this.drawDialogBox(
-                            '안녕~! 나는 ABC 대마왕!\n영어 친구들아 모여라! 크크크!',
-                            this.canvas.width / 2,
-                            this.canvas.height - 250,
-                            'ABC 대마왕'
-                        );
-                    } else {
-                        this.drawDialogBox(
-                            '이제부터 너희는 영어만 공부해야 해!\n탁구는 금지! 오직 영어 공부만! 하하하!',
-                            this.canvas.width / 2,
-                            this.canvas.height - 250,
-                            'ABC 대마왕'
-                        );
+                    // ABC 대마왕 첫 번째 대사
+                    this.drawDialogBox(
+                        '안녕~! 나는 ABC 대마왕!\n영어 친구들아 모여라! 크크크!',
+                        this.canvas.width / 2,
+                        this.canvas.height - 250,
+                        'ABC 대마왕'
+                    );
+                }
+            },
+
+            // 씬 4-2: ABC 대마왕 두 번째 대사
+            {
+                update: () => {
+                    // 보라색 하늘
+                    this.drawSkyBackground('#8B008B', '#4B0082');
+
+                    // 번개 배경
+                    for (let i = 0; i < 3; i++) {
+                        if (Math.random() < 0.02) {
+                            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                            this.ctx.lineWidth = 2;
+                            this.ctx.beginPath();
+                            const startX = Math.random() * this.canvas.width;
+                            this.ctx.moveTo(startX, 0);
+                            this.ctx.lineTo(startX + Math.random() * 100 - 50, this.canvas.height);
+                            this.ctx.stroke();
+                        }
+                    }
+
+                    // 땅
+                    this.drawGround();
+
+                    // ABC 대마왕
+                    const bossScale = 6 + Math.sin(this.animationFrame * 0.05) * 0.5;
+                    const bossY = this.canvas.height / 3;
+                    const bossCenterX = this.canvas.width / 2;
+                    const bossCenterY = bossY + bossScale * 8;
+
+                    // 알파벳 아우라
+                    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    const auraRadius = 120;
+                    const rotationSpeed = 0.02;
+
+                    for (let i = 0; i < alphabet.length; i++) {
+                        const angle = (this.animationFrame * rotationSpeed) + (i * (Math.PI * 2) / alphabet.length);
+                        const x = bossCenterX + Math.cos(angle) * auraRadius;
+                        const y = bossCenterY + Math.sin(angle) * auraRadius;
+
+                        const sizeWave = 1 + Math.sin(this.animationFrame * 0.1 + i * 0.5) * 0.2;
+                        const fontSize = 20 * sizeWave;
+
+                        const hue = (i * 360 / alphabet.length + this.animationFrame) % 360;
+                        this.ctx.fillStyle = `hsl(${hue}, 80%, 60%)`;
+                        this.ctx.font = `bold ${fontSize}px Arial`;
+                        this.ctx.textAlign = 'center';
+                        this.ctx.textBaseline = 'middle';
+
+                        this.ctx.shadowColor = this.ctx.fillStyle;
+                        this.ctx.shadowBlur = 10;
+                        this.ctx.fillText(alphabet[i], x, y);
+                        this.ctx.shadowBlur = 0;
+                    }
+
+                    this.drawBossSprite(
+                        'boss20',
+                        this.canvas.width / 2 - bossScale * 8,
+                        bossY,
+                        bossScale,
+                        true
+                    );
+
+                    // 왕관 반짝임
+                    if (Math.floor(this.animationFrame / 10) % 2 === 0) {
+                        this.ctx.fillStyle = '#FFD700';
+                        for (let i = 0; i < 5; i++) {
+                            const starX = this.canvas.width / 2 + Math.random() * 100 - 50;
+                            const starY = bossY - 20 + Math.random() * 40;
+                            this.ctx.font = '20px Arial';
+                            this.ctx.fillText('✨', starX, starY);
+                        }
+                    }
+
+                    // 지율이
+                    this.drawJiyul(
+                        this.canvas.width / 4,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    // 알파벳 미니언들
+                    const letters = ['A', 'B', 'C'];
+                    for (let i = 0; i < letters.length; i++) {
+                        const letterX = this.canvas.width / 2 + 150 + i * 60;
+                        const letterY = this.canvas.height - 150 + Math.sin(this.animationFrame * 0.1 + i) * 10;
+                        this.drawAlphabetSprite(letters[i], letterX, letterY, 3);
+                    }
+
+                    // ABC 대마왕 두 번째 대사
+                    this.drawDialogBox(
+                        '이제부터 너희는 영어만 공부해야 해!\n탁구는 금지! 오직 영어 공부만! 하하하!',
+                        this.canvas.width / 2,
+                        this.canvas.height - 250,
+                        'ABC 대마왕'
+                    );
+                }
+            },
+
+            // 씬 4-3: 지율이 반응
+            {
+                update: () => {
+                    // 보라색 하늘
+                    this.drawSkyBackground('#8B008B', '#4B0082');
+
+                    // 번개 배경
+                    for (let i = 0; i < 3; i++) {
+                        if (Math.random() < 0.02) {
+                            this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                            this.ctx.lineWidth = 2;
+                            this.ctx.beginPath();
+                            const startX = Math.random() * this.canvas.width;
+                            this.ctx.moveTo(startX, 0);
+                            this.ctx.lineTo(startX + Math.random() * 100 - 50, this.canvas.height);
+                            this.ctx.stroke();
+                        }
+                    }
+
+                    // 땅
+                    this.drawGround();
+
+                    // ABC 대마왕
+                    const bossScale = 6 + Math.sin(this.animationFrame * 0.05) * 0.5;
+                    const bossY = this.canvas.height / 3;
+                    const bossCenterX = this.canvas.width / 2;
+                    const bossCenterY = bossY + bossScale * 8;
+
+                    // 알파벳 아우라
+                    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    const auraRadius = 120;
+                    const rotationSpeed = 0.02;
+
+                    for (let i = 0; i < alphabet.length; i++) {
+                        const angle = (this.animationFrame * rotationSpeed) + (i * (Math.PI * 2) / alphabet.length);
+                        const x = bossCenterX + Math.cos(angle) * auraRadius;
+                        const y = bossCenterY + Math.sin(angle) * auraRadius;
+
+                        const sizeWave = 1 + Math.sin(this.animationFrame * 0.1 + i * 0.5) * 0.2;
+                        const fontSize = 20 * sizeWave;
+
+                        const hue = (i * 360 / alphabet.length + this.animationFrame) % 360;
+                        this.ctx.fillStyle = `hsl(${hue}, 80%, 60%)`;
+                        this.ctx.font = `bold ${fontSize}px Arial`;
+                        this.ctx.textAlign = 'center';
+                        this.ctx.textBaseline = 'middle';
+
+                        this.ctx.shadowColor = this.ctx.fillStyle;
+                        this.ctx.shadowBlur = 10;
+                        this.ctx.fillText(alphabet[i], x, y);
+                        this.ctx.shadowBlur = 0;
+                    }
+
+                    this.drawBossSprite(
+                        'boss20',
+                        this.canvas.width / 2 - bossScale * 8,
+                        bossY,
+                        bossScale,
+                        true
+                    );
+
+                    // 왕관 반짝임
+                    if (Math.floor(this.animationFrame / 10) % 2 === 0) {
+                        this.ctx.fillStyle = '#FFD700';
+                        for (let i = 0; i < 5; i++) {
+                            const starX = this.canvas.width / 2 + Math.random() * 100 - 50;
+                            const starY = bossY - 20 + Math.random() * 40;
+                            this.ctx.font = '20px Arial';
+                            this.ctx.fillText('✨', starX, starY);
+                        }
+                    }
+
+                    // 지율이
+                    this.drawJiyul(
+                        this.canvas.width / 4,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    // 알파벳 미니언들
+                    const letters = ['A', 'B', 'C'];
+                    for (let i = 0; i < letters.length; i++) {
+                        const letterX = this.canvas.width / 2 + 150 + i * 60;
+                        const letterY = this.canvas.height - 150 + Math.sin(this.animationFrame * 0.1 + i) * 10;
+                        this.drawAlphabetSprite(letters[i], letterX, letterY, 3);
                     }
 
                     // 지율이 대사
-                    if (this.animationFrame > 200) {
-                        this.drawDialogBox(
-                            '뭐라고?! 탁구는 내 생명인데!\n절대 포기 못 해!',
-                            this.canvas.width / 4,
-                            this.canvas.height - 300,
-                            '지율'
-                        );
-                    }
+                    this.drawDialogBox(
+                        '뭐라고?! 탁구는 내 생명인데!\n절대 포기 못 해!',
+                        this.canvas.width / 4,
+                        this.canvas.height - 300,
+                        '지율'
+                    );
                 }
             },
 

@@ -442,7 +442,7 @@ function startOpeningSequence() {
     canvas.style.display = 'block';
 
     // 모든 UI 요소 숨기기 (존재하는 것만)
-    const elementsToHide = ['characterSelectMenu', 'unitSelectMenu', 'ui', 'questionPanel', 'fullscreenBtn', 'controls'];
+    const elementsToHide = ['characterSelectMenu', 'unitSelectMenu', 'ui', 'questionPanel', 'fullscreenBtn', 'controls', 'wordProgress'];
     elementsToHide.forEach(id => {
         const element = document.getElementById(id);
         if (element) {

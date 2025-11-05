@@ -2636,6 +2636,12 @@ function showOpening() {
 function startGame() {
     gameState.isRunning = true;
 
+    // UI 요소 보이기 (게임 플레이 중)
+    const wordProgress = document.getElementById('wordProgress');
+    if (wordProgress) {
+        wordProgress.style.display = 'flex';
+    }
+
     // 모바일 컨트롤 보이기 (게임 플레이 중에는 보이게)
     showMobileControls();
 
