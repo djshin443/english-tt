@@ -104,6 +104,10 @@ let jiyulQuizY = 0;  // 현재 선택한 선택지 인덱스 (0~3)
 // 초기 캔버스 크기 설정 (모든 변수 정의 후 호출)
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
+// orientation change 이벤트도 추가 (모바일 회전 대응)
+window.addEventListener('orientationchange', () => {
+    setTimeout(resizeCanvas, 100); // 약간의 지연 후 리사이즈
+});
 
 // 입력 처리
 const keys = {};

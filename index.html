@@ -163,10 +163,20 @@
 
         @media (max-width: 800px) and (orientation: portrait) {
             #gameContainer {
-                display: none;
+                display: none !important;
             }
             #rotatePrompt {
                 display: flex !important;
+            }
+        }
+
+        /* 모바일 가로 모드에서는 게임 컨테이너 보이기 */
+        @media (max-width: 800px) and (orientation: landscape) {
+            #gameContainer {
+                display: block !important;
+            }
+            #rotatePrompt {
+                display: none !important;
             }
         }
 
