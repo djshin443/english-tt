@@ -869,9 +869,14 @@ class Boss {
         // 좌우 이동
         this.x += this.vx;
 
-        // X 경계 체크 (실제 캔버스 크기 기준)
-        if (this.x <= 0 || this.x >= canvas.width - this.width) {
+        // X 경계 체크 (왼쪽은 350까지만 - UI 박스 회피)
+        const minX = 350; // 왼쪽 HP/점수 박스 피하기
+        const maxX = canvas.width - this.width;
+
+        if (this.x <= minX || this.x >= maxX) {
             this.vx *= -1;
+            // 경계 밖으로 나가지 않도록 보정
+            this.x = Math.max(minX, Math.min(maxX, this.x));
         }
 
         // 통통 튀기
