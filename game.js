@@ -2411,8 +2411,7 @@ function updateUI() {
         collectedDisplay.innerHTML = '수집: ' + displayText;
     } else if (gameState.mode === GAME_MODE.QUIZ) {
         wordDisplay.textContent = currentStageData.word + '의 뜻은?';
-        const isMobile = window.innerWidth <= 800;
-        collectedDisplay.textContent = isMobile ? '버튼으로 공 발사!' : '스페이스로 공 발사!';
+        collectedDisplay.textContent = '버튼으로 공 발사!';
     } else if (gameState.mode === GAME_MODE.BOSS) {
         wordDisplay.textContent = '보스전!';
         collectedDisplay.textContent = '공을 쳐서 보스를 공격!';
@@ -2538,10 +2537,22 @@ function gameLoop() {
             checkCollisions();
             manageSpawning();
         } else {
-            // 대화 중에는 그리기만
-            letters.forEach(letter => { if (!letter.collected) letter.draw(); });
-            monsters.forEach(monster => monster.draw());
-            potions.forEach(potion => { if (!potion.collected) potion.draw(); });
+            // 대화 중에도 배경 오브젝트는 움직임
+            letters = letters.filter(letter => {
+                letter.update();
+                if (!letter.collected) letter.draw();
+                return letter.x > -letter.width && !letter.collected;
+            });
+            monsters = monsters.filter(monster => {
+                monster.update();
+                monster.draw();
+                return monster.x > -monster.width;
+            });
+            potions = potions.filter(potion => {
+                potion.update();
+                if (!potion.collected) potion.draw();
+                return potion.x > -potion.width && !potion.collected;
+            });
         }
 
     } else if (gameState.mode === GAME_MODE.QUIZ) {
