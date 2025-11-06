@@ -1442,6 +1442,7 @@ function startCollectingStage(stageNum) {
         wordProgress.style.width = '320px';
         wordProgress.style.fontSize = '18px';
         wordProgress.style.padding = '10px';
+        wordProgress.style.transform = 'none';
     }
 }
 
@@ -1479,17 +1480,19 @@ function startQuizStage() {
     // UI 업데이트 (wordProgress 위치 변경)
     updateUI();
 
-    // 강제로 스타일 적용 (우측 상단 - 가로 모드 전용이라 문제없음)
+    // 퀴즈 모드용 간결한 스타일 (상단 중앙, 작게)
     const wordProgress = document.getElementById('wordProgress');
     if (wordProgress) {
         wordProgress.style.position = 'fixed';
-        wordProgress.style.left = 'auto';
-        wordProgress.style.right = '10px';
+        wordProgress.style.left = '50%';
+        wordProgress.style.right = 'auto';
         wordProgress.style.top = '10px';
         wordProgress.style.bottom = 'auto';
-        wordProgress.style.width = '320px';
-        wordProgress.style.fontSize = '16px';
-        wordProgress.style.padding = '10px';
+        wordProgress.style.transform = 'translateX(-50%)';
+        wordProgress.style.width = 'auto';
+        wordProgress.style.maxWidth = '400px';
+        wordProgress.style.fontSize = '18px';
+        wordProgress.style.padding = '8px 15px';
     }
 }
 
@@ -1566,6 +1569,9 @@ function startDialogue(dialogues, onComplete) {
     dialogueState.currentIndex = 0;
     dialogueState.onComplete = onComplete;
     gameState.isPaused = true;
+
+    // 대화 중에는 모바일 컨트롤 숨기기
+    hideMobileControls();
 }
 
 // 대화 진행
@@ -1575,6 +1581,10 @@ function advanceDialogue() {
         // 대화 종료
         dialogueState.active = false;
         gameState.isPaused = false;
+
+        // 대화가 끝나면 모바일 컨트롤 다시 보이기
+        showMobileControls();
+
         if (dialogueState.onComplete) {
             dialogueState.onComplete();
         }
@@ -1705,6 +1715,7 @@ function startBossStage(stageNum) {
         wordProgress.style.width = '320px';
         wordProgress.style.fontSize = '16px';
         wordProgress.style.padding = '10px';
+        wordProgress.style.transform = 'none';
     }
 
     // 보스 전투 전 대화 시작
