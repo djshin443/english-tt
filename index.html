@@ -194,12 +194,15 @@
             pointer-events: none;
             z-index: 10;
             width: 320px;
-        }
-
-        #energyContainer {
             background: rgba(0, 0, 0, 0.7);
             padding: 10px;
             border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #energyContainer {
             display: flex;
             gap: 10px;
             align-items: center;
@@ -229,10 +232,6 @@
         }
 
         #playerInfo {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 10px;
-            border-radius: 8px;
-            margin-top: 8px;
             color: white;
             font-size: 14px;
             font-weight: bold;
