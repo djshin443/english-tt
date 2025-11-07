@@ -2274,23 +2274,35 @@ class StoryScene {
         // 스킵 안내 및 진행 버튼
         this.drawControls();
 
-        // 프레임 증가 (애니메이션은 계속 진행하되, 씬 전환은 사용자 입력 대기)
+        // 프레임 증가
         this.animationFrame++;
 
-        // 씬이 충분히 표시되었는지 확인 (최소 1초 - 텍스트를 빠르게 읽을 수 있도록)
-        const minDisplayTime = 60; // 1초 (60fps 기준) - 빠르게 변경
-        if (this.animationFrame >= minDisplayTime && !this.waitingForInput) {
-            this.waitingForInput = true;
-            this.canProceed = false;
-        }
+        // 씬 전환 로직
+        if (scene.duration) {
+            // duration이 있는 씬: duration만큼 기다린 후 자동으로 다음 씬
+            if (this.animationFrame >= scene.duration) {
+                this.currentScene++;
+                this.animationFrame = 0;
+                this.particles = []; // 파티클 초기화
+                this.waitingForInput = false;
+                this.canProceed = false;
+            }
+        } else {
+            // duration이 없는 씬: 클릭 기반 진행
+            const minDisplayTime = 60; // 1초 (60fps 기준)
+            if (this.animationFrame >= minDisplayTime && !this.waitingForInput) {
+                this.waitingForInput = true;
+                this.canProceed = false;
+            }
 
-        // 사용자 입력을 기다리고 있고, 입력을 받았다면 다음 씬으로
-        if (this.waitingForInput && this.canProceed) {
-            this.currentScene++;
-            this.animationFrame = 0;
-            this.particles = []; // 파티클 초기화
-            this.waitingForInput = false;
-            this.canProceed = false;
+            // 사용자 입력을 기다리고 있고, 입력을 받았다면 다음 씬으로
+            if (this.waitingForInput && this.canProceed) {
+                this.currentScene++;
+                this.animationFrame = 0;
+                this.particles = []; // 파티클 초기화
+                this.waitingForInput = false;
+                this.canProceed = false;
+            }
         }
 
         requestAnimationFrame(() => this.animate());
