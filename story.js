@@ -1738,7 +1738,6 @@ class StoryScene {
         return [
             // 씬 1: 1년 후...
             {
-                duration: 120,
                 update: () => {
                     // 검은 화면
                     this.ctx.fillStyle = '#000000';
@@ -1765,7 +1764,6 @@ class StoryScene {
 
             // 씬 2: 경기장
             {
-                duration: 250,
                 update: () => {
                     // 경기장 배경
                     this.drawSkyBackground('#4169E1', '#87CEEB');
@@ -1848,7 +1846,6 @@ class StoryScene {
 
             // 씬 3: 금메달 시상식
             {
-                duration: 300,
                 update: () => {
                     // 축하 배경
                     this.drawSkyBackground('#FFD700', '#FFA500');
@@ -1922,7 +1919,6 @@ class StoryScene {
 
             // 씬 4: 대마왕이 코치가 됨
             {
-                duration: 250,
                 update: () => {
                     // 화목한 배경
                     this.drawSkyBackground('#87CEEB', '#E0F6FF');
@@ -1986,7 +1982,6 @@ class StoryScene {
 
             // 씬 5: THE END
             {
-                duration: 300,
                 update: () => {
                     // 무지개 배경
                     const gradient = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
