@@ -55,6 +55,9 @@ class StoryScene {
 
     // 이벤트 리스너 설정
     setupEventListeners() {
+        // 기존 리스너가 있다면 먼저 제거 (중복 방지)
+        this.cleanupEventListeners();
+
         // 바인딩된 함수 참조 저장 (나중에 제거하기 위해)
         this.boundHandleClick = (e) => this.handleInput(e);
         this.boundHandleTouch = (e) => {
@@ -1735,7 +1738,6 @@ class StoryScene {
         return [
             // 씬 1: 1년 후...
             {
-                duration: 120,
                 update: () => {
                     // 검은 화면
                     this.ctx.fillStyle = '#000000';
@@ -1762,7 +1764,6 @@ class StoryScene {
 
             // 씬 2: 경기장
             {
-                duration: 250,
                 update: () => {
                     // 경기장 배경
                     this.drawSkyBackground('#4169E1', '#87CEEB');
@@ -1845,7 +1846,6 @@ class StoryScene {
 
             // 씬 3: 금메달 시상식
             {
-                duration: 300,
                 update: () => {
                     // 축하 배경
                     this.drawSkyBackground('#FFD700', '#FFA500');
@@ -1919,7 +1919,6 @@ class StoryScene {
 
             // 씬 4: 대마왕이 코치가 됨
             {
-                duration: 250,
                 update: () => {
                     // 화목한 배경
                     this.drawSkyBackground('#87CEEB', '#E0F6FF');
@@ -1983,7 +1982,6 @@ class StoryScene {
 
             // 씬 5: THE END
             {
-                duration: 300,
                 update: () => {
                     // 무지개 배경
                     const gradient = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
@@ -2229,6 +2227,12 @@ class StoryScene {
         this.animationFrame = 0;
         this.bgScroll = 0;
         this.onComplete = onComplete;
+        this.waitingForInput = false;
+        this.canProceed = false;
+
+        // 이벤트 리스너 재설정 (오프닝 시작 시)
+        this.setupEventListeners();
+
         this.animate();
     }
 
@@ -2238,6 +2242,12 @@ class StoryScene {
         this.animationFrame = 0;
         this.bgScroll = 0;
         this.onComplete = onComplete;
+        this.waitingForInput = false;
+        this.canProceed = false;
+
+        // 이벤트 리스너 재설정 (엔딩 시작 시)
+        this.setupEventListeners();
+
         this.animate();
     }
 
@@ -2259,23 +2269,35 @@ class StoryScene {
         // 스킵 안내 및 진행 버튼
         this.drawControls();
 
-        // 프레임 증가 (애니메이션은 계속 진행하되, 씬 전환은 사용자 입력 대기)
+        // 프레임 증가
         this.animationFrame++;
 
-        // 씬이 충분히 표시되었는지 확인 (최소 1초 - 텍스트를 빠르게 읽을 수 있도록)
-        const minDisplayTime = 60; // 1초 (60fps 기준) - 빠르게 변경
-        if (this.animationFrame >= minDisplayTime && !this.waitingForInput) {
-            this.waitingForInput = true;
-            this.canProceed = false;
-        }
+        // 씬 전환 로직
+        if (scene.duration) {
+            // duration이 있는 씬: duration만큼 기다린 후 자동으로 다음 씬
+            if (this.animationFrame >= scene.duration) {
+                this.currentScene++;
+                this.animationFrame = 0;
+                this.particles = []; // 파티클 초기화
+                this.waitingForInput = false;
+                this.canProceed = false;
+            }
+        } else {
+            // duration이 없는 씬: 클릭 기반 진행
+            const minDisplayTime = 60; // 1초 (60fps 기준)
+            if (this.animationFrame >= minDisplayTime && !this.waitingForInput) {
+                this.waitingForInput = true;
+                this.canProceed = false;
+            }
 
-        // 사용자 입력을 기다리고 있고, 입력을 받았다면 다음 씬으로
-        if (this.waitingForInput && this.canProceed) {
-            this.currentScene++;
-            this.animationFrame = 0;
-            this.particles = []; // 파티클 초기화
-            this.waitingForInput = false;
-            this.canProceed = false;
+            // 사용자 입력을 기다리고 있고, 입력을 받았다면 다음 씬으로
+            if (this.waitingForInput && this.canProceed) {
+                this.currentScene++;
+                this.animationFrame = 0;
+                this.particles = []; // 파티클 초기화
+                this.waitingForInput = false;
+                this.canProceed = false;
+            }
         }
 
         requestAnimationFrame(() => this.animate());
