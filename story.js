@@ -55,6 +55,9 @@ class StoryScene {
 
     // 이벤트 리스너 설정
     setupEventListeners() {
+        // 기존 리스너가 있다면 먼저 제거 (중복 방지)
+        this.cleanupEventListeners();
+
         // 바인딩된 함수 참조 저장 (나중에 제거하기 위해)
         this.boundHandleClick = (e) => this.handleInput(e);
         this.boundHandleTouch = (e) => {
@@ -2229,6 +2232,12 @@ class StoryScene {
         this.animationFrame = 0;
         this.bgScroll = 0;
         this.onComplete = onComplete;
+        this.waitingForInput = false;
+        this.canProceed = false;
+
+        // 이벤트 리스너 재설정 (오프닝 시작 시)
+        this.setupEventListeners();
+
         this.animate();
     }
 
@@ -2238,6 +2247,12 @@ class StoryScene {
         this.animationFrame = 0;
         this.bgScroll = 0;
         this.onComplete = onComplete;
+        this.waitingForInput = false;
+        this.canProceed = false;
+
+        // 이벤트 리스너 재설정 (엔딩 시작 시)
+        this.setupEventListeners();
+
         this.animate();
     }
 
