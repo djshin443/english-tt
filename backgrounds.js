@@ -45,14 +45,14 @@ const stageBackgrounds = {
         monsters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
     },
     5: {
-        name: '놀이터',
+        name: '슬라임 카페',
         sky: {
-            top: '#87CEEB',
-            middle: '#6FB9E8',
-            bottom: '#57A4E5'
+            top: '#FFE4F5',
+            middle: '#FFD4ED',
+            bottom: '#FFC4E5'
         },
-        ground: '#F4A460',
-        decorations: 'playground',
+        ground: '#FFB6D9',
+        decorations: 'slimecafe',
         monsters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']  // 보스 스테이지
     },
     6: {
@@ -100,14 +100,14 @@ const stageBackgrounds = {
         monsters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
     },
     10: {
-        name: '동물원',
+        name: '슬라임 카페',
         sky: {
-            top: '#FFE8A3',
-            middle: '#FFE090',
-            bottom: '#FFD87D'
+            top: '#E8F4FF',
+            middle: '#D8EAFF',
+            bottom: '#C8E0FF'
         },
-        ground: '#A8C68F',
-        decorations: 'zoo',
+        ground: '#B8D6FF',
+        decorations: 'slimecafe',
         monsters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']  // 보스 스테이지
     },
     11: {
@@ -155,14 +155,14 @@ const stageBackgrounds = {
         monsters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M']
     },
     15: {
-        name: '음악실',
+        name: '슬라임 카페',
         sky: {
-            top: '#FFE5F0',
-            middle: '#FFDBE8',
-            bottom: '#FFD1E0'
+            top: '#FFF4E8',
+            middle: '#FFEAC8',
+            bottom: '#FFE0A8'
         },
-        ground: '#C9A0DC',
-        decorations: 'musicroom',
+        ground: '#FFD698',
+        decorations: 'slimecafe',
         monsters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M']  // 보스 스테이지
     },
     16: {
@@ -210,14 +210,14 @@ const stageBackgrounds = {
         monsters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M']
     },
     20: {
-        name: '숲속 (산)',
+        name: '슬라임 카페',
         sky: {
-            top: '#98D8C8',
-            middle: '#88CEB8',
-            bottom: '#78C4A8'
+            top: '#FFE4FF',
+            middle: '#FFDAFF',
+            bottom: '#FFD0FF'
         },
-        ground: '#6B8E23',
-        decorations: 'forest',
+        ground: '#FFC6FF',
+        decorations: 'slimecafe',
         monsters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M']  // 최종 보스 스테이지
     }
 };
@@ -3482,6 +3482,249 @@ const backgroundDecorations = {
                 const flowerX = 80 + i * 110 - scroll * 1.5 + (repeat * canvas.width * 2);
                 drawCuteFlower(ctx, flowerX, canvas.height - 50, flowerColors[i % 4]);
             }
+        }
+    },
+
+    // 보스 스테이지: 슬라임 카페
+    slimecafe: function(ctx, canvas, scrollX) {
+        const scroll = scrollX * 0.5 % (canvas.width * 2);
+
+        // 카페 벽 (파스텔 핑크)
+        const wallGrad = ctx.createLinearGradient(0, canvas.height - 200, 0, canvas.height - 50);
+        wallGrad.addColorStop(0, '#FFE4F5');
+        wallGrad.addColorStop(1, '#FFD4ED');
+        ctx.fillStyle = wallGrad;
+        ctx.fillRect(0, canvas.height - 200, canvas.width, 150);
+
+        // 카페 바닥 타일 (체크무늬)
+        for (let x = 0; x < canvas.width; x += 40) {
+            for (let y = 0; y < 50; y += 40) {
+                const isEven = (Math.floor(x / 40) + Math.floor(y / 40)) % 2;
+                ctx.fillStyle = isEven ? '#FFF0F8' : '#FFE0F0';
+                ctx.fillRect(x, canvas.height - 50 + y, 40, 40);
+            }
+        }
+
+        // 귀여운 창문들 (스크롤)
+        for (let repeat = -1; repeat <= 1; repeat++) {
+            for (let i = 0; i < 3; i++) {
+                const windowX = 100 + i * 250 - scroll * 0.3 + (repeat * canvas.width * 2);
+                const windowY = canvas.height - 170;
+
+                // 창문 프레임 (파스텔 블루)
+                ctx.fillStyle = '#B8E0FF';
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.roundRect(windowX - 40, windowY - 40, 80, 80, 10);
+                ctx.fill();
+                ctx.stroke();
+
+                // 창문 십자 프레임
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(windowX, windowY - 40);
+                ctx.lineTo(windowX, windowY + 40);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(windowX - 40, windowY);
+                ctx.lineTo(windowX + 40, windowY);
+                ctx.stroke();
+
+                // 구름 보이기
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.beginPath();
+                ctx.arc(windowX - 10, windowY - 10, 8, 0, Math.PI * 2);
+                ctx.arc(windowX, windowY - 10, 10, 0, Math.PI * 2);
+                ctx.arc(windowX + 10, windowY - 10, 8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // 귀여운 테이블들 (스크롤)
+        for (let repeat = -1; repeat <= 1; repeat++) {
+            for (let i = 0; i < 4; i++) {
+                const tableX = 80 + i * 180 - scroll * 1.0 + (repeat * canvas.width * 2);
+                const tableY = canvas.height - 80;
+
+                // 테이블 상판 (파스텔)
+                const tableGrad = ctx.createLinearGradient(tableX - 35, tableY - 10, tableX + 35, tableY);
+                tableGrad.addColorStop(0, '#FFDAB9');
+                tableGrad.addColorStop(1, '#FFB6C1');
+                ctx.fillStyle = tableGrad;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.ellipse(tableX, tableY - 5, 35, 15, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // 테이블 다리
+                ctx.fillStyle = '#E6B8D0';
+                ctx.fillRect(tableX - 20, tableY, 8, 30);
+                ctx.fillRect(tableX + 12, tableY, 8, 30);
+
+                // 귀여운 컵 (랜덤 색상)
+                const cupColors = ['#FFB6C1', '#FFD700', '#87CEEB', '#98D8C8'];
+                const cupColor = cupColors[i % 4];
+
+                // 컵 몸통
+                const cupGrad = ctx.createLinearGradient(tableX - 8, tableY - 25, tableX + 8, tableY - 15);
+                cupGrad.addColorStop(0, cupColor);
+                cupGrad.addColorStop(1, shadeColor(cupColor, -20));
+                ctx.fillStyle = cupGrad;
+                ctx.beginPath();
+                ctx.roundRect(tableX - 8, tableY - 25, 16, 15, 3);
+                ctx.fill();
+
+                // 컵 손잡이
+                ctx.strokeStyle = cupColor;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(tableX + 8, tableY - 18, 5, -Math.PI / 2, Math.PI / 2);
+                ctx.stroke();
+
+                // 하트 증기
+                ctx.fillStyle = 'rgba(255, 182, 193, 0.6)';
+                ctx.font = '12px Arial';
+                ctx.fillText('♥', tableX - 3, tableY - 30);
+            }
+        }
+
+        // 슬라임들 (스크롤, 애니메이션)
+        for (let repeat = -1; repeat <= 1; repeat++) {
+            const slimeColors = [
+                { body: '#FFB6C1', shine: '#FFD4E0' }, // 핑크
+                { body: '#87CEEB', shine: '#B0E0FF' }, // 블루
+                { body: '#98D8C8', shine: '#B8F0E8' }, // 민트
+                { body: '#FFD700', shine: '#FFE650' }  // 옐로우
+            ];
+
+            for (let i = 0; i < 5; i++) {
+                const slimeX = 60 + i * 150 - scroll * 1.3 + (repeat * canvas.width * 2);
+                const slimeY = canvas.height - 60;
+                const bounce = Math.sin(Date.now() * 0.003 + i) * 3;
+                const slime = slimeColors[i % 4];
+
+                // 슬라임 그림자
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+                ctx.beginPath();
+                ctx.ellipse(slimeX, canvas.height - 48, 22, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 슬라임 몸통
+                const slimeGrad = ctx.createRadialGradient(slimeX - 8, slimeY - 15 + bounce, 5, slimeX, slimeY + bounce, 25);
+                slimeGrad.addColorStop(0, slime.shine);
+                slimeGrad.addColorStop(1, slime.body);
+                ctx.fillStyle = slimeGrad;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                ctx.shadowBlur = 6;
+                ctx.beginPath();
+                ctx.arc(slimeX, slimeY + bounce, 20, Math.PI, 0);
+                ctx.bezierCurveTo(
+                    slimeX + 20, slimeY - 5 + bounce,
+                    slimeX + 15, slimeY - 20 + bounce,
+                    slimeX, slimeY - 15 + bounce
+                );
+                ctx.bezierCurveTo(
+                    slimeX - 15, slimeY - 20 + bounce,
+                    slimeX - 20, slimeY - 5 + bounce,
+                    slimeX - 20, slimeY + bounce
+                );
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // 슬라임 눈
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(slimeX - 7, slimeY - 8 + bounce, 3, 0, Math.PI * 2);
+                ctx.arc(slimeX + 7, slimeY - 8 + bounce, 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 슬라임 눈 하이라이트
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(slimeX - 6, slimeY - 9 + bounce, 1.5, 0, Math.PI * 2);
+                ctx.arc(slimeX + 8, slimeY - 9 + bounce, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 슬라임 입
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(slimeX, slimeY - 5 + bounce, 4, 0, Math.PI);
+                ctx.stroke();
+
+                // 슬라임 볼터치
+                ctx.fillStyle = 'rgba(255, 182, 193, 0.4)';
+                ctx.beginPath();
+                ctx.arc(slimeX - 12, slimeY - 3 + bounce, 3, 0, Math.PI * 2);
+                ctx.arc(slimeX + 12, slimeY - 3 + bounce, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // 귀여운 화분들 (스크롤)
+        for (let repeat = -1; repeat <= 1; repeat++) {
+            for (let i = 0; i < 3; i++) {
+                const potX = 130 + i * 300 - scroll * 0.7 + (repeat * canvas.width * 2);
+                const potY = canvas.height - 70;
+
+                // 화분
+                const potGrad = ctx.createLinearGradient(potX - 15, potY, potX + 15, potY + 20);
+                potGrad.addColorStop(0, '#FFB6C1');
+                potGrad.addColorStop(1, '#FF9AA0');
+                ctx.fillStyle = potGrad;
+                ctx.beginPath();
+                ctx.moveTo(potX - 12, potY);
+                ctx.lineTo(potX - 15, potY + 20);
+                ctx.lineTo(potX + 15, potY + 20);
+                ctx.lineTo(potX + 12, potY);
+                ctx.closePath();
+                ctx.fill();
+
+                // 화분 테두리
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // 하트 무늬
+                ctx.fillStyle = '#FFD4E0';
+                ctx.font = '10px Arial';
+                ctx.fillText('♥', potX - 3, potY + 12);
+
+                // 꽃
+                const petalColors = ['#FF69B4', '#FFD700', '#9370DB'];
+                const petalColor = petalColors[i % 3];
+
+                for (let p = 0; p < 5; p++) {
+                    const angle = (Math.PI * 2 / 5) * p;
+                    const petalX = potX + Math.cos(angle) * 8;
+                    const petalY = potY - 15 + Math.sin(angle) * 8;
+
+                    ctx.fillStyle = petalColor;
+                    ctx.beginPath();
+                    ctx.ellipse(petalX, petalY, 5, 7, angle, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // 꽃 중심
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(potX, potY - 15, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // 벽 장식 (별과 하트)
+        for (let i = 0; i < 8; i++) {
+            const decorX = 80 + i * 150;
+            const decorY = canvas.height - 180 + Math.sin(i) * 15;
+
+            ctx.fillStyle = i % 2 === 0 ? '#FFD700' : '#FFB6C1';
+            ctx.font = '20px Arial';
+            ctx.fillText(i % 2 === 0 ? '★' : '♥', decorX, decorY);
         }
     }
 };

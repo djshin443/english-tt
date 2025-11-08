@@ -1765,82 +1765,574 @@ class StoryScene {
             // 씬 2: 경기장
             {
                 update: () => {
-                    // 경기장 배경
+                    // 경기장 배경 (스크롤링)
                     this.drawSkyBackground('#4169E1', '#87CEEB');
 
-                    // 관중석
-                    this.ctx.fillStyle = '#696969';
-                    this.ctx.fillRect(0, 100, this.canvas.width, 150);
+                    // 구름 배경 (왼쪽으로 스크롤)
+                    const scrollSpeed = 1;
+                    const cloudScroll = (this.animationFrame * scrollSpeed) % 200;
 
-                    // 관중들
-                    for (let row = 0; row < 3; row++) {
-                        for (let col = 0; col < 20; col++) {
-                            const x = col * 40 + 20;
-                            const y = 120 + row * 40;
-                            const colors = ['#FFE0BD', '#8B4513', '#F5DEB3'];
-                            this.ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
-                            this.ctx.beginPath();
-                            this.ctx.arc(x, y, 10, 0, Math.PI * 2);
-                            this.ctx.fill();
+                    for (let i = 0; i < 5; i++) {
+                        const cloudX = (i * 200 - cloudScroll) % this.canvas.width;
+                        const cloudY = 50 + i * 30;
 
-                            // 응원
-                            if (Math.random() < 0.3) {
-                                this.ctx.font = '16px Arial';
-                                this.ctx.fillText('👏', x - 8, y - 15);
+                        // 구름 그리기
+                        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                        this.ctx.beginPath();
+                        this.ctx.arc(cloudX, cloudY, 20, 0, Math.PI * 2);
+                        this.ctx.arc(cloudX + 20, cloudY, 25, 0, Math.PI * 2);
+                        this.ctx.arc(cloudX + 40, cloudY, 20, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+
+                    // 관중석 (아기자기하게!)
+                    // 그라디언트 배경
+                    const audienceGradient = this.ctx.createLinearGradient(0, 100, 0, 280);
+                    audienceGradient.addColorStop(0, '#FFE4E1');  // 미스티 로즈
+                    audienceGradient.addColorStop(0.5, '#E6E6FA'); // 라벤더
+                    audienceGradient.addColorStop(1, '#FFB6C1');   // 라이트 핑크
+                    this.ctx.fillStyle = audienceGradient;
+                    this.ctx.fillRect(0, 100, this.canvas.width, 180);
+
+                    // 좌석 구분선 (가로줄)
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = 2;
+                    for (let i = 0; i < 6; i++) {
+                        const lineY = 100 + i * 30;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(0, lineY);
+                        this.ctx.lineTo(this.canvas.width, lineY);
+                        this.ctx.stroke();
+                    }
+
+                    // 반짝이는 별 장식 (배경)
+                    for (let i = 0; i < 20; i++) {
+                        const starX = (i * 40 + this.animationFrame * 0.5) % this.canvas.width;
+                        const starY = 105 + (i % 5) * 35;
+                        this.ctx.fillStyle = i % 2 === 0 ? '#FFD700' : '#FFFFFF';
+                        this.ctx.font = '12px Arial';
+                        this.ctx.fillText('⭐', starX, starY);
+                    }
+
+                    // 테두리
+                    this.ctx.strokeStyle = '#FF69B4';
+                    this.ctx.lineWidth = 4;
+                    this.ctx.strokeRect(0, 100, this.canvas.width, 180);
+
+                    // 관중 캐릭터들 (귀여운 픽셀 스타일)
+                    const audienceTypes = [
+                        // 타입 1: 남자아이
+                        {
+                            sprite: [
+                                [0,1,1,1,0],
+                                [1,2,2,2,1],
+                                [2,3,2,3,2],
+                                [2,2,2,2,2],
+                                [0,4,4,4,0],
+                                [4,4,4,4,4],
+                                [0,5,0,5,0]
+                            ],
+                            colors: {
+                                1: '#2C1810', 2: '#FFE0BD', 3: '#000000',
+                                4: '#4169E1', 5: '#8B4513'
+                            }
+                        },
+                        // 타입 2: 여자아이
+                        {
+                            sprite: [
+                                [1,1,1,1,1],
+                                [1,2,2,2,1],
+                                [2,3,2,3,2],
+                                [2,2,5,2,2],
+                                [0,6,6,6,0],
+                                [6,6,6,6,6],
+                                [0,7,0,7,0]
+                            ],
+                            colors: {
+                                1: '#FF69B4', 2: '#FFE0BD', 3: '#000000',
+                                5: '#FF1493', 6: '#FFC0CB', 7: '#FFD700'
+                            }
+                        },
+                        // 타입 3: 아이 (귀여운)
+                        {
+                            sprite: [
+                                [0,1,1,1,0],
+                                [1,2,2,2,1],
+                                [2,3,2,3,2],
+                                [2,2,2,2,2],
+                                [0,4,4,4,0],
+                                [4,4,4,4,4],
+                                [0,5,0,5,0]
+                            ],
+                            colors: {
+                                1: '#FFD700', 2: '#FFE0BD', 3: '#000000',
+                                4: '#00FF00', 5: '#FF6347'
+                            }
+                        }
+                    ];
+
+                    // 관중들 그리기 (전체 가득 채우기!)
+                    const totalCols = Math.floor(this.canvas.width / 27);
+                    for (let row = 0; row < 5; row++) {
+                        for (let col = 0; col < totalCols; col++) {
+                            const x = col * 27 + 5;
+                            const y = 105 + row * 32;
+
+                            // 랜덤하게 캐릭터 타입 선택 (시드 사용해서 매번 같은 위치에 같은 캐릭터)
+                            const seed = row * 100 + col;
+                            const typeIndex = seed % audienceTypes.length;
+                            const audience = audienceTypes[typeIndex];
+
+                            const scale = 3;
+
+                            // 픽셀 스프라이트 그리기
+                            for (let r = 0; r < audience.sprite.length; r++) {
+                                for (let c = 0; c < audience.sprite[r].length; c++) {
+                                    const pixel = audience.sprite[r][c];
+                                    if (pixel !== 0 && audience.colors[pixel]) {
+                                        this.ctx.fillStyle = audience.colors[pixel];
+                                        this.ctx.fillRect(
+                                            x + c * scale,
+                                            y + r * scale,
+                                            scale,
+                                            scale
+                                        );
+                                    }
+                                }
+                            }
+
+                            // 응원 애니메이션 (손 흔들기 또는 응원봉)
+                            if ((seed + this.animationFrame) % 30 < 15) {
+                                // 반짝이는 응원봉
+                                const pompomColors = ['#FFD700', '#FF69B4', '#00FF00', '#FF6347'];
+                                this.ctx.fillStyle = pompomColors[seed % pompomColors.length];
+                                this.ctx.fillRect(x + 2 * scale, y - 5, scale * 2, scale);
+
+                                // 반짝임
+                                if (this.animationFrame % 10 < 5) {
+                                    this.ctx.fillStyle = '#FFFFFF';
+                                    this.ctx.fillRect(x + 2 * scale, y - 6, scale, scale);
+                                }
                             }
                         }
                     }
 
-                    // 탁구대
-                    this.ctx.fillStyle = '#006400';
-                    this.ctx.fillRect(this.canvas.width / 2 - 200, this.canvas.height - 200, 400, 20);
+                    // 탁구대 (현실적으로!)
+                    const tableX = this.canvas.width / 2 - 250;
+                    const tableY = this.canvas.height - 160;
+                    const tableWidth = 500;
+                    const tableHeight = 15;
 
-                    // 네트
+                    // 테이블 그림자
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                    this.ctx.fillRect(tableX + 5, tableY + 5, tableWidth, tableHeight);
+
+                    // 테이블 메인 색상 (다크 블루)
+                    const tableGradient = this.ctx.createLinearGradient(tableX, tableY, tableX, tableY + tableHeight);
+                    tableGradient.addColorStop(0, '#1a5f7a');
+                    tableGradient.addColorStop(0.5, '#0d3b52');
+                    tableGradient.addColorStop(1, '#0a2e42');
+                    this.ctx.fillStyle = tableGradient;
+                    this.ctx.fillRect(tableX, tableY, tableWidth, tableHeight);
+
+                    // 테이블 가장자리 하이라이트
+                    this.ctx.strokeStyle = '#2a7faa';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.strokeRect(tableX, tableY, tableWidth, tableHeight);
+
+                    // 중앙선 (흰색)
+                    this.ctx.strokeStyle = '#FFFFFF';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.canvas.width / 2, tableY);
+                    this.ctx.lineTo(this.canvas.width / 2, tableY + tableHeight);
+                    this.ctx.stroke();
+
+                    // 테이블 엣지 라인
+                    this.ctx.strokeStyle = '#FFFFFF';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.strokeRect(tableX + 2, tableY + 2, tableWidth - 4, tableHeight - 4);
+
+                    // 네트 (디테일하게)
+                    const netX = this.canvas.width / 2;
+                    const netY = tableY - 20;
+                    const netHeight = 20;
+
+                    // 네트 기둥 (왼쪽)
+                    this.ctx.fillStyle = '#404040';
+                    this.ctx.fillRect(netX - 60, netY, 5, netHeight);
+
+                    // 네트 기둥 (오른쪽)
+                    this.ctx.fillRect(netX + 55, netY, 5, netHeight);
+
+                    // 네트 망 (격자무늬)
+                    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                    this.ctx.lineWidth = 1;
+                    for (let i = 0; i < 5; i++) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(netX - 55, netY + i * 8);
+                        this.ctx.lineTo(netX + 55, netY + i * 8);
+                        this.ctx.stroke();
+                    }
+                    for (let i = 0; i < 15; i++) {
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(netX - 55 + i * 8, netY);
+                        this.ctx.lineTo(netX - 55 + i * 8, netY + netHeight);
+                        this.ctx.stroke();
+                    }
+
+                    // 네트 상단 라인
                     this.ctx.strokeStyle = '#FFFFFF';
                     this.ctx.lineWidth = 3;
                     this.ctx.beginPath();
-                    this.ctx.moveTo(this.canvas.width / 2, this.canvas.height - 200);
-                    this.ctx.lineTo(this.canvas.width / 2, this.canvas.height - 250);
+                    this.ctx.moveTo(netX - 60, netY);
+                    this.ctx.lineTo(netX + 60, netY);
                     this.ctx.stroke();
 
-                    // 지율이 (승리 포즈)
+                    // 탁구대 다리 (4개) - 길게
+                    const legHeight = 110;
+                    this.ctx.fillStyle = '#1a1a1a';
+                    // 왼쪽 앞다리
+                    this.ctx.fillRect(tableX + 20, tableY + tableHeight, 15, legHeight);
+                    // 왼쪽 뒷다리
+                    this.ctx.fillRect(tableX + 80, tableY + tableHeight, 15, legHeight);
+                    // 오른쪽 앞다리
+                    this.ctx.fillRect(tableX + tableWidth - 95, tableY + tableHeight, 15, legHeight);
+                    // 오른쪽 뒷다리
+                    this.ctx.fillRect(tableX + tableWidth - 35, tableY + tableHeight, 15, legHeight);
+
+                    // 다리 하이라이트
+                    this.ctx.strokeStyle = '#333333';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.strokeRect(tableX + 20, tableY + tableHeight, 15, legHeight);
+                    this.ctx.strokeRect(tableX + 80, tableY + tableHeight, 15, legHeight);
+                    this.ctx.strokeRect(tableX + tableWidth - 95, tableY + tableHeight, 15, legHeight);
+                    this.ctx.strokeRect(tableX + tableWidth - 35, tableY + tableHeight, 15, legHeight);
+
+                    // 지율이 (승리 포즈) - 탁구대 왼쪽 멀리
                     this.drawJiyul(
-                        this.canvas.width / 2 - 150,
-                        this.canvas.height - 280,
+                        this.canvas.width / 2 - 350,
+                        this.canvas.height - 180,
                         'jump',
                         0,
                         4
                     );
 
-                    // 상대 선수
+                    // 상대 선수 (지율이 아빠 - 귀여운 SD 캐릭터)
+                    const opponentSprite = [
+                        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],  // 짧은 머리
+                        [0,0,1,1,1,1,1,1,1,1,1,1,0,0],
+                        [0,1,1,1,1,1,1,1,1,1,1,1,1,0],
+                        [1,1,2,2,2,2,2,2,2,2,2,2,1,1],  // 얼굴
+                        [1,2,2,3,3,2,2,2,3,3,2,2,2,1],  // 눈썹
+                        [1,2,2,4,4,4,2,2,4,4,4,2,2,1],  // 눈 흰자 (지율이와 똑같이)
+                        [1,2,2,4,4,5,2,2,4,4,5,2,2,1],  // 검은 눈동자 오른쪽 아래
+                        [0,2,2,2,2,2,2,2,2,2,2,2,0,0],  // 얼굴
+                        [0,2,2,2,7,7,7,7,2,2,2,2,0,0],  // 웃는 입
+                        [0,0,8,8,8,8,8,8,8,8,0,0,0,0],  // 파란 운동복
+                        [0,8,8,8,9,9,9,8,8,8,8,0,0,0],  // 운동복 + 번호
+                        [8,8,8,8,8,8,8,8,8,8,8,8,0,0],
+                        [0,2,2,8,8,8,8,8,8,2,2,0,0,0],  // 팔
+                        [0,0,10,10,10,10,10,10,10,10,0,0,0,0],  // 남색 바지
+                        [0,0,10,10,10,10,10,10,10,10,0,0,0,0],
+                        [0,0,11,11,0,0,0,0,11,11,0,0,0,0]  // 신발
+                    ];
+
+                    const opponentColors = {
+                        0: null,
+                        1: '#2C1810',    // 짙은 갈색 머리
+                        2: '#FFE0BD',    // 살색
+                        3: '#654321',    // 갈색 눈썹
+                        4: '#FFFFFF',    // 흰 눈
+                        5: '#000000',    // 검은 눈동자
+                        7: '#FF69B4',    // 핑크 미소
+                        8: '#4169E1',    // 파란 운동복
+                        9: '#FFD700',    // 금색 번호
+                        10: '#2C3E50',   // 진한 남색 바지
+                        11: '#FFFFFF'    // 하얀 운동화
+                    };
+
+                    const opponentScale = 5;
+                    const opponentX = this.canvas.width / 2 + 280;
+                    const opponentY = this.canvas.height - 180;
+
+                    for (let row = 0; row < opponentSprite.length; row++) {
+                        for (let col = 0; col < opponentSprite[row].length; col++) {
+                            const pixel = opponentSprite[row][col];
+                            if (pixel !== 0 && opponentColors[pixel]) {
+                                this.ctx.fillStyle = opponentColors[pixel];
+                                this.ctx.fillRect(
+                                    opponentX + col * opponentScale,
+                                    opponentY + row * opponentScale,
+                                    opponentScale,
+                                    opponentScale
+                                );
+                            }
+                        }
+                    }
+
+                    // 지율이 라켓 (작게)
+                    const jiyulRacketX = this.canvas.width / 2 - 320;
+                    const jiyulRacketY = this.canvas.height - 150;
+
+                    // 라켓 손잡이
+                    this.ctx.fillStyle = '#8B4513';
+                    this.ctx.fillRect(jiyulRacketX - 15, jiyulRacketY + 18, 5, 20);
+
+                    // 라켓 면 (보라색)
+                    this.ctx.fillStyle = '#9370DB';
+                    this.ctx.strokeStyle = '#8B4513';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(jiyulRacketX - 12, jiyulRacketY, 14, 18, -0.3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+
+                    // 라켓 고무 (검정)
+                    this.ctx.fillStyle = '#000000';
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(jiyulRacketX - 12, jiyulRacketY, 11, 15, -0.3, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // 아빠 라켓 (작게)
+                    const dadRacketX = opponentX + 35;
+                    const dadRacketY = opponentY + 30;
+
+                    // 라켓 손잡이
+                    this.ctx.fillStyle = '#654321';
+                    this.ctx.fillRect(dadRacketX + 10, dadRacketY + 18, 5, 20);
+
+                    // 라켓 면
                     this.ctx.fillStyle = '#4169E1';
-                    this.ctx.fillRect(
-                        this.canvas.width / 2 + 100,
-                        this.canvas.height - 280,
-                        60,
-                        80
-                    );
+                    this.ctx.strokeStyle = '#654321';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(dadRacketX + 12, dadRacketY, 14, 18, 0.3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+
+                    // 라켓 고무 (검정)
+                    this.ctx.fillStyle = '#000000';
+                    this.ctx.beginPath();
+                    this.ctx.ellipse(dadRacketX + 12, dadRacketY, 11, 15, 0.3, 0, Math.PI * 2);
+                    this.ctx.fill();
 
                     // 탁구공 애니메이션
                     const ballX = this.canvas.width / 2 - 100 + Math.sin(this.animationFrame * 0.1) * 100;
                     const ballY = this.canvas.height - 300 - Math.abs(Math.sin(this.animationFrame * 0.1)) * 50;
                     this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = 2;
                     this.ctx.beginPath();
                     this.ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
                     this.ctx.fill();
+                    this.ctx.stroke();
 
-                    // 점수판
-                    this.ctx.fillStyle = '#000000';
-                    this.ctx.fillRect(this.canvas.width / 2 - 100, 20, 200, 60);
-                    this.ctx.fillStyle = '#00FF00';
-                    this.ctx.font = 'bold 40px Arial';
+                    // 점수판 (아기자기하게)
+                    const scoreboardX = this.canvas.width / 2 - 120;
+                    const scoreboardY = 20;
+
+                    // 점수판 배경 (그라디언트)
+                    const scoreGradient = this.ctx.createLinearGradient(
+                        scoreboardX, scoreboardY,
+                        scoreboardX, scoreboardY + 80
+                    );
+                    scoreGradient.addColorStop(0, '#FFB6C1');
+                    scoreGradient.addColorStop(0.5, '#FFC0CB');
+                    scoreGradient.addColorStop(1, '#FFB6C1');
+                    this.ctx.fillStyle = scoreGradient;
+                    this.ctx.fillRect(scoreboardX, scoreboardY, 240, 80);
+
+                    // 점수판 테두리 (금색)
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = 4;
+                    this.ctx.strokeRect(scoreboardX, scoreboardY, 240, 80);
+
+                    // 내부 하얀 테두리
+                    this.ctx.strokeStyle = '#FFFFFF';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.strokeRect(scoreboardX + 5, scoreboardY + 5, 230, 70);
+
+                    // 반짝이는 별 (점수판 장식)
+                    this.ctx.font = '20px Arial';
+                    this.ctx.fillText('✨', scoreboardX + 15, scoreboardY + 25);
+                    this.ctx.fillText('✨', scoreboardX + 215, scoreboardY + 25);
+
+                    // 점수 텍스트
+                    this.ctx.fillStyle = '#FF1493';
+                    this.ctx.font = 'bold 45px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('11 : 9', this.canvas.width / 2, 60);
+                    this.ctx.textBaseline = 'middle';
+
+                    // 그림자 효과
+                    this.ctx.shadowColor = '#FFFFFF';
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.fillText('11 : 9', this.canvas.width / 2, scoreboardY + 40);
+                    this.ctx.shadowBlur = 0;
+
+                    // 하트 장식
+                    this.ctx.font = '25px Arial';
+                    this.ctx.fillText('💖', scoreboardX + 30, scoreboardY + 65);
+                    this.ctx.fillText('💖', scoreboardX + 210, scoreboardY + 65);
+
+                    // 현수막 배경
+                    const bannerY = 270;
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = 4;
+                    this.ctx.beginPath();
+                    this.ctx.roundRect(this.canvas.width / 2 - 280, bannerY - 40, 560, 70, 10);
+                    this.ctx.fill();
+                    this.ctx.stroke();
+
+                    // 현수막 테두리 장식
+                    this.ctx.strokeStyle = '#FF69B4';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.roundRect(this.canvas.width / 2 - 275, bannerY - 35, 550, 60, 8);
+                    this.ctx.stroke();
 
                     // 대회 이름
-                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.fillStyle = '#FF1493';
+                    this.ctx.font = 'bold 28px Arial';
+                    this.ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                    this.ctx.shadowBlur = 4;
+                    this.ctx.fillText('🏆 세기의 탁구 대회 결승전 🏆', this.canvas.width / 2, bannerY - 10);
+                    this.ctx.shadowBlur = 0;
+
+                    // 특별한 설명
+                    this.ctx.fillStyle = '#4169E1';
+                    this.ctx.font = 'bold 18px Arial';
+                    this.ctx.fillText('제니스 대표 지율이 vs 동네 탁구장 대표 아빠', this.canvas.width / 2, bannerY + 15);
+
+                    // ⭐⭐⭐ 중계 멘트 (화려하게!) ⭐⭐⭐
+                    const commentaryY = 350;
+
+                    // 중계석 배경 (반투명 검정)
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                    this.ctx.fillRect(0, commentaryY - 10, this.canvas.width, 60);
+
+                    // 중계석 테두리 (금색, 애니메이션)
+                    const borderPulse = 2 + Math.sin(this.animationFrame * 0.15) * 1;
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = borderPulse;
+                    this.ctx.strokeRect(2, commentaryY - 8, this.canvas.width - 4, 56);
+
+                    // 중계 멘트 (애니메이션으로 변경)
+                    const commentaries = [
+                        '⚡ 여기는 세기의 탁구 대회 결승전!!! ⚡',
+                        '🔥 제니스 대표 지율이 선수의 등장입니다!!! 🔥',
+                        '💪 지율이 선수의 강력한 스매싱!!! 💪',
+                        '🏓 동네 탁구장 대표 아빠의 수비도 만만치 않습니다!!! 🏓',
+                        '✨ 도마뱀 대표 키위도 선전하고 있습니다! ✨',
+                        '🎯 제니스 대표 지율이 선수가 11:9로 우승!!! 🎯'
+                    ];
+
+                    const commentaryIndex = Math.floor(this.animationFrame / 200) % commentaries.length;
+                    const commentary = commentaries[commentaryIndex];
+
+                    // 중계 멘트 배경 (번쩍번쩍)
+                    const bgPulse = 0.7 + Math.sin(this.animationFrame * 0.2) * 0.3;
+                    const commentGradient = this.ctx.createLinearGradient(0, commentaryY, this.canvas.width, commentaryY + 40);
+                    commentGradient.addColorStop(0, `rgba(255, 0, 0, ${bgPulse})`);
+                    commentGradient.addColorStop(0.5, `rgba(255, 215, 0, ${bgPulse})`);
+                    commentGradient.addColorStop(1, `rgba(255, 0, 0, ${bgPulse})`);
+                    this.ctx.fillStyle = commentGradient;
+                    this.ctx.fillRect(10, commentaryY, this.canvas.width - 20, 40);
+
+                    // 중계 멘트 텍스트 (번쩍이는 효과)
+                    const textScale = 1 + Math.sin(this.animationFrame * 0.1) * 0.05;
+                    this.ctx.save();
+                    this.ctx.translate(this.canvas.width / 2, commentaryY + 20);
+                    this.ctx.scale(textScale, textScale);
+
+                    // 텍스트 외곽선 (검정)
+                    this.ctx.strokeStyle = '#000000';
+                    this.ctx.lineWidth = 6;
                     this.ctx.font = 'bold 24px Arial';
-                    this.ctx.fillText('국제 청소년 탁구 대회 결승', this.canvas.width / 2, 100);
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.strokeText(commentary, 0, 0);
+
+                    // 텍스트 메인 (흰색)
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.fillText(commentary, 0, 0);
+
+                    // 텍스트 하이라이트
+                    this.ctx.shadowColor = '#FFFF00';
+                    this.ctx.shadowBlur = 15;
+                    this.ctx.fillText(commentary, 0, 0);
+                    this.ctx.shadowBlur = 0;
+
+                    this.ctx.restore();
+
+                    // 응원 파티클 효과 (GPU 태우기!)
+                    for (let i = 0; i < 30; i++) {
+                        const x = (this.animationFrame * 3 + i * 30) % this.canvas.width;
+                        const y = commentaryY - 20 - Math.abs(Math.sin(this.animationFrame * 0.05 + i)) * 30;
+                        const size = 3 + Math.sin(this.animationFrame * 0.1 + i) * 2;
+                        const particleColors = ['#FFD700', '#FF1493', '#00FF00', '#FF6347', '#00BFFF'];
+                        this.ctx.fillStyle = particleColors[i % particleColors.length];
+                        this.ctx.beginPath();
+                        this.ctx.arc(x, y, size, 0, Math.PI * 2);
+                        this.ctx.fill();
+
+                        // 별 모양 추가
+                        if (i % 3 === 0) {
+                            this.ctx.save();
+                            this.ctx.translate(x, y);
+                            this.ctx.rotate(this.animationFrame * 0.05 + i);
+                            this.ctx.fillStyle = '#FFFF00';
+                            this.ctx.font = '16px Arial';
+                            this.ctx.textAlign = 'center';
+                            this.ctx.fillText('⭐', 0, 0);
+                            this.ctx.restore();
+                        }
+                    }
+
+                    // 관중석에서 날아오는 응원 풍선들
+                    for (let i = 0; i < 15; i++) {
+                        const balloonX = 50 + (i * 50 + this.animationFrame * 2) % (this.canvas.width - 100);
+                        const balloonY = 100 + Math.sin(this.animationFrame * 0.05 + i) * 30;
+                        const balloonColors = ['#FF69B4', '#87CEEB', '#FFD700', '#90EE90'];
+
+                        // 풍선
+                        this.ctx.fillStyle = balloonColors[i % balloonColors.length];
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(balloonX, balloonY, 8, 10, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+
+                        // 풍선 줄
+                        this.ctx.strokeStyle = '#333333';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(balloonX, balloonY + 10);
+                        this.ctx.lineTo(balloonX, balloonY + 25);
+                        this.ctx.stroke();
+                    }
+
+                    // 스포트라이트 효과 (캐릭터들 강조)
+                    const spotlight1 = this.ctx.createRadialGradient(
+                        this.canvas.width / 2 - 150, this.canvas.height - 280,
+                        0,
+                        this.canvas.width / 2 - 150, this.canvas.height - 280,
+                        100
+                    );
+                    spotlight1.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
+                    spotlight1.addColorStop(1, 'rgba(255, 255, 200, 0)');
+                    this.ctx.fillStyle = spotlight1;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    const spotlight2 = this.ctx.createRadialGradient(
+                        this.canvas.width / 2 + 80, this.canvas.height - 280,
+                        0,
+                        this.canvas.width / 2 + 80, this.canvas.height - 280,
+                        100
+                    );
+                    spotlight2.addColorStop(0, 'rgba(255, 255, 200, 0.3)');
+                    spotlight2.addColorStop(1, 'rgba(255, 255, 200, 0)');
+                    this.ctx.fillStyle = spotlight2;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 }
             },
 
@@ -1850,16 +2342,253 @@ class StoryScene {
                     // 축하 배경
                     this.drawSkyBackground('#FFD700', '#FFA500');
 
-                    // 시상대
+                    // 관중석 배경 (아기자기하게!)
+                    // 그라디언트 배경
+                    const ceremonyGradient = this.ctx.createLinearGradient(0, 100, 0, 280);
+                    ceremonyGradient.addColorStop(0, '#FFFACD');  // 레몬 시폰
+                    ceremonyGradient.addColorStop(0.5, '#FFE4E1'); // 미스티 로즈
+                    ceremonyGradient.addColorStop(1, '#E0BBE4');   // 라벤더 핑크
+                    this.ctx.fillStyle = ceremonyGradient;
+                    this.ctx.fillRect(0, 100, this.canvas.width, 180);
+
+                    // 좌석 구분선 (가로줄)
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = 2;
+                    for (let i = 0; i < 7; i++) {
+                        const lineY = 100 + i * 25;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(0, lineY);
+                        this.ctx.lineTo(this.canvas.width, lineY);
+                        this.ctx.stroke();
+                    }
+
+                    // 축하 장식 (하트와 별)
+                    for (let i = 0; i < 15; i++) {
+                        const decorX = (i * 50 + this.animationFrame * 0.3) % this.canvas.width;
+                        const decorY = 110 + (i % 6) * 28;
+                        if (i % 3 === 0) {
+                            this.ctx.fillStyle = '#FF69B4';
+                            this.ctx.font = '14px Arial';
+                            this.ctx.fillText('💖', decorX, decorY);
+                        } else {
+                            this.ctx.fillStyle = i % 2 === 0 ? '#FFD700' : '#FFFFFF';
+                            this.ctx.font = '12px Arial';
+                            this.ctx.fillText('⭐', decorX, decorY);
+                        }
+                    }
+
+                    // 테두리 (금색과 핑크 이중 테두리)
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = 5;
+                    this.ctx.strokeRect(0, 100, this.canvas.width, 180);
+                    this.ctx.strokeStyle = '#FF69B4';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.strokeRect(3, 103, this.canvas.width - 6, 174);
+
+                    // 관중들 (뒷쪽에 작게)
+                    const audienceTypes = [
+                        // 타입 1: 남자아이
+                        {
+                            sprite: [
+                                [0,1,1,1,0],
+                                [1,2,2,2,1],
+                                [2,3,2,3,2],
+                                [2,2,2,2,2],
+                                [0,4,4,4,0],
+                                [4,4,4,4,4],
+                                [0,5,0,5,0]
+                            ],
+                            colors: {
+                                1: '#2C1810', 2: '#FFE0BD', 3: '#000000',
+                                4: '#4169E1', 5: '#8B4513'
+                            }
+                        },
+                        // 타입 2: 여자아이
+                        {
+                            sprite: [
+                                [1,1,1,1,1],
+                                [1,2,2,2,1],
+                                [2,3,2,3,2],
+                                [2,2,5,2,2],
+                                [0,6,6,6,0],
+                                [6,6,6,6,6],
+                                [0,7,0,7,0]
+                            ],
+                            colors: {
+                                1: '#FF69B4', 2: '#FFE0BD', 3: '#000000',
+                                5: '#FF1493', 6: '#FFC0CB', 7: '#FFD700'
+                            }
+                        },
+                        // 타입 3: 아이 (귀여운)
+                        {
+                            sprite: [
+                                [0,1,1,1,0],
+                                [1,2,2,2,1],
+                                [2,3,2,3,2],
+                                [2,2,2,2,2],
+                                [0,4,4,4,0],
+                                [4,4,4,4,4],
+                                [0,5,0,5,0]
+                            ],
+                            colors: {
+                                1: '#FFD700', 2: '#FFE0BD', 3: '#000000',
+                                4: '#00FF00', 5: '#FF6347'
+                            }
+                        }
+                    ];
+
+                    // 관중들 그리기 (전체 가득 채우기!)
+                    const totalColsAudience = Math.floor(this.canvas.width / 22);
+                    for (let row = 0; row < 6; row++) {
+                        for (let col = 0; col < totalColsAudience; col++) {
+                            const x = col * 22 + 5;
+                            const y = 120 + row * 25;
+
+                            const seed = row * 100 + col;
+                            const typeIndex = seed % audienceTypes.length;
+                            const audience = audienceTypes[typeIndex];
+                            const scale = 2;
+
+                            // 픽셀 스프라이트 그리기
+                            for (let r = 0; r < audience.sprite.length; r++) {
+                                for (let c = 0; c < audience.sprite[r].length; c++) {
+                                    const pixel = audience.sprite[r][c];
+                                    if (pixel !== 0 && audience.colors[pixel]) {
+                                        this.ctx.fillStyle = audience.colors[pixel];
+                                        this.ctx.fillRect(
+                                            x + c * scale,
+                                            y + r * scale,
+                                            scale,
+                                            scale
+                                        );
+                                    }
+                                }
+                            }
+
+                            // 박수 이모지 (애니메이션)
+                            if ((seed + this.animationFrame) % 20 < 10) {
+                                this.ctx.font = '15px Arial';
+                                this.ctx.fillText('👏', x + 5, y - 5);
+                            }
+                        }
+                    }
+
+                    // 시상대 (3개)
+
+                    // 2위 시상대 (왼쪽)
                     this.ctx.fillStyle = '#8B4513';
-                    // 1등
+                    this.ctx.fillRect(this.canvas.width / 2 - 200, this.canvas.height - 200, 120, 100);
+                    // 2위 번호 (단상 안에)
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.font = 'bold 80px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.strokeStyle = '#000000';
+                    this.ctx.lineWidth = 4;
+                    this.ctx.strokeText('2', this.canvas.width / 2 - 140, this.canvas.height - 150);
+                    this.ctx.fillText('2', this.canvas.width / 2 - 140, this.canvas.height - 150);
+
+                    // 1위 시상대 (중앙, 가장 높음 - 화려하게!)
+                    // 황금 그라디언트 배경
+                    const goldGradient = this.ctx.createLinearGradient(
+                        this.canvas.width / 2 - 60, this.canvas.height - 250,
+                        this.canvas.width / 2 - 60, this.canvas.height - 100
+                    );
+                    goldGradient.addColorStop(0, '#FFD700');
+                    goldGradient.addColorStop(0.5, '#FFA500');
+                    goldGradient.addColorStop(1, '#FF8C00');
+                    this.ctx.fillStyle = goldGradient;
                     this.ctx.fillRect(this.canvas.width / 2 - 60, this.canvas.height - 250, 120, 150);
-                    this.ctx.fillStyle = '#FFD700';
+
+                    // 1위 테두리 (반짝이)
+                    this.ctx.strokeStyle = '#FFFF00';
+                    this.ctx.lineWidth = 3 + Math.sin(this.animationFrame * 0.15) * 1;
+                    this.ctx.strokeRect(this.canvas.width / 2 - 60, this.canvas.height - 250, 120, 150);
+
+                    // 1위 번호 (단상 안에 - 더 화려하게)
+                    this.ctx.save();
+                    const num1Scale = 1 + Math.sin(this.animationFrame * 0.1) * 0.05;
+                    this.ctx.translate(this.canvas.width / 2, this.canvas.height - 175);
+                    this.ctx.scale(num1Scale, num1Scale);
+
+                    // 번호 그림자
+                    this.ctx.shadowColor = '#FF0000';
+                    this.ctx.shadowBlur = 20;
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.font = 'bold 100px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText('1', 0, 0);
+
+                    // 번호 외곽선
+                    this.ctx.shadowBlur = 0;
+                    this.ctx.strokeStyle = '#FF0000';
+                    this.ctx.lineWidth = 5;
+                    this.ctx.strokeText('1', 0, 0);
+
+                    this.ctx.restore();
+
+                    // 3위 시상대 (오른쪽)
+                    this.ctx.fillStyle = '#8B4513';
+                    this.ctx.fillRect(this.canvas.width / 2 + 80, this.canvas.height - 150, 120, 50);
+                    // 3위 번호 (단상 안에)
+                    this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 60px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('1', this.canvas.width / 2, this.canvas.height - 130);
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.strokeStyle = '#000000';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.strokeText('3', this.canvas.width / 2 + 140, this.canvas.height - 125);
+                    this.ctx.fillText('3', this.canvas.width / 2 + 140, this.canvas.height - 125);
 
-                    // 지율이 (시상대 위)
+                    // 2위 아빠 캐릭터
+                    const dadSprite = [
+                        [0,0,0,1,1,1,1,1,1,1,1,0,0,0],
+                        [0,0,1,1,1,1,1,1,1,1,1,1,0,0],
+                        [0,1,1,1,1,1,1,1,1,1,1,1,1,0],
+                        [1,1,2,2,2,2,2,2,2,2,2,2,1,1],
+                        [1,2,2,3,3,2,2,2,3,3,2,2,2,1],
+                        [1,2,2,4,4,4,2,2,4,4,4,2,2,1],
+                        [1,2,2,4,4,5,2,2,4,4,5,2,2,1],
+                        [0,2,2,2,2,2,2,2,2,2,2,2,0,0],
+                        [0,2,2,2,7,7,7,7,2,2,2,2,0,0],
+                        [0,0,8,8,8,8,8,8,8,8,0,0,0,0],
+                        [0,8,8,8,9,9,9,8,8,8,8,0,0,0],
+                        [8,8,8,8,8,8,8,8,8,8,8,8,0,0],
+                        [0,2,2,8,8,8,8,8,8,2,2,0,0,0],
+                        [0,0,10,10,10,10,10,10,10,10,0,0,0,0],
+                        [0,0,10,10,10,10,10,10,10,10,0,0,0,0],
+                        [0,0,11,11,0,0,0,0,11,11,0,0,0,0]
+                    ];
+
+                    const dadColors = {
+                        0: null,
+                        1: '#2C1810', 2: '#FFE0BD', 3: '#654321',
+                        4: '#FFFFFF', 5: '#000000', 7: '#FF69B4',
+                        8: '#4169E1', 9: '#FFD700',
+                        10: '#2C3E50', 11: '#FFFFFF'
+                    };
+
+                    const dadScale = 4;
+                    const dadX = this.canvas.width / 2 - 180;
+                    const dadY = this.canvas.height - 300;
+
+                    for (let row = 0; row < dadSprite.length; row++) {
+                        for (let col = 0; col < dadSprite[row].length; col++) {
+                            const pixel = dadSprite[row][col];
+                            if (pixel !== 0 && dadColors[pixel]) {
+                                this.ctx.fillStyle = dadColors[pixel];
+                                this.ctx.fillRect(
+                                    dadX + col * dadScale,
+                                    dadY + row * dadScale,
+                                    dadScale,
+                                    dadScale
+                                );
+                            }
+                        }
+                    }
+
+                    // 1위 지율이 (시상대 위)
                     this.drawJiyul(
                         this.canvas.width / 2 - 30,
                         this.canvas.height - 350,
@@ -1868,7 +2597,53 @@ class StoryScene {
                         4
                     );
 
-                    // 금메달
+                    // 3위 크레스티드 게코 도마뱀 (주황색)
+                    const geckoSprite = [
+                        [0,0,0,1,1,1,1,0,0,0],
+                        [0,0,1,2,2,2,2,1,0,0],
+                        [0,1,2,3,2,2,3,2,1,0],
+                        [1,2,2,2,2,2,2,2,2,1],
+                        [1,2,4,4,4,4,4,4,2,1],
+                        [1,2,4,5,4,4,5,4,2,1],
+                        [0,1,2,2,2,2,2,2,1,0],
+                        [0,0,1,6,6,6,6,1,0,0],
+                        [0,1,6,6,6,6,6,6,1,0],
+                        [1,6,6,7,6,6,7,6,6,1],
+                        [0,1,6,6,6,6,6,6,1,0],
+                        [0,0,1,1,0,0,1,1,0,0]
+                    ];
+
+                    const geckoColors = {
+                        0: null,
+                        1: '#CC5500',    // 다크 오렌지 외곽
+                        2: '#FF8C00',    // 밝은 오렌지 머리
+                        3: '#8B4513',    // 갈색 뿔
+                        4: '#FFA500',    // 오렌지 몸
+                        5: '#000000',    // 검은 점
+                        6: '#FF7F50',    // 코랄 오렌지 꼬리
+                        7: '#FFD700'     // 금색 무늬
+                    };
+
+                    const geckoScale = 4;
+                    const geckoX = this.canvas.width / 2 + 110;
+                    const geckoY = this.canvas.height - 200;
+
+                    for (let row = 0; row < geckoSprite.length; row++) {
+                        for (let col = 0; col < geckoSprite[row].length; col++) {
+                            const pixel = geckoSprite[row][col];
+                            if (pixel !== 0 && geckoColors[pixel]) {
+                                this.ctx.fillStyle = geckoColors[pixel];
+                                this.ctx.fillRect(
+                                    geckoX + col * geckoScale,
+                                    geckoY + row * geckoScale,
+                                    geckoScale,
+                                    geckoScale
+                                );
+                            }
+                        }
+                    }
+
+                    // 금메달 (1위) - 번호 없이
                     this.ctx.save();
                     this.ctx.translate(this.canvas.width / 2, this.canvas.height - 280);
 
@@ -1887,12 +2662,94 @@ class StoryScene {
                     this.ctx.arc(0, 0, medalSize, 0, Math.PI * 2);
                     this.ctx.fill();
 
-                    this.ctx.fillStyle = '#000000';
-                    this.ctx.font = 'bold 30px Arial';
-                    this.ctx.textAlign = 'center';
-                    this.ctx.textBaseline = 'middle';
-                    this.ctx.fillText('1', 0, 0);
+                    // 메달 반짝이
+                    this.ctx.fillStyle = '#FFFF00';
+                    this.ctx.beginPath();
+                    this.ctx.arc(-8, -8, 8, 0, Math.PI * 2);
+                    this.ctx.fill();
+
                     this.ctx.restore();
+
+                    // 은메달 (2위) - 번호 없이
+                    this.ctx.save();
+                    this.ctx.translate(this.canvas.width / 2 - 140, this.canvas.height - 230);
+                    this.ctx.strokeStyle = '#C0C0C0';
+                    this.ctx.lineWidth = 6;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, -25);
+                    this.ctx.lineTo(0, 0);
+                    this.ctx.stroke();
+                    this.ctx.fillStyle = '#C0C0C0';
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, 25, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    // 은메달 반짝이
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.beginPath();
+                    this.ctx.arc(-6, -6, 6, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+
+                    // 동메달 (3위) - 번호 없이
+                    this.ctx.save();
+                    this.ctx.translate(this.canvas.width / 2 + 140, this.canvas.height - 160);
+                    this.ctx.strokeStyle = '#CD7F32';
+                    this.ctx.lineWidth = 6;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, -20);
+                    this.ctx.lineTo(0, 0);
+                    this.ctx.stroke();
+                    this.ctx.fillStyle = '#CD7F32';
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, 20, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    // 동메달 반짝이
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.beginPath();
+                    this.ctx.arc(-5, -5, 5, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+
+                    // 선수 이름 및 소속 표시
+                    // 1위 지율이 - 제니스 대표
+                    this.ctx.fillStyle = 'rgba(255, 215, 0, 0.9)';
+                    this.ctx.fillRect(this.canvas.width / 2 - 80, this.canvas.height - 90, 160, 50);
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.strokeRect(this.canvas.width / 2 - 80, this.canvas.height - 90, 160, 50);
+                    this.ctx.fillStyle = '#000000';
+                    this.ctx.font = 'bold 20px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('지율이', this.canvas.width / 2, this.canvas.height - 70);
+                    this.ctx.font = 'bold 14px Arial';
+                    this.ctx.fillStyle = '#FF1493';
+                    this.ctx.fillText('제니스 대표', this.canvas.width / 2, this.canvas.height - 50);
+
+                    // 2위 아빠 - 동네 탁구장 대표
+                    this.ctx.fillStyle = 'rgba(192, 192, 192, 0.9)';
+                    this.ctx.fillRect(this.canvas.width / 2 - 220, this.canvas.height - 90, 160, 50);
+                    this.ctx.strokeStyle = '#C0C0C0';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.strokeRect(this.canvas.width / 2 - 220, this.canvas.height - 90, 160, 50);
+                    this.ctx.fillStyle = '#000000';
+                    this.ctx.font = 'bold 18px Arial';
+                    this.ctx.fillText('아빠', this.canvas.width / 2 - 140, this.canvas.height - 70);
+                    this.ctx.font = 'bold 13px Arial';
+                    this.ctx.fillStyle = '#4169E1';
+                    this.ctx.fillText('동네 탁구장 대표', this.canvas.width / 2 - 140, this.canvas.height - 50);
+
+                    // 3위 키위 - 도마뱀 대표
+                    this.ctx.fillStyle = 'rgba(205, 127, 50, 0.9)';
+                    this.ctx.fillRect(this.canvas.width / 2 + 60, this.canvas.height - 90, 160, 50);
+                    this.ctx.strokeStyle = '#CD7F32';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.strokeRect(this.canvas.width / 2 + 60, this.canvas.height - 90, 160, 50);
+                    this.ctx.fillStyle = '#000000';
+                    this.ctx.font = 'bold 18px Arial';
+                    this.ctx.fillText('키위', this.canvas.width / 2 + 140, this.canvas.height - 70);
+                    this.ctx.font = 'bold 13px Arial';
+                    this.ctx.fillStyle = '#FF8C00';
+                    this.ctx.fillText('도마뱀 대표', this.canvas.width / 2 + 140, this.canvas.height - 50);
 
                     // 컨페티
                     for (let i = 0; i < 50; i++) {
@@ -1917,7 +2774,7 @@ class StoryScene {
                 }
             },
 
-            // 씬 4: 대마왕이 코치가 됨
+            // 씬 4: 대마왕이 코치가 됨 - 지율이 대화
             {
                 update: () => {
                     // 화목한 배경
@@ -1931,7 +2788,8 @@ class StoryScene {
                     this.ctx.fillRect(50, this.canvas.height - 300, 250, 200);
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
-                    this.ctx.fillText('지율 탁구 클럽', 120, this.canvas.height - 250);
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('지율 탁구&잉글리시 클럽', 175, this.canvas.height - 250);
 
                     // ABC 대마왕 (코치 복장)
                     this.drawBossSprite(
@@ -1954,22 +2812,13 @@ class StoryScene {
                         4
                     );
 
-                    // 대화
-                    if (this.animationFrame < 125) {
-                        this.drawDialogBox(
-                            '코치님! 덕분에 금메달 땄어요!',
-                            this.canvas.width / 2 - 100,
-                            this.canvas.height - 250,
-                            '지율'
-                        );
-                    } else {
-                        this.drawDialogBox(
-                            '자랑스럽다!\n이제 영어도 탁구도 최고야!',
-                            this.canvas.width / 2 + 100,
-                            this.canvas.height - 280,
-                            'ABC 코치'
-                        );
-                    }
+                    // 지율이 대화
+                    this.drawDialogBox(
+                        '코치님! 덕분에 금메달 땄어요!',
+                        this.canvas.width / 2 - 100,
+                        this.canvas.height - 250,
+                        '지율'
+                    );
 
                     // 하트 효과
                     for (let i = 0; i < 5; i++) {
@@ -1980,7 +2829,62 @@ class StoryScene {
                 }
             },
 
-            // 씬 5: THE END
+            // 씬 5: ABC 코치의 대답
+            {
+                update: () => {
+                    // 화목한 배경
+                    this.drawSkyBackground('#87CEEB', '#E0F6FF');
+
+                    // 땅
+                    this.drawGround();
+
+                    // 탁구장 건물
+                    this.ctx.fillStyle = '#8B7355';
+                    this.ctx.fillRect(50, this.canvas.height - 300, 250, 200);
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.font = 'bold 20px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('지율 탁구&잉글리시 클럽', 175, this.canvas.height - 250);
+
+                    // ABC 대마왕 (코치 복장)
+                    this.drawBossSprite(
+                        'boss20',
+                        this.canvas.width / 2 + 50,
+                        this.canvas.height - 200,
+                        4
+                    );
+
+                    // 코치 휘슬
+                    this.ctx.fillStyle = '#C0C0C0';
+                    this.ctx.fillRect(this.canvas.width / 2 + 100, this.canvas.height - 150, 30, 10);
+
+                    // 지율이
+                    this.drawJiyul(
+                        this.canvas.width / 2 - 100,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    // ABC 코치 대화
+                    this.drawDialogBox(
+                        '자랑스럽다!\n이제 영어도 탁구도 최고야!',
+                        this.canvas.width / 2 + 100,
+                        this.canvas.height - 280,
+                        'ABC 코치'
+                    );
+
+                    // 하트 효과
+                    for (let i = 0; i < 5; i++) {
+                        const heartY = this.canvas.height - 300 - Math.sin(this.animationFrame * 0.05 + i) * 20;
+                        this.ctx.font = '30px Arial';
+                        this.ctx.fillText('❤️', this.canvas.width / 2 - 50 + i * 30, heartY);
+                    }
+                }
+            },
+
+            // 씬 6: THE END
             {
                 update: () => {
                     // 무지개 배경
@@ -2145,9 +3049,9 @@ class StoryScene {
             this.ctx.fillRect(x, y, 2, 2);
         }
 
-        // sunzero 선생님 등장 (천사 모습)
+        // sunzero 선생님 등장 (천사 모습 - 픽셀 아트 스타일)
         const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2 - 50;
+        const centerY = this.canvas.height / 2 - 30;
 
         // 빛나는 후광
         const haloGlow = Math.sin(this.animationFrame * 0.05) * 20 + 80;
@@ -2165,58 +3069,138 @@ class StoryScene {
         this.ctx.strokeStyle = '#FFD700';
         this.ctx.lineWidth = 4;
         this.ctx.beginPath();
-        this.ctx.arc(centerX, centerY - 80, 40, 0, Math.PI * 2);
+        this.ctx.arc(centerX, centerY - 100, 40, 0, Math.PI * 2);
         this.ctx.stroke();
 
-        // sunzero 선생님 몸 (간단한 천사 형상)
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.fillRect(centerX - 25, centerY - 40, 50, 70);
+        // 천사 날개 (먼저 그려서 뒤에 배치)
+        const wingFlap = Math.sin(this.animationFrame * 0.1) * 5;
 
-        // 얼굴
-        this.ctx.fillStyle = '#FFE0BD';
-        this.ctx.beginPath();
-        this.ctx.arc(centerX, centerY - 50, 25, 0, Math.PI * 2);
-        this.ctx.fill();
-
-        // 눈
-        this.ctx.fillStyle = '#000000';
-        this.ctx.beginPath();
-        this.ctx.arc(centerX - 8, centerY - 55, 3, 0, Math.PI * 2);
-        this.ctx.arc(centerX + 8, centerY - 55, 3, 0, Math.PI * 2);
-        this.ctx.fill();
-
-        // 미소
-        this.ctx.strokeStyle = '#000000';
+        // 왼쪽 날개 (큰 깃털 3개로 구성)
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        this.ctx.strokeStyle = '#FFD700';
         this.ctx.lineWidth = 2;
+
+        // 왼쪽 날개 - 깃털 1
         this.ctx.beginPath();
-        this.ctx.arc(centerX, centerY - 48, 8, 0, Math.PI, false);
+        this.ctx.ellipse(centerX - 45, centerY - 20 + wingFlap, 30, 40, -Math.PI / 4, 0, Math.PI * 2);
+        this.ctx.fill();
         this.ctx.stroke();
 
-        // 천사 날개 (부드러운 애니메이션)
-        const wingFlap = Math.sin(this.animationFrame * 0.1) * 10;
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-
-        // 왼쪽 날개
+        // 왼쪽 날개 - 깃털 2
         this.ctx.beginPath();
-        this.ctx.ellipse(centerX - 40, centerY - 10, 35, 50 + wingFlap, -Math.PI / 6, 0, Math.PI * 2);
+        this.ctx.ellipse(centerX - 55, centerY + wingFlap, 25, 35, -Math.PI / 5, 0, Math.PI * 2);
         this.ctx.fill();
+        this.ctx.stroke();
 
-        // 오른쪽 날개
+        // 왼쪽 날개 - 깃털 3
         this.ctx.beginPath();
-        this.ctx.ellipse(centerX + 40, centerY - 10, 35, 50 + wingFlap, Math.PI / 6, 0, Math.PI * 2);
+        this.ctx.ellipse(centerX - 60, centerY + 20 + wingFlap, 20, 30, -Math.PI / 6, 0, Math.PI * 2);
         this.ctx.fill();
+        this.ctx.stroke();
+
+        // 오른쪽 날개 - 깃털 1
+        this.ctx.beginPath();
+        this.ctx.ellipse(centerX + 45, centerY - 20 - wingFlap, 30, 40, Math.PI / 4, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        // 오른쪽 날개 - 깃털 2
+        this.ctx.beginPath();
+        this.ctx.ellipse(centerX + 55, centerY - wingFlap, 25, 35, Math.PI / 5, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        // 오른쪽 날개 - 깃털 3
+        this.ctx.beginPath();
+        this.ctx.ellipse(centerX + 60, centerY + 20 - wingFlap, 20, 30, Math.PI / 6, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.stroke();
+
+        // sunzero 선생님 픽셀 스프라이트 (오프닝과 동일)
+        const sunzeroSprite = [
+            [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],  // 긴 머리
+            [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,2,2,2,2,2,2,2,2,2,2,1,1,1],  // 얼굴 시작
+            [1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1],
+            [0,1,2,3,3,3,2,2,2,3,3,3,2,2,1,0],  // 큰 눈
+            [0,1,2,3,4,4,2,2,2,3,4,4,2,2,1,0],  // 눈동자
+            [0,1,2,2,2,2,2,2,2,2,2,2,2,2,1,0],  // 얼굴
+            [0,0,2,9,2,2,5,5,5,2,2,9,2,0,0,0],  // 볼터치 + 미소
+            [0,0,0,6,6,6,6,6,6,6,6,6,0,0,0,0],  // 하얀 천사 옷
+            [0,0,6,6,6,7,6,6,7,6,6,6,6,0,0,0],  // 옷 (금색 장식)
+            [0,0,0,6,6,6,6,6,6,6,6,6,0,0,0,0],  // 하얀 옷
+            [0,0,0,6,6,6,6,6,6,6,6,6,0,0,0,0],
+            [0,0,0,0,10,10,0,0,10,10,0,0,0,0,0,0],  // 금색 장식
+            [0,0,2,2,2,0,0,0,0,2,2,2,0,0,0,0],  // 다리
+            [0,0,11,11,11,0,0,0,0,11,11,11,0,0,0,0]  // 금색 신발
+        ];
+
+        const sunzeroColorMap = {
+            0: null,
+            1: '#2C1810',    // 검은 갈색 머리
+            2: '#FFE0BD',    // 살색
+            3: '#FFFFFF',    // 눈 흰자
+            4: '#000000',    // 눈동자
+            5: '#FF69B4',    // 핑크 입술
+            6: '#FFFFFF',    // 하얀 천사 옷
+            7: '#FFD700',    // 금색 장식
+            8: '#FFFFFF',    // 하얀색
+            9: '#FFB6C1',    // 볼터치
+            10: '#FFD700',   // 금색 장식
+            11: '#FFD700'    // 금색 신발
+        };
+
+        // 픽셀 스프라이트 그리기
+        const scale = 5;
+        const startX = centerX - (sunzeroSprite[0].length * scale) / 2;
+        const startY = centerY - 50;
+
+        for (let row = 0; row < sunzeroSprite.length; row++) {
+            for (let col = 0; col < sunzeroSprite[row].length; col++) {
+                const pixel = sunzeroSprite[row][col];
+                if (pixel !== 0 && sunzeroColorMap[pixel]) {
+                    this.ctx.fillStyle = sunzeroColorMap[pixel];
+                    this.ctx.fillRect(
+                        startX + col * scale,
+                        startY + row * scale,
+                        scale,
+                        scale
+                    );
+                }
+            }
+        }
+
+        // 머리카락 하이라이트 (반짝임)
+        this.ctx.fillStyle = 'rgba(255, 215, 0, 0.4)';
+        this.ctx.fillRect(startX + 5 * scale, startY + 1 * scale, 2 * scale, scale);
+        this.ctx.fillRect(startX + 9 * scale, startY + 1 * scale, 2 * scale, scale);
 
         // 빛 입자 효과
-        for (let i = 0; i < 20; i++) {
-            const angle = (this.animationFrame * 0.02 + i * Math.PI * 2 / 20);
-            const radius = 100 + Math.sin(this.animationFrame * 0.05 + i) * 20;
+        for (let i = 0; i < 30; i++) {
+            const angle = (this.animationFrame * 0.02 + i * Math.PI * 2 / 30);
+            const radius = 120 + Math.sin(this.animationFrame * 0.05 + i) * 20;
             const px = centerX + Math.cos(angle) * radius;
             const py = centerY + Math.sin(angle) * radius;
             const alpha = Math.sin(this.animationFrame * 0.05 + i) * 0.5 + 0.5;
             this.ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
             this.ctx.beginPath();
-            this.ctx.arc(px, py, 3, 0, Math.PI * 2);
+            this.ctx.arc(px, py, 4, 0, Math.PI * 2);
             this.ctx.fill();
+        }
+
+        // 반짝이는 별 효과 (천사 주변)
+        for (let i = 0; i < 10; i++) {
+            const starAngle = (this.animationFrame * 0.03 + i * Math.PI * 2 / 10);
+            const starRadius = 90;
+            const sx = centerX + Math.cos(starAngle) * starRadius;
+            const sy = centerY + Math.sin(starAngle) * starRadius;
+            const starAlpha = Math.sin(this.animationFrame * 0.1 + i) * 0.5 + 0.5;
+
+            this.ctx.fillStyle = `rgba(255, 255, 255, ${starAlpha})`;
+            this.ctx.font = '20px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('✨', sx, sy);
         }
     }
 
