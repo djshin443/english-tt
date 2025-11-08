@@ -600,10 +600,38 @@ class DivineSword {
         this.rotation = 0;  // 회전 애니메이션
         this.trail = [];  // 잔상 효과
         this.glowPhase = 0;  // 빛나는 효과
+        this.framesSinceLaunch = 0;  // 발사 후 경과 프레임
+        this.hasSplit = false;  // 분열 여부
     }
 
     update() {
-        if (!this.active) return;
+        if (!this.active) return [];
+
+        // 프레임 카운터 증가
+        this.framesSinceLaunch++;
+
+        // 1초(60프레임) 경과 시 분열
+        const newSwords = [];
+        if (this.framesSinceLaunch === 60 && !this.hasSplit) {
+            this.hasSplit = true;
+
+            // 현재 각도 기준으로 -30도, +30도 방향으로 2개 신검 추가 생성
+            const splitAngle1 = this.angle - Math.PI / 6;  // -30도 (1시 방향)
+            const splitAngle2 = this.angle + Math.PI / 6;  // +30도 (5시 방향)
+
+            newSwords.push(new DivineSword(this.x, this.y, splitAngle1));
+            newSwords.push(new DivineSword(this.x, this.y, splitAngle2));
+
+            // 분열 파티클 효과
+            for (let i = 0; i < 20; i++) {
+                const colors = ['#BA55D3', '#FF69B4', '#FFD700', '#9370DB'];
+                particles.push(new Particle(
+                    this.x, this.y,
+                    colors[Math.floor(Math.random() * colors.length)],
+                    'star'
+                ));
+            }
+        }
 
         this.x += this.vx;
         this.y += this.vy;
@@ -625,7 +653,7 @@ class DivineSword {
         if (this.x < -500 || this.x > canvas.width + 500 ||
             this.y < -500 || this.y > canvas.height + 500) {
             this.active = false;
-            return;
+            return [];
         }
 
         // 몬스터와 충돌 체크
@@ -651,6 +679,9 @@ class DivineSword {
                 // 신검은 관통하므로 계속 날아감 (비활성화 안 함)
             }
         });
+
+        // 분열된 신검 배열 반환
+        return newSwords;
     }
 
     checkCollision(monster) {
@@ -2461,8 +2492,8 @@ function manageSpawning() {
 
     spawnTimer++;
 
-    // 몬스터 스폰 빈도 감소 (120 -> 180, 난이도 쉽게)
-    if (spawnTimer % 180 === 0) {
+    // 몬스터 스폰 빈도 증가 (180 -> 90, 2배 증가)
+    if (spawnTimer % 90 === 0) {
         spawnMonster();
     }
 
@@ -2531,11 +2562,16 @@ function gameLoop() {
 
         // 신검 업데이트 및 그리기
         if (!dialogueState.active) {
+            const newSwords = []; // 분열된 신검들을 모을 배열
             divineSwords = divineSwords.filter(sword => {
-                sword.update();
+                const splitSwords = sword.update();
+                if (splitSwords && splitSwords.length > 0) {
+                    newSwords.push(...splitSwords);
+                }
                 sword.draw();
                 return sword.active;
             });
+            divineSwords.push(...newSwords); // 분열된 신검들 추가
         } else {
             // 대화 중에도 신검 그리기
             divineSwords.forEach(sword => sword.draw());
