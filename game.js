@@ -1705,6 +1705,12 @@ function drawDialogue() {
 function startBossStage(stageNum) {
     gameState.mode = GAME_MODE.BOSS;
 
+    // UI 숨기기 (HP바와 점수 박스가 캐릭터를 가리지 않도록)
+    const ui = document.getElementById('ui');
+    if (ui) {
+        ui.style.display = 'none';
+    }
+
     // 플레이어 위치 초기화
     player.x = 100;
     player.y = canvas.height / 2 - player.height / 2;
