@@ -127,6 +127,13 @@ let spacePressed = false;  // 스페이스바 눌림 상태 (연속 발사용)
 
 window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
+
+    // 테스트용: E 키로 바로 엔딩 보기
+    if (e.key === 'e' || e.key === 'E') {
+        showEnding();
+        return;
+    }
+
     if (e.key === ' ') {
         e.preventDefault();
 
@@ -1603,7 +1610,7 @@ function drawDialogue() {
     const dialogue = dialogueState.dialogues[dialogueState.currentIndex];
 
     // 대화창 높이를 화면 크기에 맞게 조정 (모바일: 작게, PC: 크게)
-    const dialogueHeight = Math.min(150, canvas.height * 0.25);
+    const dialogueHeight = Math.min(180, canvas.height * 0.3);
     const padding = Math.max(10, canvas.width * 0.0125);
     const fontSize = Math.max(14, Math.min(18, canvas.width * 0.0225));
     const speakerFontSize = Math.max(16, Math.min(20, canvas.width * 0.025));
@@ -1621,37 +1628,51 @@ function drawDialogue() {
     ctx.fillStyle = '#FFD700';
     ctx.font = `bold ${speakerFontSize}px Arial`;
     ctx.textAlign = 'left';
-    ctx.fillText(dialogue.speaker, padding * 2, canvas.height - dialogueHeight + padding * 4);
+    ctx.textBaseline = 'top';
+    ctx.fillText(dialogue.speaker, padding * 2, canvas.height - dialogueHeight + padding * 2);
 
     // 대화 내용
     ctx.fillStyle = '#FFFFFF';
     ctx.font = `${fontSize}px Arial`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
 
     // 긴 텍스트 줄바꿈 (한글 지원)
-    const maxWidth = canvas.width - padding * 6;
+    const maxWidth = canvas.width - padding * 4;
     let line = '';
-    let y = canvas.height - dialogueHeight + padding * 6 + speakerFontSize;
-    const lineHeight = fontSize + 7;
+    let y = canvas.height - dialogueHeight + padding * 2 + speakerFontSize + 8;
+    const lineHeight = fontSize + 5;
+    // 대화창 끝 (버튼 위) - 여유있게
+    const btnHeight = 40;
+    const maxY = canvas.height - btnHeight - padding;
 
     for (let i = 0; i < dialogue.text.length; i++) {
         const testLine = line + dialogue.text[i];
         const metrics = ctx.measureText(testLine);
 
         if (metrics.width > maxWidth && line.length > 0) {
-            ctx.fillText(line, padding * 2, y);
-            line = dialogue.text[i];
+            // 현재 줄 그리기
+            if (y < maxY) {
+                ctx.fillText(line, padding * 2, y);
+            }
             y += lineHeight;
+            line = dialogue.text[i];
+
+            // 다음 줄이 박스를 벗어나면 중단
+            if (y >= maxY) {
+                break;
+            }
         } else {
             line = testLine;
         }
     }
-    if (line.length > 0) {
+    // 마지막 줄 그리기
+    if (line.length > 0 && y < maxY) {
         ctx.fillText(line, padding * 2, y);
     }
 
     // 클릭 버튼 그리기 (오프닝 시퀀스 스타일)
     const btnWidth = 100;
-    const btnHeight = 40;
     const btnX = canvas.width - btnWidth - padding * 3;
     const btnY = canvas.height - btnHeight - padding * 2;
 
@@ -1674,6 +1695,10 @@ function drawDialogue() {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('Click', btnX + btnWidth / 2, btnY + btnHeight / 2);
+
+    // textAlign과 textBaseline 복원
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
 }
 
 // 보스 스테이지 시작
@@ -2754,6 +2779,12 @@ function showEnding() {
 
     // 모바일 컨트롤 숨기기 (엔딩 중에는 안 보이게)
     hideMobileControls();
+
+    // UI 컨테이너들 숨기기
+    const ui = document.getElementById('ui');
+    const wordProgress = document.getElementById('wordProgress');
+    if (ui) ui.style.display = 'none';
+    if (wordProgress) wordProgress.style.display = 'none';
 
     // 스토리 애니메이션 시작
     if (storyScene) {
