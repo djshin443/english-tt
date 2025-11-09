@@ -129,9 +129,64 @@
             }
         }
 
-        /* 세로 모드 회전 안내 - 사용 안 함 (세로/가로 모두 플레이 가능) */
+        /* 세로 모드 회전 안내 */
         #rotatePrompt {
-            display: none !important;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #rotatePrompt .rotate-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: rotate 2s infinite ease-in-out;
+        }
+
+        @keyframes rotate {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+
+        #rotatePrompt h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #FFD700;
+        }
+
+        #rotatePrompt p {
+            font-size: 16px;
+            color: #FFFFFF;
+        }
+
+        /* 모바일 세로 모드에서 회전 안내 표시 */
+        @media (max-width: 800px) and (orientation: portrait) {
+            #gameContainer {
+                display: none !important;
+            }
+            #rotatePrompt {
+                display: flex !important;
+            }
+        }
+
+        /* 모바일 가로 모드에서는 게임 컨테이너 보이기 */
+        @media (max-width: 800px) and (orientation: landscape) {
+            #gameContainer {
+                display: block !important;
+            }
+            #rotatePrompt {
+                display: none !important;
+            }
         }
 
         #gameCanvas {
