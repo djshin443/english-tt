@@ -3,8 +3,8 @@
   "short_name": "탁구헌터J",
   "description": "영어를 배우며 탁구 실력도 키우는 재미있는 교육 게임",
   "start_url": "./index.html",
-  "display": "fullscreen",
-  "orientation": "landscape",
+  "display": "standalone",
+  "orientation": "any",
   "background_color": "#667eea",
   "theme_color": "#667eea",
   "icons": [

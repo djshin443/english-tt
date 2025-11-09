@@ -1368,6 +1368,84 @@
         </div>
     </div>
 
+    <script>
+        // 풀스크린 제어 - iOS와 Android 구분
+        (function() {
+            // iOS 감지
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            // Android 감지
+            const isAndroid = /Android/.test(navigator.userAgent);
+
+            // iOS는 홈 화면 추가 시 자동으로 풀스크린 (apple-mobile-web-app-capable 메타 태그로 처리)
+            // Android만 처리
+            if (isAndroid) {
+                function handleOrientation() {
+                    // 가로 모드인지 확인
+                    const isLandscape = window.innerWidth > window.innerHeight ||
+                                       screen.orientation?.type?.includes('landscape') ||
+                                       window.orientation === 90 ||
+                                       window.orientation === -90;
+
+                    if (isLandscape) {
+                        // 가로 모드: 풀스크린 요청
+                        if (document.documentElement.requestFullscreen) {
+                            document.documentElement.requestFullscreen().catch(err => {
+                                console.log('풀스크린 요청 실패:', err);
+                            });
+                        } else if (document.documentElement.webkitRequestFullscreen) {
+                            document.documentElement.webkitRequestFullscreen().catch(err => {
+                                console.log('풀스크린 요청 실패:', err);
+                            });
+                        }
+                    } else {
+                        // 세로 모드: 풀스크린 해제
+                        if (document.fullscreenElement || document.webkitFullscreenElement) {
+                            if (document.exitFullscreen) {
+                                document.exitFullscreen();
+                            } else if (document.webkitExitFullscreen) {
+                                document.webkitExitFullscreen();
+                            }
+                        }
+                    }
+                }
+
+                // orientation 변경 감지
+                window.addEventListener('orientationchange', function() {
+                    setTimeout(handleOrientation, 100);
+                });
+
+                // resize 이벤트로도 감지 (일부 기기에서 필요)
+                window.addEventListener('resize', function() {
+                    setTimeout(handleOrientation, 100);
+                });
+
+                // 사용자 인터랙션 후 풀스크린 요청 (자동 실행은 브라우저가 막을 수 있음)
+                let firstInteraction = true;
+                const interactionEvents = ['touchstart', 'click', 'keydown'];
+
+                function onFirstInteraction() {
+                    if (firstInteraction) {
+                        firstInteraction = false;
+                        handleOrientation();
+
+                        // 이벤트 리스너 제거
+                        interactionEvents.forEach(event => {
+                            document.removeEventListener(event, onFirstInteraction);
+                        });
+                    }
+                }
+
+                // 첫 번째 사용자 인터랙션 시 풀스크린 시도
+                interactionEvents.forEach(event => {
+                    document.addEventListener(event, onFirstInteraction, { once: true });
+                });
+
+                // 페이지 로드 시 초기 확인 (일부 브라우저는 허용)
+                setTimeout(handleOrientation, 500);
+            }
+        })();
+    </script>
+
     <script src="characters-player.js"></script>
     <script src="characters-alphabet.js"></script>
     <script src="characters-boss.js"></script>
