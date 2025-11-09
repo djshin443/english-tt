@@ -611,17 +611,19 @@ class DivineSword {
         // 프레임 카운터 증가
         this.framesSinceLaunch++;
 
-        // 0.5초(30프레임) 경과 시 분열 (depth가 0일 때만 - 최대 9개 제한)
+        // 0.5초(30프레임) 경과 시 분열 (depth가 0일 때만 - 최대 12개 제한: 3개 + 9개)
         const newSwords = [];
         if (this.framesSinceLaunch === 30 && !this.hasSplit && this.depth === 0) {
             this.hasSplit = true;
 
-            // 현재 각도 기준으로 -30도, +30도 방향으로 2개 신검 추가 생성
-            const splitAngle1 = this.angle - Math.PI / 6;  // -30도 (1시 방향)
-            const splitAngle2 = this.angle + Math.PI / 6;  // +30도 (5시 방향)
+            // 현재 각도 기준으로 -30도, 0도, +30도 방향으로 3개 신검 추가 생성
+            const splitAngle1 = this.angle - Math.PI / 6;  // -30도 (왼쪽)
+            const splitAngle2 = this.angle;                 // 0도 (중앙)
+            const splitAngle3 = this.angle + Math.PI / 6;  // +30도 (오른쪽)
 
             newSwords.push(new DivineSword(this.x, this.y, splitAngle1, this.depth + 1));
             newSwords.push(new DivineSword(this.x, this.y, splitAngle2, this.depth + 1));
+            newSwords.push(new DivineSword(this.x, this.y, splitAngle3, this.depth + 1));
 
             // 분열 파티클 효과
             for (let i = 0; i < 20; i++) {
