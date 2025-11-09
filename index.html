@@ -2,15 +2,23 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- 모바일 풀스크린 설정 -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
+    <meta name="theme-color" content="#000000">
     <meta name="format-detection" content="telephone=no">
+
+    <!-- Android 풀스크린 설정 -->
     <meta name="full-screen" content="yes">
     <meta name="x5-fullscreen" content="true">
     <meta name="x5-page-mode" content="app">
+
+    <!-- 추가 모바일 최적화 -->
+    <meta name="HandheldFriendly" content="true">
+    <meta name="MobileOptimized" content="width">
 
     <!-- 아이콘 -->
     <link rel="apple-touch-icon" href="ico.png">
@@ -1369,18 +1377,19 @@
     </div>
 
     <script>
-        // 풀스크린 제어 - iOS와 Android 구분
+        // 풀스크린 제어 - iOS와 Android 모두 지원
         (function() {
             // iOS 감지
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             // Android 감지
             const isAndroid = /Android/.test(navigator.userAgent);
+            // 모바일 여부 확인
+            const isMobile = isIOS || isAndroid;
 
-            // iOS는 홈 화면 추가 시 자동으로 풀스크린 (apple-mobile-web-app-capable 메타 태그로 처리)
-            // Android만 처리
-            if (isAndroid) {
+            if (isMobile) {
+                // 화면 방향 감지 및 풀스크린 처리
                 function handleOrientation() {
-                    // 가로 모드인지 확인
+                    // 가로 모드인지 확인 - 다양한 방법으로 체크
                     const isLandscape = window.innerWidth > window.innerHeight ||
                                        screen.orientation?.type?.includes('landscape') ||
                                        window.orientation === 90 ||
@@ -1388,60 +1397,148 @@
 
                     if (isLandscape) {
                         // 가로 모드: 풀스크린 요청
-                        if (document.documentElement.requestFullscreen) {
-                            document.documentElement.requestFullscreen().catch(err => {
-                                console.log('풀스크린 요청 실패:', err);
-                            });
-                        } else if (document.documentElement.webkitRequestFullscreen) {
-                            document.documentElement.webkitRequestFullscreen().catch(err => {
-                                console.log('풀스크린 요청 실패:', err);
-                            });
-                        }
+                        requestFullscreen();
                     } else {
                         // 세로 모드: 풀스크린 해제
-                        if (document.fullscreenElement || document.webkitFullscreenElement) {
-                            if (document.exitFullscreen) {
-                                document.exitFullscreen();
-                            } else if (document.webkitExitFullscreen) {
-                                document.webkitExitFullscreen();
-                            }
+                        exitFullscreen();
+                    }
+                }
+
+                // 풀스크린 요청 함수 (크로스 브라우저 지원)
+                function requestFullscreen() {
+                    const elem = document.documentElement;
+
+                    // 이미 풀스크린이면 리턴
+                    if (document.fullscreenElement ||
+                        document.webkitFullscreenElement ||
+                        document.mozFullScreenElement ||
+                        document.msFullscreenElement) {
+                        return;
+                    }
+
+                    // 다양한 브라우저 API 시도
+                    if (elem.requestFullscreen) {
+                        elem.requestFullscreen().catch(err => {
+                            console.log('풀스크린 요청 실패:', err.message);
+                        });
+                    } else if (elem.webkitRequestFullscreen) { // iOS Safari, Chrome
+                        elem.webkitRequestFullscreen();
+                    } else if (elem.webkitEnterFullscreen) { // iOS 구형
+                        elem.webkitEnterFullscreen();
+                    } else if (elem.mozRequestFullScreen) { // Firefox
+                        elem.mozRequestFullScreen();
+                    } else if (elem.msRequestFullscreen) { // IE/Edge
+                        elem.msRequestFullscreen();
+                    }
+
+                    // iOS의 경우 viewport 메타 태그 동적 조정
+                    if (isIOS) {
+                        const viewport = document.querySelector('meta[name=viewport]');
+                        if (viewport) {
+                            viewport.setAttribute('content',
+                                'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+                        }
+
+                        // iOS에서 주소창 숨기기 (스크롤 트릭)
+                        setTimeout(() => {
+                            window.scrollTo(0, 1);
+                        }, 100);
+                    }
+                }
+
+                // 풀스크린 해제 함수 (크로스 브라우저 지원)
+                function exitFullscreen() {
+                    // 풀스크린이 아니면 리턴
+                    if (!document.fullscreenElement &&
+                        !document.webkitFullscreenElement &&
+                        !document.mozFullScreenElement &&
+                        !document.msFullscreenElement) {
+                        return;
+                    }
+
+                    // 다양한 브라우저 API 시도
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(err => {
+                            console.log('풀스크린 해제 실패:', err.message);
+                        });
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.webkitCancelFullScreen) { // iOS 구형
+                        document.webkitCancelFullScreen();
+                    } else if (document.mozCancelFullScreen) { // Firefox
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) { // IE/Edge
+                        document.msExitFullscreen();
+                    }
+
+                    // iOS의 경우 원래 viewport로 복원
+                    if (isIOS) {
+                        const viewport = document.querySelector('meta[name=viewport]');
+                        if (viewport) {
+                            viewport.setAttribute('content',
+                                'width=device-width, initial-scale=1.0, viewport-fit=cover');
                         }
                     }
                 }
 
-                // orientation 변경 감지
+                // 화면 방향 변경 감지
+                if (screen.orientation) {
+                    // 최신 API 사용
+                    screen.orientation.addEventListener('change', function() {
+                        setTimeout(handleOrientation, 100);
+                    });
+                }
+
+                // orientationchange 이벤트 (구형 기기 호환성)
                 window.addEventListener('orientationchange', function() {
                     setTimeout(handleOrientation, 100);
                 });
 
                 // resize 이벤트로도 감지 (일부 기기에서 필요)
+                let resizeTimeout;
                 window.addEventListener('resize', function() {
-                    setTimeout(handleOrientation, 100);
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(handleOrientation, 150);
                 });
 
-                // 사용자 인터랙션 후 풀스크린 요청 (자동 실행은 브라우저가 막을 수 있음)
+                // 풀스크린 상태 변경 감지
+                document.addEventListener('fullscreenchange', function() {
+                    console.log('풀스크린 상태 변경:', !!document.fullscreenElement);
+                });
+                document.addEventListener('webkitfullscreenchange', function() {
+                    console.log('웹킷 풀스크린 상태 변경:', !!document.webkitFullscreenElement);
+                });
+
+                // 첫 사용자 인터랙션 시 풀스크린 시도
                 let firstInteraction = true;
-                const interactionEvents = ['touchstart', 'click', 'keydown'];
+                const interactionEvents = ['touchstart', 'touchend', 'click', 'keydown'];
 
                 function onFirstInteraction() {
                     if (firstInteraction) {
                         firstInteraction = false;
+                        console.log('첫 사용자 인터랙션 감지, 풀스크린 처리 시작');
                         handleOrientation();
-
-                        // 이벤트 리스너 제거
-                        interactionEvents.forEach(event => {
-                            document.removeEventListener(event, onFirstInteraction);
-                        });
                     }
                 }
 
-                // 첫 번째 사용자 인터랙션 시 풀스크린 시도
+                // 모든 인터랙션 이벤트에 리스너 추가
                 interactionEvents.forEach(event => {
                     document.addEventListener(event, onFirstInteraction, { once: true });
                 });
 
-                // 페이지 로드 시 초기 확인 (일부 브라우저는 허용)
-                setTimeout(handleOrientation, 500);
+                // 페이지 로드 후 초기 방향 확인
+                window.addEventListener('load', function() {
+                    setTimeout(handleOrientation, 500);
+                });
+
+                // DOMContentLoaded 이벤트에서도 시도
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        setTimeout(handleOrientation, 300);
+                    });
+                } else {
+                    setTimeout(handleOrientation, 300);
+                }
             }
         })();
     </script>
