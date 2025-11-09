@@ -129,63 +129,9 @@
             }
         }
 
-        /* 세로 모드 회전 안내 */
+        /* 세로 모드 회전 안내 - 사용 안 함 (세로/가로 모두 플레이 가능) */
         #rotatePrompt {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 9999;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-
-        #rotatePrompt .rotate-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            animation: rotate 2s infinite ease-in-out;
-        }
-
-        @keyframes rotate {
-            0%, 100% { transform: rotate(0deg); }
-            50% { transform: rotate(90deg); }
-        }
-
-        #rotatePrompt h2 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #FFD700;
-        }
-
-        #rotatePrompt p {
-            font-size: 16px;
-            color: #FFFFFF;
-        }
-
-        @media (max-width: 800px) and (orientation: portrait) {
-            #gameContainer {
-                display: none !important;
-            }
-            #rotatePrompt {
-                display: flex !important;
-            }
-        }
-
-        /* 모바일 가로 모드에서는 게임 컨테이너 보이기 */
-        @media (max-width: 800px) and (orientation: landscape) {
-            #gameContainer {
-                display: block !important;
-            }
-            #rotatePrompt {
-                display: none !important;
-            }
+            display: none !important;
         }
 
         #gameCanvas {
@@ -1377,7 +1323,7 @@
     </div>
 
     <script>
-        // 풀스크린 제어 - iOS와 Android 모두 지원
+        // 풀스크린 제어 - iOS와 Android 모두 지원 (모든 화면에서 가로=풀스크린, 세로=일반)
         (function() {
             // iOS 감지
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -1387,13 +1333,20 @@
             const isMobile = isIOS || isAndroid;
 
             if (isMobile) {
+                let isHandlingOrientation = false;
+
                 // 화면 방향 감지 및 풀스크린 처리
                 function handleOrientation() {
+                    if (isHandlingOrientation) return;
+                    isHandlingOrientation = true;
+
                     // 가로 모드인지 확인 - 다양한 방법으로 체크
                     const isLandscape = window.innerWidth > window.innerHeight ||
                                        screen.orientation?.type?.includes('landscape') ||
                                        window.orientation === 90 ||
                                        window.orientation === -90;
+
+                    console.log('화면 방향:', isLandscape ? '가로' : '세로');
 
                     if (isLandscape) {
                         // 가로 모드: 풀스크린 요청
@@ -1402,6 +1355,10 @@
                         // 세로 모드: 풀스크린 해제
                         exitFullscreen();
                     }
+
+                    setTimeout(() => {
+                        isHandlingOrientation = false;
+                    }, 200);
                 }
 
                 // 풀스크린 요청 함수 (크로스 브라우저 지원)
@@ -1413,22 +1370,47 @@
                         document.webkitFullscreenElement ||
                         document.mozFullScreenElement ||
                         document.msFullscreenElement) {
+                        console.log('이미 풀스크린 상태');
+                        applyFullscreenStyles();
                         return;
                     }
 
+                    console.log('풀스크린 요청 시작');
+
                     // 다양한 브라우저 API 시도
-                    if (elem.requestFullscreen) {
-                        elem.requestFullscreen().catch(err => {
-                            console.log('풀스크린 요청 실패:', err.message);
-                        });
-                    } else if (elem.webkitRequestFullscreen) { // iOS Safari, Chrome
-                        elem.webkitRequestFullscreen();
-                    } else if (elem.webkitEnterFullscreen) { // iOS 구형
-                        elem.webkitEnterFullscreen();
-                    } else if (elem.mozRequestFullScreen) { // Firefox
-                        elem.mozRequestFullScreen();
-                    } else if (elem.msRequestFullscreen) { // IE/Edge
-                        elem.msRequestFullscreen();
+                    try {
+                        if (elem.requestFullscreen) {
+                            elem.requestFullscreen().then(() => {
+                                console.log('풀스크린 성공 (standard)');
+                                applyFullscreenStyles();
+                            }).catch(err => {
+                                console.log('풀스크린 요청 실패 (standard):', err.message);
+                                applyFullscreenStyles(); // 실패해도 스타일 적용
+                            });
+                        } else if (elem.webkitRequestFullscreen) { // iOS Safari, Chrome
+                            elem.webkitRequestFullscreen();
+                            console.log('풀스크린 요청 (webkit)');
+                            setTimeout(applyFullscreenStyles, 100);
+                        } else if (elem.webkitEnterFullscreen) { // iOS 구형
+                            elem.webkitEnterFullscreen();
+                            console.log('풀스크린 요청 (webkit legacy)');
+                            setTimeout(applyFullscreenStyles, 100);
+                        } else if (elem.mozRequestFullScreen) { // Firefox
+                            elem.mozRequestFullScreen();
+                            console.log('풀스크린 요청 (moz)');
+                            setTimeout(applyFullscreenStyles, 100);
+                        } else if (elem.msRequestFullscreen) { // IE/Edge
+                            elem.msRequestFullscreen();
+                            console.log('풀스크린 요청 (ms)');
+                            setTimeout(applyFullscreenStyles, 100);
+                        } else {
+                            // API가 없어도 CSS로 풀스크린처럼 보이도록
+                            console.log('풀스크린 API 없음, CSS로 대체');
+                            applyFullscreenStyles();
+                        }
+                    } catch (err) {
+                        console.error('풀스크린 요청 중 에러:', err);
+                        applyFullscreenStyles(); // 에러 발생해도 스타일 적용
                     }
 
                     // iOS의 경우 viewport 메타 태그 동적 조정
@@ -1453,22 +1435,41 @@
                         !document.webkitFullscreenElement &&
                         !document.mozFullScreenElement &&
                         !document.msFullscreenElement) {
+                        console.log('이미 풀스크린 아님');
+                        removeFullscreenStyles();
                         return;
                     }
 
+                    console.log('풀스크린 해제 시작');
+
                     // 다양한 브라우저 API 시도
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen().catch(err => {
-                            console.log('풀스크린 해제 실패:', err.message);
-                        });
-                    } else if (document.webkitExitFullscreen) {
-                        document.webkitExitFullscreen();
-                    } else if (document.webkitCancelFullScreen) { // iOS 구형
-                        document.webkitCancelFullScreen();
-                    } else if (document.mozCancelFullScreen) { // Firefox
-                        document.mozCancelFullScreen();
-                    } else if (document.msExitFullscreen) { // IE/Edge
-                        document.msExitFullscreen();
+                    try {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen().then(() => {
+                                console.log('풀스크린 해제 성공');
+                                removeFullscreenStyles();
+                            }).catch(err => {
+                                console.log('풀스크린 해제 실패:', err.message);
+                                removeFullscreenStyles();
+                            });
+                        } else if (document.webkitExitFullscreen) {
+                            document.webkitExitFullscreen();
+                            setTimeout(removeFullscreenStyles, 100);
+                        } else if (document.webkitCancelFullScreen) { // iOS 구형
+                            document.webkitCancelFullScreen();
+                            setTimeout(removeFullscreenStyles, 100);
+                        } else if (document.mozCancelFullScreen) { // Firefox
+                            document.mozCancelFullScreen();
+                            setTimeout(removeFullscreenStyles, 100);
+                        } else if (document.msExitFullscreen) { // IE/Edge
+                            document.msExitFullscreen();
+                            setTimeout(removeFullscreenStyles, 100);
+                        } else {
+                            removeFullscreenStyles();
+                        }
+                    } catch (err) {
+                        console.error('풀스크린 해제 중 에러:', err);
+                        removeFullscreenStyles();
                     }
 
                     // iOS의 경우 원래 viewport로 복원
@@ -1481,16 +1482,47 @@
                     }
                 }
 
+                // 풀스크린 스타일 적용 (CSS로 강제)
+                function applyFullscreenStyles() {
+                    document.body.style.position = 'fixed';
+                    document.body.style.top = '0';
+                    document.body.style.left = '0';
+                    document.body.style.width = '100vw';
+                    document.body.style.height = '100vh';
+                    document.body.style.overflow = 'hidden';
+                    document.body.style.backgroundColor = '#000';
+
+                    // 메타 테마 색상 변경
+                    const themeColor = document.querySelector('meta[name=theme-color]');
+                    if (themeColor) themeColor.setAttribute('content', '#000000');
+
+                    console.log('풀스크린 스타일 적용');
+                }
+
+                // 풀스크린 스타일 제거
+                function removeFullscreenStyles() {
+                    document.body.style.position = '';
+                    document.body.style.top = '';
+                    document.body.style.left = '';
+                    document.body.style.width = '';
+                    document.body.style.height = '';
+                    document.body.style.overflow = '';
+
+                    console.log('풀스크린 스타일 제거');
+                }
+
                 // 화면 방향 변경 감지
                 if (screen.orientation) {
                     // 최신 API 사용
                     screen.orientation.addEventListener('change', function() {
+                        console.log('Screen orientation change event');
                         setTimeout(handleOrientation, 100);
                     });
                 }
 
                 // orientationchange 이벤트 (구형 기기 호환성)
                 window.addEventListener('orientationchange', function() {
+                    console.log('Window orientationchange event');
                     setTimeout(handleOrientation, 100);
                 });
 
@@ -1498,47 +1530,79 @@
                 let resizeTimeout;
                 window.addEventListener('resize', function() {
                     clearTimeout(resizeTimeout);
-                    resizeTimeout = setTimeout(handleOrientation, 150);
+                    resizeTimeout = setTimeout(() => {
+                        console.log('Window resize event');
+                        handleOrientation();
+                    }, 200);
                 });
 
-                // 풀스크린 상태 변경 감지
+                // 풀스크린 상태 변경 감지 - 사용자가 수동으로 해제할 경우 대응
                 document.addEventListener('fullscreenchange', function() {
-                    console.log('풀스크린 상태 변경:', !!document.fullscreenElement);
+                    const isFullscreen = !!document.fullscreenElement;
+                    console.log('풀스크린 상태 변경:', isFullscreen);
+
+                    // 가로 모드인데 풀스크린이 해제되었다면 다시 요청
+                    const isLandscape = window.innerWidth > window.innerHeight;
+                    if (isLandscape && !isFullscreen) {
+                        setTimeout(handleOrientation, 500);
+                    }
                 });
+
                 document.addEventListener('webkitfullscreenchange', function() {
-                    console.log('웹킷 풀스크린 상태 변경:', !!document.webkitFullscreenElement);
+                    const isFullscreen = !!document.webkitFullscreenElement;
+                    console.log('웹킷 풀스크린 상태 변경:', isFullscreen);
+
+                    const isLandscape = window.innerWidth > window.innerHeight;
+                    if (isLandscape && !isFullscreen) {
+                        setTimeout(handleOrientation, 500);
+                    }
                 });
 
                 // 첫 사용자 인터랙션 시 풀스크린 시도
                 let firstInteraction = true;
-                const interactionEvents = ['touchstart', 'touchend', 'click', 'keydown'];
+                const interactionEvents = ['touchstart', 'touchend', 'click', 'keydown', 'pointerdown'];
 
-                function onFirstInteraction() {
+                function onFirstInteraction(e) {
                     if (firstInteraction) {
                         firstInteraction = false;
-                        console.log('첫 사용자 인터랙션 감지, 풀스크린 처리 시작');
+                        console.log('첫 사용자 인터랙션 감지:', e.type);
                         handleOrientation();
                     }
                 }
 
                 // 모든 인터랙션 이벤트에 리스너 추가
                 interactionEvents.forEach(event => {
-                    document.addEventListener(event, onFirstInteraction, { once: true });
+                    document.addEventListener(event, onFirstInteraction, { once: true, passive: true });
                 });
 
                 // 페이지 로드 후 초기 방향 확인
                 window.addEventListener('load', function() {
+                    console.log('Page loaded');
                     setTimeout(handleOrientation, 500);
                 });
 
                 // DOMContentLoaded 이벤트에서도 시도
                 if (document.readyState === 'loading') {
                     document.addEventListener('DOMContentLoaded', function() {
+                        console.log('DOM Content Loaded');
                         setTimeout(handleOrientation, 300);
                     });
                 } else {
+                    console.log('DOM already loaded');
                     setTimeout(handleOrientation, 300);
                 }
+
+                // 주기적으로 풀스크린 상태 체크 (가로 모드일 때만)
+                setInterval(function() {
+                    const isLandscape = window.innerWidth > window.innerHeight;
+                    if (isLandscape) {
+                        const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+                        if (!isFullscreen) {
+                            console.log('가로 모드인데 풀스크린 아님, 재시도');
+                            applyFullscreenStyles(); // 최소한 CSS 스타일은 적용
+                        }
+                    }
+                }, 3000); // 3초마다 체크
             }
         })();
     </script>
