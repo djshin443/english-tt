@@ -2493,7 +2493,7 @@ function manageSpawning() {
     spawnTimer++;
 
     // 몬스터 스폰 빈도 증가 (180 -> 90, 2배 증가)
-    if (spawnTimer % 90 === 0) {
+    if (spawnTimer % 45 === 0) {
         spawnMonster();
     }
 
