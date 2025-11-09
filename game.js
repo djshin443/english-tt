@@ -587,7 +587,7 @@ class Ball {
 
 // 신검(Divine Sword) 클래스 - 케데헌 조이 스타일
 class DivineSword {
-    constructor(x, y, angle) {
+    constructor(x, y, angle, depth = 0) {
         this.x = x;
         this.y = y;
         this.angle = angle;  // 발사 각도
@@ -602,6 +602,7 @@ class DivineSword {
         this.glowPhase = 0;  // 빛나는 효과
         this.framesSinceLaunch = 0;  // 발사 후 경과 프레임
         this.hasSplit = false;  // 분열 여부
+        this.depth = depth;  // 분열 깊이 (0: 최초 발사, 1: 1차 분열, ...)
     }
 
     update() {
@@ -610,17 +611,19 @@ class DivineSword {
         // 프레임 카운터 증가
         this.framesSinceLaunch++;
 
-        // 0.5초(30프레임) 경과 시 분열
+        // 0.5초(30프레임) 경과 시 분열 (depth가 0일 때만 - 최대 12개 제한: 3개 + 9개)
         const newSwords = [];
-        if (this.framesSinceLaunch === 30 && !this.hasSplit) {
+        if (this.framesSinceLaunch === 30 && !this.hasSplit && this.depth === 0) {
             this.hasSplit = true;
 
-            // 현재 각도 기준으로 -30도, +30도 방향으로 2개 신검 추가 생성
-            const splitAngle1 = this.angle - Math.PI / 6;  // -30도 (1시 방향)
-            const splitAngle2 = this.angle + Math.PI / 6;  // +30도 (5시 방향)
+            // 현재 각도 기준으로 -30도, 0도, +30도 방향으로 3개 신검 추가 생성
+            const splitAngle1 = this.angle - Math.PI / 6;  // -30도 (왼쪽)
+            const splitAngle2 = this.angle;                 // 0도 (중앙)
+            const splitAngle3 = this.angle + Math.PI / 6;  // +30도 (오른쪽)
 
-            newSwords.push(new DivineSword(this.x, this.y, splitAngle1));
-            newSwords.push(new DivineSword(this.x, this.y, splitAngle2));
+            newSwords.push(new DivineSword(this.x, this.y, splitAngle1, this.depth + 1));
+            newSwords.push(new DivineSword(this.x, this.y, splitAngle2, this.depth + 1));
+            newSwords.push(new DivineSword(this.x, this.y, splitAngle3, this.depth + 1));
 
             // 분열 파티클 효과
             for (let i = 0; i < 20; i++) {
