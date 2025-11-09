@@ -105,7 +105,7 @@ let smashTimer = 0;
 
 // 신검 발사 쿨다운
 let swordCooldown = 0;
-const SWORD_COOLDOWN_MAX = 60;  // 15프레임마다 발사 (약 1초)
+const SWORD_COOLDOWN_MAX = 60;  // 60프레임마다 발사 (약 1초)
 
 // 퀴즈 선택지
 let quizChoices = [];
