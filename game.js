@@ -105,7 +105,7 @@ let smashTimer = 0;
 
 // 신검 발사 쿨다운
 let swordCooldown = 0;
-const SWORD_COOLDOWN_MAX = 15;  // 15프레임마다 발사 (약 0.25초)
+const SWORD_COOLDOWN_MAX = 60;  // 15프레임마다 발사 (약 1초)
 
 // 퀴즈 선택지
 let quizChoices = [];
@@ -610,9 +610,9 @@ class DivineSword {
         // 프레임 카운터 증가
         this.framesSinceLaunch++;
 
-        // 1초(60프레임) 경과 시 분열
+        // 0.5초(30프레임) 경과 시 분열
         const newSwords = [];
-        if (this.framesSinceLaunch === 60 && !this.hasSplit) {
+        if (this.framesSinceLaunch === 30 && !this.hasSplit) {
             this.hasSplit = true;
 
             // 현재 각도 기준으로 -30도, +30도 방향으로 2개 신검 추가 생성
