@@ -1148,7 +1148,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            align-items: flex-end;  /* center에서 flex-end로 변경 - 오른쪽 정렬 */
+            align-items: flex-end;  /* 오른쪽 끝 정렬 */
             pointer-events: all;
         }
 
@@ -1193,6 +1193,11 @@
         #ballBtn {
             background: linear-gradient(135deg, rgba(255, 165, 0, 0.4), rgba(255, 215, 0, 0.4));
             border-color: #FFA500;
+        }
+
+        #characterBtn {
+            background: linear-gradient(135deg, rgba(147, 112, 219, 0.4), rgba(186, 85, 211, 0.4));
+            border-color: #9370DB;
         }
 
         /* 버튼 숨김 상태 */
@@ -1266,8 +1271,10 @@
                 font-size: 8px;
             }
 
-            .action-buttons {
-                gap: 10px;
+            /* 작은 화면에서는 버튼 크기 조정 */
+            .action-btn {
+                width: 60px;
+                height: 60px;
             }
 
             #energyContainer {
@@ -1367,11 +1374,15 @@
             <div class="action-buttons">
                 <button id="swordBtn" class="action-btn">
                     <span>⚔️</span>
-                    <div class="btn-label">신검</div>
+                    <div class="btn-label">공격</div>
                 </button>
                 <button id="ballBtn" class="action-btn hidden">
                     <span>🏓</span>
                     <div class="btn-label">탁구공</div>
+                </button>
+                <button id="characterBtn" class="action-btn">
+                    <span>👥</span>
+                    <div class="btn-label">지율 세은</div>
                 </button>
             </div>
         </div>
