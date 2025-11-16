@@ -2895,11 +2895,11 @@ function gameLoop() {
                 if (player.weaponTimer > 0) {
                     player.weaponTimer--;
                     // 천천히 휘두르기
-                    player.weaponAngle += 0.1;
+                    player.weaponAngle += 0.08;
                 } else {
                     // 타이머 종료 시 빠르게 휘두르기
-                    player.weaponAngle += 0.4;
-                    if (player.weaponAngle > Math.PI / 6) {  // 4시 방향까지 휘두르기
+                    player.weaponAngle += 0.3;
+                    if (player.weaponAngle >= 0) {  // 3시 방향까지 휘두르기 (4시 근처)
                         player.showWeapon = false;
                         player.animation = 'idle';  // 애니메이션을 idle로 복귀
                     }
@@ -3252,12 +3252,12 @@ function drawGreenDragonBlade(x, y, angle) {
     const dynamicGlowSize = 45 + Math.sin(glowPhase) * 8;
     const outerGlowSize = 60 + Math.sin(glowPhase * 1.3) * 10;
 
-    // 외부 글로우 (청룡 오라)
+    // 외부 글로우 (케데헌 미라 오라)
     const outerGlow = ctx.createRadialGradient(20, 0, 0, 20, 0, outerGlowSize);
-    outerGlow.addColorStop(0, 'rgba(0, 255, 255, 0.4)');      // 시안
-    outerGlow.addColorStop(0.3, 'rgba(0, 191, 255, 0.3)');    // 딥스카이블루
-    outerGlow.addColorStop(0.6, 'rgba(30, 144, 255, 0.2)');   // 도지블루
-    outerGlow.addColorStop(1, 'rgba(70, 130, 180, 0)');       // 투명
+    outerGlow.addColorStop(0, 'rgba(255, 0, 255, 0.4)');      // 마젠타
+    outerGlow.addColorStop(0.3, 'rgba(148, 0, 211, 0.3)');    // 다크바이올렛
+    outerGlow.addColorStop(0.6, 'rgba(138, 43, 226, 0.2)');   // 블루바이올렛
+    outerGlow.addColorStop(1, 'rgba(75, 0, 130, 0)');         // 투명
     ctx.fillStyle = outerGlow;
     ctx.beginPath();
     ctx.arc(20, 0, outerGlowSize, 0, Math.PI * 2);
@@ -3266,9 +3266,9 @@ function drawGreenDragonBlade(x, y, angle) {
     // 내부 글로우 (강렬한 빛)
     const innerGlow = ctx.createRadialGradient(20, 0, 0, 20, 0, dynamicGlowSize);
     innerGlow.addColorStop(0, 'rgba(255, 255, 255, 0.8)');    // 백색
-    innerGlow.addColorStop(0.2, 'rgba(135, 206, 235, 0.7)');  // 스카이블루
-    innerGlow.addColorStop(0.5, 'rgba(0, 191, 255, 0.5)');    // 딥스카이블루
-    innerGlow.addColorStop(1, 'rgba(30, 144, 255, 0)');       // 투명
+    innerGlow.addColorStop(0.2, 'rgba(218, 112, 214, 0.7)');  // 오키드
+    innerGlow.addColorStop(0.5, 'rgba(186, 85, 211, 0.5)');   // 미디엄오키드
+    innerGlow.addColorStop(1, 'rgba(148, 0, 211, 0)');        // 투명
     ctx.fillStyle = innerGlow;
     ctx.beginPath();
     ctx.arc(20, 0, dynamicGlowSize, 0, Math.PI * 2);
@@ -3293,18 +3293,18 @@ function drawGreenDragonBlade(x, y, angle) {
     ctx.shadowBlur = 0;
     ctx.strokeRect(-90, -4, 90, 8);
 
-    // 창날 본체 (더 크고 날카로운 지율 신검 스타일)
+    // 창날 본체 (더 크고 날카로운 지율 신검 스타일 + 케데헌 미라 컬러)
     const spearGradient = ctx.createLinearGradient(0, -10, 60, 10);
     spearGradient.addColorStop(0, '#FFD700');                  // 금색
-    spearGradient.addColorStop(0.15, '#87CEEB');               // 스카이블루
+    spearGradient.addColorStop(0.15, '#DA70D6');               // 오키드
     spearGradient.addColorStop(0.3, '#FFFFFF');                // 백색 (빛나는)
-    spearGradient.addColorStop(0.5, '#E0FFFF');                // 라이트시안
-    spearGradient.addColorStop(0.7, '#00BFFF');                // 딥스카이블루
-    spearGradient.addColorStop(0.85, '#1E90FF');               // 도지블루
-    spearGradient.addColorStop(1, 'rgba(30, 144, 255, 0.3)');  // 반투명
+    spearGradient.addColorStop(0.5, '#EE82EE');                // 바이올렛
+    spearGradient.addColorStop(0.7, '#BA55D3');                // 미디엄오키드
+    spearGradient.addColorStop(0.85, '#9932CC');               // 다크오키드
+    spearGradient.addColorStop(1, 'rgba(138, 43, 226, 0.3)');  // 반투명
 
     ctx.fillStyle = spearGradient;
-    ctx.shadowColor = '#00FFFF';
+    ctx.shadowColor = '#FF00FF';
     ctx.shadowBlur = 25;
 
     // 창날 본체 그리기 (더 길고 날카롭게)
@@ -3318,9 +3318,9 @@ function drawGreenDragonBlade(x, y, angle) {
     ctx.fill();
 
     // 창날 이중 테두리 (빛나는 효과)
-    ctx.strokeStyle = '#00FFFF';
+    ctx.strokeStyle = '#FF00FF';
     ctx.lineWidth = 2;
-    ctx.shadowColor = '#00FFFF';
+    ctx.shadowColor = '#FF00FF';
     ctx.shadowBlur = 15;
     ctx.stroke();
 
@@ -3339,13 +3339,13 @@ function drawGreenDragonBlade(x, y, angle) {
     // 케데헌 미라 스타일 초승달 날 (더 크고 화려하게)
     const bladeGradient = ctx.createRadialGradient(50, 0, 5, 50, 0, 25);
     bladeGradient.addColorStop(0, '#FFFFFF');                  // 백색 중심
-    bladeGradient.addColorStop(0.3, '#87CEEB');                // 스카이블루
-    bladeGradient.addColorStop(0.6, '#00BFFF');                // 딥스카이블루
-    bladeGradient.addColorStop(0.8, '#1E90FF');                // 도지블루
-    bladeGradient.addColorStop(1, 'rgba(30, 144, 255, 0.6)');  // 반투명
+    bladeGradient.addColorStop(0.3, '#DA70D6');                // 오키드
+    bladeGradient.addColorStop(0.6, '#BA55D3');                // 미디엄오키드
+    bladeGradient.addColorStop(0.8, '#9932CC');                // 다크오키드
+    bladeGradient.addColorStop(1, 'rgba(138, 43, 226, 0.6)');  // 반투명
 
     ctx.fillStyle = bladeGradient;
-    ctx.shadowColor = '#87CEEB';
+    ctx.shadowColor = '#BA55D3';
     ctx.shadowBlur = 20;
 
     // 위쪽 초승달 날 (더 크고 곡선미 있게)
@@ -3382,8 +3382,8 @@ function drawGreenDragonBlade(x, y, angle) {
     ctx.quadraticCurveTo(68, 10, 60, 0);
     ctx.stroke();
 
-    // 외부 시안 테두리
-    ctx.strokeStyle = '#00FFFF';
+    // 외부 마젠타 테두리
+    ctx.strokeStyle = '#FF00FF';
     ctx.lineWidth = 0.8;
     ctx.shadowBlur = 8;
     ctx.beginPath();
@@ -3407,8 +3407,8 @@ function drawGreenDragonBlade(x, y, angle) {
     ctx.lineTo(58, 0);
     ctx.stroke();
 
-    // 중앙선 시안 오라
-    ctx.strokeStyle = '#00FFFF';
+    // 중앙선 마젠타 오라
+    ctx.strokeStyle = '#FF00FF';
     ctx.lineWidth = 5;
     ctx.globalAlpha = 0.3;
     ctx.shadowBlur = 25;
@@ -3418,13 +3418,13 @@ function drawGreenDragonBlade(x, y, angle) {
     // 중앙 용의 눈 보석 (더 크고 화려하게)
     const gemGradient = ctx.createRadialGradient(30, 0, 0, 30, 0, 7);
     gemGradient.addColorStop(0, '#FFFFFF');
-    gemGradient.addColorStop(0.2, '#E0FFFF');
-    gemGradient.addColorStop(0.4, '#00FFFF');
-    gemGradient.addColorStop(0.6, '#00BFFF');
-    gemGradient.addColorStop(0.8, '#4169E1');
-    gemGradient.addColorStop(1, '#191970');
+    gemGradient.addColorStop(0.2, '#FFE6FF');
+    gemGradient.addColorStop(0.4, '#FF00FF');
+    gemGradient.addColorStop(0.6, '#BA55D3');
+    gemGradient.addColorStop(0.8, '#8B008B');
+    gemGradient.addColorStop(1, '#4B0082');
     ctx.fillStyle = gemGradient;
-    ctx.shadowColor = '#00FFFF';
+    ctx.shadowColor = '#FF00FF';
     ctx.shadowBlur = 25;
     ctx.beginPath();
     ctx.arc(30, 0, 7, 0, Math.PI * 2);
@@ -3455,8 +3455,8 @@ function drawGreenDragonBlade(x, y, angle) {
 
         // 장식 구슬 외부 글로우
         const decorOuterGlow = ctx.createRadialGradient(decorX, 0, 0, decorX, 0, 6);
-        decorOuterGlow.addColorStop(0, 'rgba(0, 255, 255, 0.5)');
-        decorOuterGlow.addColorStop(1, 'rgba(0, 255, 255, 0)');
+        decorOuterGlow.addColorStop(0, 'rgba(255, 0, 255, 0.5)');
+        decorOuterGlow.addColorStop(1, 'rgba(255, 0, 255, 0)');
         ctx.fillStyle = decorOuterGlow;
         ctx.shadowBlur = 0;
         ctx.beginPath();
@@ -3466,11 +3466,11 @@ function drawGreenDragonBlade(x, y, angle) {
         // 장식 구슬 본체
         const decorGradient = ctx.createRadialGradient(decorX, 0, 0, decorX, 0, 4);
         decorGradient.addColorStop(0, '#FFFFFF');
-        decorGradient.addColorStop(0.3, '#E0FFFF');
-        decorGradient.addColorStop(0.6, '#00CED1');
-        decorGradient.addColorStop(1, '#4682B4');
+        decorGradient.addColorStop(0.3, '#FFE6FF');
+        decorGradient.addColorStop(0.6, '#DA70D6');
+        decorGradient.addColorStop(1, '#9370DB');
         ctx.fillStyle = decorGradient;
-        ctx.shadowColor = '#00CED1';
+        ctx.shadowColor = '#DA70D6';
         ctx.shadowBlur = 15;
         ctx.beginPath();
         ctx.arc(decorX, 0, 4, 0, Math.PI * 2);
@@ -3485,11 +3485,11 @@ function drawGreenDragonBlade(x, y, angle) {
         ctx.stroke();
     }
 
-    // 번개 효과 (랜덤하게 나타나는 청룡의 힘)
+    // 번개 효과 (랜덤하게 나타나는 케데헌 미라의 힘)
     if (Math.random() < 0.15) {
-        ctx.strokeStyle = '#00FFFF';
+        ctx.strokeStyle = '#FF00FF';
         ctx.lineWidth = 2;
-        ctx.shadowColor = '#00FFFF';
+        ctx.shadowColor = '#FF00FF';
         ctx.shadowBlur = 20;
         ctx.globalAlpha = 0.7;
         ctx.beginPath();
