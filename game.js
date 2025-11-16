@@ -2899,7 +2899,7 @@ function gameLoop() {
                 } else {
                     // 타이머 종료 시 빠르게 휘두르기
                     player.weaponAngle += 0.4;
-                    if (player.weaponAngle > Math.PI / 2) {
+                    if (player.weaponAngle > Math.PI / 6) {  // 4시 방향까지 휘두르기
                         player.showWeapon = false;
                         player.animation = 'idle';  // 애니메이션을 idle로 복귀
                     }
@@ -3146,7 +3146,7 @@ function switchCharacter() {
     if (characterBtn) {
         const btnLabel = characterBtn.querySelector('.btn-label');
         if (btnLabel) {
-            btnLabel.textContent = currentCharacter === 0 ? '지율' : '세은';
+            btnLabel.textContent = '캐릭터 체인지';
         }
     }
 }
@@ -3215,7 +3215,7 @@ function fireTornado() {
 
     // 무기 표시
     player.showWeapon = true;
-    player.weaponAngle = -Math.PI / 3;  // 더 큰 각도로 시작
+    player.weaponAngle = -Math.PI / 2;  // 12시 방향에서 시작
     player.weaponTimer = 30;  // 30프레임 동안 유지
     player.animation = 'casting';  // 캐스팅 애니메이션으로 변경
     player.frameIndex = 0;
