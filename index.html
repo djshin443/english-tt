@@ -1103,6 +1103,7 @@
             right: 0;
             display: none;
             justify-content: space-between;
+            align-items: flex-end;
             padding: 0 20px;
             pointer-events: none;
             z-index: 50;
@@ -1372,6 +1373,10 @@
                 <div class="joystick-stick" id="joystickStick"></div>
             </div>
             <div class="action-buttons">
+                <button id="characterBtn" class="action-btn">
+                    <span>👥</span>
+                    <div class="btn-label">캐릭터 체인지</div>
+                </button>
                 <button id="swordBtn" class="action-btn">
                     <span>⚔️</span>
                     <div class="btn-label">공격</div>
@@ -1379,10 +1384,6 @@
                 <button id="ballBtn" class="action-btn hidden">
                     <span>🏓</span>
                     <div class="btn-label">탁구공</div>
-                </button>
-                <button id="characterBtn" class="action-btn">
-                    <span>👥</span>
-                    <div class="btn-label">지율 세은</div>
                 </button>
             </div>
         </div>
