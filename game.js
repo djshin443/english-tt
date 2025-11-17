@@ -3136,6 +3136,11 @@ function switchCharacter() {
     currentCharacter = (currentCharacter + 1) % characters.length;
     player.sprite = characters[currentCharacter];
 
+    // 애니메이션 초기화 (중요: 각 캐릭터가 가진 애니메이션이 다를 수 있음)
+    player.animation = 'idle';
+    player.frameIndex = 0;
+    player.showWeapon = false;  // 무기도 초기화
+
     // 캐릭터 전환 효과
     for (let i = 0; i < 20; i++) {
         particles.push(new Particle(
