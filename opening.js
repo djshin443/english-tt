@@ -334,8 +334,14 @@ function showTitleScreen() {
         startButton.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
     };
 
-    startButton.onclick = () => {
+    startButton.onclick = (e) => {
         console.log('🚀 Start button clicked!');
+
+        // 이벤트 전파 방지 (canvas로 전파되지 않도록)
+        if (e) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
 
         // 화면 전체 폭죽 효과
         const fireworkCount = isMobilePortrait ? 15 : 30;
@@ -421,6 +427,7 @@ function showTitleScreen() {
     // 터치 이벤트도 추가 (모바일 지원)
     startButton.addEventListener('touchend', (e) => {
         e.preventDefault();
+        e.stopPropagation(); // 이벤트 전파 방지
         startButton.click();
     });
 }
