@@ -523,6 +523,15 @@ let particles = [];
 // 파티클 최적화 설정
 const MAX_PARTICLES = 200;  // 최대 파티클 개수 제한
 
+// 안전한 파티클 추가 함수 (최대 개수 제한)
+function addParticle(x, y, color, shape = 'circle') {
+    if (particles.length < MAX_PARTICLES) {
+        particles.push(new Particle(x, y, color, shape));
+        return true;
+    }
+    return false;
+}
+
 // 무기 글로우 효과 카운터 (Date.now() 대신 사용)
 let glowPhaseCounter = 0;
 
@@ -644,6 +653,8 @@ class DivineSword {
         this.height = 8;   // 검 두께
         this.rotation = 0;  // 회전 애니메이션
         this.trail = [];  // 잔상 효과
+        this.trailIndex = 0;  // Circular buffer 인덱스
+        this.maxTrailLength = 5;  // 8개 → 5개로 감소 (메모리 최적화)
         this.glowPhase = 0;  // 빛나는 효과
         this.framesSinceLaunch = 0;  // 발사 후 경과 프레임
         this.hasSplit = false;  // 분열 여부
@@ -663,14 +674,14 @@ class DivineSword {
         // 1초(60프레임) 경과 시 자동 제거
         if (this.lifetime <= 0) {
             this.active = false;
-            // 소멸 파티클 효과
-            for (let i = 0; i < 10; i++) {
-                const colors = ['#BA55D3', '#FF69B4', '#FFD700', '#9370DB'];
-                particles.push(new Particle(
+            // 소멸 파티클 효과 (파티클 제한 적용)
+            const colors = ['#BA55D3', '#FF69B4', '#FFD700', '#9370DB'];
+            for (let i = 0; i < 5; i++) {  // 10개 → 5개로 감소
+                addParticle(
                     this.x, this.y,
                     colors[Math.floor(Math.random() * colors.length)],
                     'star'
-                ));
+                );
             }
             return [];
         }
@@ -689,14 +700,14 @@ class DivineSword {
             newSwords.push(new DivineSword(this.x, this.y, splitAngle2, this.depth + 1));
             newSwords.push(new DivineSword(this.x, this.y, splitAngle3, this.depth + 1));
 
-            // 분열 파티클 효과
-            for (let i = 0; i < 20; i++) {
-                const colors = ['#BA55D3', '#FF69B4', '#FFD700', '#9370DB'];
-                particles.push(new Particle(
+            // 분열 파티클 효과 (파티클 제한 적용)
+            const colors = ['#BA55D3', '#FF69B4', '#FFD700', '#9370DB'];
+            for (let i = 0; i < 8; i++) {  // 20개 → 8개로 감소
+                addParticle(
                     this.x, this.y,
                     colors[Math.floor(Math.random() * colors.length)],
                     'star'
-                ));
+                );
             }
         }
 
@@ -705,10 +716,16 @@ class DivineSword {
         this.rotation += 0.3;  // 회전 효과
         this.glowPhase += 0.2;
 
-        // 잔상 효과 추가
-        this.trail.push({ x: this.x, y: this.y, alpha: 1 });
-        if (this.trail.length > 8) {
-            this.trail.shift();
+        // 잔상 효과 추가 (Circular buffer 방식으로 최적화)
+        if (this.trail.length < this.maxTrailLength) {
+            // 배열이 아직 최대 길이가 아니면 추가
+            this.trail.push({ x: this.x, y: this.y, alpha: 1 });
+        } else {
+            // 배열이 최대 길이면 기존 요소 재사용 (shift/push 없이)
+            this.trail[this.trailIndex].x = this.x;
+            this.trail[this.trailIndex].y = this.y;
+            this.trail[this.trailIndex].alpha = 1;
+            this.trailIndex = (this.trailIndex + 1) % this.maxTrailLength;
         }
         // 잔상 페이드 아웃
         this.trail.forEach((t, i) => {
@@ -732,15 +749,15 @@ class DivineSword {
                 // 점수 추가
                 addScore(10); // 몬스터 처치 +10점
 
-                // 파티클 효과 (보라색 계열)
-                for (let i = 0; i < 30; i++) {
-                    const colors = ['#BA55D3', '#FF69B4', '#FFD700', '#9370DB', '#DDA0DD'];
-                    particles.push(new Particle(
+                // 파티클 효과 (보라색 계열) - 파티클 제한 적용
+                const colors = ['#BA55D3', '#FF69B4', '#FFD700', '#9370DB', '#DDA0DD'];
+                for (let i = 0; i < 10; i++) {  // 30개 → 10개로 대폭 감소
+                    addParticle(
                         monster.x + monster.width / 2,
                         monster.y + monster.height / 2,
                         colors[Math.floor(Math.random() * colors.length)],
                         'star'
-                    ));
+                    );
                 }
 
                 // 신검은 관통하므로 계속 날아감 (비활성화 안 함)
@@ -890,10 +907,11 @@ class Tornado {
         this.toRemove = false;
         this.hasSplit = false;  // 분열 여부
 
-        // 토네이도 파티클 초기화
-        for (let i = 0; i < 15; i++) {
+        // 토네이도 파티클 초기화 (15개 → 8개로 감소, 메모리 최적화)
+        const particleCount = 8;
+        for (let i = 0; i < particleCount; i++) {
             this.particles.push({
-                angle: (Math.PI * 2 / 15) * i,
+                angle: (Math.PI * 2 / particleCount) * i,
                 radius: Math.random() * 20 + 10,
                 height: Math.random() * 40 - 20,
                 speed: Math.random() * 0.05 + 0.05
@@ -910,13 +928,9 @@ class Tornado {
         // 1초 후 제거
         if (this.lifetime <= 0) {
             this.toRemove = true;
-            // 소멸 이펙트
-            for (let i = 0; i < 20; i++) {
-                particles.push(new Particle(
-                    this.x, this.y,
-                    '#87CEEB',
-                    'circle'
-                ));
+            // 소멸 이펙트 (파티클 제한 적용)
+            for (let i = 0; i < 10; i++) {  // 20개 → 10개로 감소
+                addParticle(this.x, this.y, '#87CEEB', 'circle');
             }
             return [];
         }
@@ -986,14 +1000,14 @@ class Tornado {
                 // 점수 추가
                 addScore(15);
 
-                // 파티클 효과
-                for (let i = 0; i < 10; i++) {
-                    particles.push(new Particle(
+                // 파티클 효과 (파티클 제한 적용)
+                for (let i = 0; i < 5; i++) {  // 10개 → 5개로 감소
+                    addParticle(
                         monster.x + monster.width / 2,
                         monster.y + monster.height / 2,
                         '#00CED1',
                         'star'
-                    ));
+                    );
                 }
             }
         });
@@ -2813,9 +2827,10 @@ function checkCollisions() {
                     currentStageData.collectedLetters.push(letter.letter);
                     addScore(20); // 알파벳 수집 +20점
 
-                    for (let i = 0; i < 30; i++) {
-                        const colors = ['#FFD700', '#FFA500', '#FF69B4'];
-                        particles.push(new Particle(letter.x + letter.width / 2, letter.y + letter.height / 2, colors[Math.floor(Math.random() * colors.length)], 'star'));
+                    // 파티클 효과 (파티클 제한 적용)
+                    const colors = ['#FFD700', '#FFA500', '#FF69B4'];
+                    for (let i = 0; i < 15; i++) {  // 30개 → 15개로 감소
+                        addParticle(letter.x + letter.width / 2, letter.y + letter.height / 2, colors[Math.floor(Math.random() * colors.length)], 'star');
                     }
 
                     updateUI();
@@ -2847,8 +2862,9 @@ function checkCollisions() {
                 letter.collected = true;
                 loseEnergy();
 
-                for (let i = 0; i < 20; i++) {
-                    particles.push(new Particle(letter.x + letter.width / 2, letter.y + letter.height / 2, '#FF0000', 'normal'));
+                // 파티클 효과 (파티클 제한 적용)
+                for (let i = 0; i < 10; i++) {  // 20개 → 10개로 감소
+                    addParticle(letter.x + letter.width / 2, letter.y + letter.height / 2, '#FF0000', 'normal');
                 }
             }
         }
@@ -2860,9 +2876,10 @@ function checkCollisions() {
             loseEnergy();
             monsters.splice(monsters.indexOf(monster), 1);
 
+            // 파티클 효과 (파티클 제한 적용)
             const colors = ['#FF4444', '#FF6B6B', '#FFA500'];
-            for (let i = 0; i < 25; i++) {
-                particles.push(new Particle(monster.x + monster.width / 2, monster.y + monster.height / 2, colors[Math.floor(Math.random() * colors.length)], 'normal'));
+            for (let i = 0; i < 12; i++) {  // 25개 → 12개로 감소
+                addParticle(monster.x + monster.width / 2, monster.y + monster.height / 2, colors[Math.floor(Math.random() * colors.length)], 'normal');
             }
         }
     });
@@ -2874,9 +2891,10 @@ function checkCollisions() {
             gainEnergy();
             addScore(30); // 포션 수집 +30점
 
+            // 파티클 효과 (파티클 제한 적용)
             const colors = ['#FF69B4', '#FFB6C1', '#FF1493'];
-            for (let i = 0; i < 30; i++) {
-                particles.push(new Particle(potion.x + potion.width / 2, potion.y + potion.height / 2, colors[Math.floor(Math.random() * colors.length)], 'heart'));
+            for (let i = 0; i < 15; i++) {  // 30개 → 15개로 감소
+                addParticle(potion.x + potion.width / 2, potion.y + potion.height / 2, colors[Math.floor(Math.random() * colors.length)], 'heart');
             }
         }
     });
@@ -3403,14 +3421,14 @@ function switchCharacter() {
     player.weaponAngle = 0;     // 무기 각도 초기화
     player.weaponTimer = 0;     // 무기 타이머 초기화
 
-    // 캐릭터 전환 효과
-    for (let i = 0; i < 20; i++) {
-        particles.push(new Particle(
+    // 캐릭터 전환 효과 (파티클 제한 적용)
+    for (let i = 0; i < 12; i++) {  // 20개 → 12개로 감소
+        addParticle(
             player.x + player.width / 2,
             player.y + player.height / 2,
             currentCharacter === 0 ? '#FF69B4' : (currentCharacter === 1 ? '#9370DB' : '#BA55D3'),
             'star'
-        ));
+        );
     }
 
     // 버튼 텍스트 업데이트
@@ -3462,14 +3480,14 @@ function fireDivineSword() {
     jiyulSmashing = true;
     smashTimer = 15;
 
-    // 발사 효과음 대신 파티클
-    for (let i = 0; i < 10; i++) {
-        particles.push(new Particle(
+    // 발사 효과 파티클 (파티클 제한 적용)
+    for (let i = 0; i < 8; i++) {  // 10개 → 8개로 감소
+        addParticle(
             player.x + player.width,
             player.y + player.height / 2,
             '#FFD700',
             'star'
-        ));
+        );
     }
 }
 
