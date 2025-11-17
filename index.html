@@ -1342,15 +1342,6 @@
     <div id="gameContainer">
         <canvas id="gameCanvas"></canvas>
 
-        <!-- 디버그 패널 (모바일 디버깅용) -->
-        <div id="debugPanel" style="display: none; position: fixed; top: 10px; left: 10px; right: 10px; max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.9); color: #0f0; font-family: monospace; font-size: 10px; padding: 10px; z-index: 99999; border: 2px solid #0f0; border-radius: 5px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                <span style="color: #ff0; font-weight: bold;">DEBUG LOG</span>
-                <button onclick="document.getElementById('debugPanel').style.display='none'" style="background: #f00; color: #fff; border: none; padding: 2px 8px; border-radius: 3px; cursor: pointer;">닫기</button>
-            </div>
-            <div id="debugLog"></div>
-        </div>
-
         <div id="ui">
             <div id="energyContainer">
                 <div id="hpBarBackground">
@@ -1401,68 +1392,6 @@
     </div>
 
     <script>
-        // 모바일 디버그 패널 - console.log를 화면에 표시
-        (function() {
-            const debugPanel = document.getElementById('debugPanel');
-            const debugLog = document.getElementById('debugLog');
-            const maxLogs = 50;
-            let logCount = 0;
-
-            // console.log override
-            const originalLog = console.log;
-            const originalError = console.error;
-            const originalWarn = console.warn;
-
-            function addToDebugPanel(message, type = 'log') {
-                if (!debugPanel || !debugLog) return;
-
-                // 자동으로 패널 표시
-                debugPanel.style.display = 'block';
-
-                const logEntry = document.createElement('div');
-                logEntry.style.marginBottom = '3px';
-                logEntry.style.borderBottom = '1px solid #333';
-                logEntry.style.paddingBottom = '2px';
-
-                if (type === 'error') {
-                    logEntry.style.color = '#f00';
-                } else if (type === 'warn') {
-                    logEntry.style.color = '#ff0';
-                } else {
-                    logEntry.style.color = '#0f0';
-                }
-
-                const timestamp = new Date().toLocaleTimeString();
-                logEntry.textContent = `[${timestamp}] ${message}`;
-
-                debugLog.insertBefore(logEntry, debugLog.firstChild);
-
-                // 로그 개수 제한
-                logCount++;
-                if (logCount > maxLogs) {
-                    debugLog.removeChild(debugLog.lastChild);
-                }
-            }
-
-            console.log = function(...args) {
-                originalLog.apply(console, args);
-                addToDebugPanel(args.join(' '), 'log');
-            };
-
-            console.error = function(...args) {
-                originalError.apply(console, args);
-                addToDebugPanel('ERROR: ' + args.join(' '), 'error');
-            };
-
-            console.warn = function(...args) {
-                originalWarn.apply(console, args);
-                addToDebugPanel('WARN: ' + args.join(' '), 'warn');
-            };
-
-            // 초기 메시지
-            console.log('🔍 Debug panel initialized');
-        })();
-
         // 풀스크린 제어 - iOS와 Android 모두 지원 (모든 화면에서 가로=풀스크린, 세로=일반)
         (function() {
             // iOS 감지
