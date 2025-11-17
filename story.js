@@ -1905,7 +1905,7 @@ class StoryScene {
                     this.ctx.rotate(-Math.PI / 4 + Math.sin(this.animationFrame * 0.1) * 0.3);
 
                     // 강력한 보라색 글로우 효과 (펄스 애니메이션)
-                    const glowPhase = Date.now() * 0.004;
+                    const glowPhase = this.animationFrame * 0.1;
                     const dynamicGlowSize = 45 + Math.sin(glowPhase) * 8;
                     const outerGlowSize = 60 + Math.sin(glowPhase * 1.3) * 10;
 
