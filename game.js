@@ -3859,12 +3859,12 @@ function drawLightningSword(x, y, angle) {
     ctx.beginPath();
     ctx.moveTo(5, -7);
     ctx.lineTo(43, -4);
-    ctx.lineTo(57, 0);
+    ctx.lineTo(73, 0);
     ctx.lineTo(43, 4);
     ctx.lineTo(5, 7);
     ctx.stroke();
 
-    // 케데헌 루미 스타일 초승달 날 (더 크고 화려하게)
+    // 케데헌 루미 스타일 사인검 날 (뾰족하고 날카롭게)
     const bladeGradient = ctx.createRadialGradient(50, 0, 5, 50, 0, 25);
     bladeGradient.addColorStop(0, '#FFFFFF');                  // 백색 중심
     bladeGradient.addColorStop(0.3, '#DA70D6');                // 오키드
@@ -3876,38 +3876,40 @@ function drawLightningSword(x, y, angle) {
     ctx.shadowColor = '#BA55D3';
     ctx.shadowBlur = 20;
 
-    // 위쪽 초승달 날 (더 크고 곡선미 있게)
+    // 위쪽 사인검 날 (뾰족하고 날카롭게)
     ctx.beginPath();
-    ctx.moveTo(45, -6);
-    ctx.quadraticCurveTo(53, -22, 65, -15);
-    ctx.quadraticCurveTo(68, -10, 60, 0);
-    ctx.lineTo(45, -6);
+    ctx.moveTo(45, -5);
+    ctx.quadraticCurveTo(58, -14, 73, -6);
+    ctx.lineTo(76, 0);
+    ctx.lineTo(60, 0);
+    ctx.lineTo(45, -5);
     ctx.closePath();
     ctx.fill();
 
-    // 아래쪽 초승달 날 (대칭)
+    // 아래쪽 사인검 날 (대칭)
     ctx.beginPath();
-    ctx.moveTo(45, 6);
-    ctx.quadraticCurveTo(53, 22, 65, 15);
-    ctx.quadraticCurveTo(68, 10, 60, 0);
-    ctx.lineTo(45, 6);
+    ctx.moveTo(45, 5);
+    ctx.quadraticCurveTo(58, 14, 73, 6);
+    ctx.lineTo(76, 0);
+    ctx.lineTo(60, 0);
+    ctx.lineTo(45, 5);
     ctx.closePath();
     ctx.fill();
 
-    // 초승달 날 이중 테두리
+    // 사인검 날 이중 테두리
     ctx.strokeStyle = '#FFFFFF';
     ctx.lineWidth = 1.5;
     ctx.shadowColor = '#FFFFFF';
     ctx.shadowBlur = 12;
     ctx.beginPath();
-    ctx.moveTo(45, -6);
-    ctx.quadraticCurveTo(53, -22, 65, -15);
-    ctx.quadraticCurveTo(68, -10, 60, 0);
+    ctx.moveTo(45, -5);
+    ctx.quadraticCurveTo(58, -14, 73, -6);
+    ctx.lineTo(76, 0);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(45, 6);
-    ctx.quadraticCurveTo(53, 22, 65, 15);
-    ctx.quadraticCurveTo(68, 10, 60, 0);
+    ctx.moveTo(45, 5);
+    ctx.quadraticCurveTo(58, 14, 73, 6);
+    ctx.lineTo(76, 0);
     ctx.stroke();
 
     // 외부 보라색 테두리
@@ -3915,14 +3917,14 @@ function drawLightningSword(x, y, angle) {
     ctx.lineWidth = 0.8;
     ctx.shadowBlur = 8;
     ctx.beginPath();
-    ctx.moveTo(45, -6);
-    ctx.quadraticCurveTo(53, -22, 65, -15);
-    ctx.quadraticCurveTo(68, -10, 60, 0);
+    ctx.moveTo(45, -5);
+    ctx.quadraticCurveTo(58, -14, 73, -6);
+    ctx.lineTo(76, 0);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(45, 6);
-    ctx.quadraticCurveTo(53, 22, 65, 15);
-    ctx.quadraticCurveTo(68, 10, 60, 0);
+    ctx.moveTo(45, 5);
+    ctx.quadraticCurveTo(58, 14, 73, 6);
+    ctx.lineTo(76, 0);
     ctx.stroke();
 
     // 중앙선 (강렬한 빛의 선)
@@ -3932,7 +3934,7 @@ function drawLightningSword(x, y, angle) {
     ctx.shadowBlur = 20;
     ctx.beginPath();
     ctx.moveTo(5, 0);
-    ctx.lineTo(58, 0);
+    ctx.lineTo(73, 0);
     ctx.stroke();
 
     // 중앙선 보라색 오라
