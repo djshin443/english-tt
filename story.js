@@ -4032,7 +4032,11 @@ class StoryScene {
         console.log('🖼️ Canvas display:', this.canvas.style.display);
 
         // 이벤트 리스너 재설정 (오프닝 시작 시)
-        this.setupEventListeners();
+        // 약간 지연시켜서 타이틀 버튼 클릭 이벤트와 충돌 방지
+        setTimeout(() => {
+            this.setupEventListeners();
+            console.log('✅ Event listeners setup complete');
+        }, 100);
 
         console.log('▶️ Starting animation loop...');
         this.animate();
@@ -4048,7 +4052,10 @@ class StoryScene {
         this.canProceed = false;
 
         // 이벤트 리스너 재설정 (엔딩 시작 시)
-        this.setupEventListeners();
+        // 약간 지연시켜서 이전 이벤트와 충돌 방지
+        setTimeout(() => {
+            this.setupEventListeners();
+        }, 100);
 
         this.animate();
     }
