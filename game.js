@@ -3753,23 +3753,23 @@ function drawGreenDragonBlade(x, y, angle) {
     ctx.restore();
 }
 
-// 번개검 그리기 함수 (지율/세은 검 스타일 + 번개 테마)
+// 케데헌 루미 보라색 사인검 그리기 함수 (지율/세은 검 스타일 + 보라색 테마)
 function drawLightningSword(x, y, angle) {
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle);
 
-    // 강력한 번개 글로우 효과 (펄스 애니메이션)
+    // 강력한 보라색 글로우 효과 (펄스 애니메이션)
     const glowPhase = Date.now() * 0.004;
     const dynamicGlowSize = 45 + Math.sin(glowPhase) * 8;
     const outerGlowSize = 60 + Math.sin(glowPhase * 1.3) * 10;
 
-    // 외부 글로우 (번개 오라)
+    // 외부 글로우 (케데헌 루미 오라)
     const outerGlow = ctx.createRadialGradient(20, 0, 0, 20, 0, outerGlowSize);
-    outerGlow.addColorStop(0, 'rgba(0, 191, 255, 0.4)');      // 딥 스카이 블루
-    outerGlow.addColorStop(0.3, 'rgba(30, 144, 255, 0.3)');   // 다저 블루
-    outerGlow.addColorStop(0.6, 'rgba(65, 105, 225, 0.2)');   // 로열 블루
-    outerGlow.addColorStop(1, 'rgba(0, 0, 139, 0)');          // 투명
+    outerGlow.addColorStop(0, 'rgba(138, 43, 226, 0.4)');     // 블루바이올렛
+    outerGlow.addColorStop(0.3, 'rgba(148, 0, 211, 0.3)');    // 다크바이올렛
+    outerGlow.addColorStop(0.6, 'rgba(128, 0, 128, 0.2)');    // 퍼플
+    outerGlow.addColorStop(1, 'rgba(75, 0, 130, 0)');         // 투명
     ctx.fillStyle = outerGlow;
     ctx.beginPath();
     ctx.arc(20, 0, outerGlowSize, 0, Math.PI * 2);
@@ -3778,15 +3778,15 @@ function drawLightningSword(x, y, angle) {
     // 내부 글로우 (강렬한 빛)
     const innerGlow = ctx.createRadialGradient(20, 0, 0, 20, 0, dynamicGlowSize);
     innerGlow.addColorStop(0, 'rgba(255, 255, 255, 0.8)');    // 백색
-    innerGlow.addColorStop(0.2, 'rgba(135, 206, 250, 0.7)');  // 라이트 스카이 블루
-    innerGlow.addColorStop(0.5, 'rgba(0, 191, 255, 0.5)');    // 딥 스카이 블루
-    innerGlow.addColorStop(1, 'rgba(30, 144, 255, 0)');       // 투명
+    innerGlow.addColorStop(0.2, 'rgba(218, 112, 214, 0.7)');  // 오키드
+    innerGlow.addColorStop(0.5, 'rgba(186, 85, 211, 0.5)');   // 미디엄오키드
+    innerGlow.addColorStop(1, 'rgba(148, 0, 211, 0)');        // 투명
     ctx.fillStyle = innerGlow;
     ctx.beginPath();
     ctx.arc(20, 0, dynamicGlowSize, 0, Math.PI * 2);
     ctx.fill();
 
-    // 창대 (더 굵고 화려한 금색)
+    // 검 손잡이 (더 굵고 화려한 금색)
     const handleGradient = ctx.createLinearGradient(-90, 0, 0, 0);
     handleGradient.addColorStop(0, '#B8860B');      // 다크골드
     handleGradient.addColorStop(0.2, '#FFD700');    // 골드
@@ -3799,40 +3799,40 @@ function drawLightningSword(x, y, angle) {
     ctx.shadowBlur = 15;
     ctx.fillRect(-90, -4, 90, 8);
 
-    // 창대 테두리
+    // 손잡이 테두리
     ctx.strokeStyle = '#8B4513';
     ctx.lineWidth = 1;
     ctx.shadowBlur = 0;
     ctx.strokeRect(-90, -4, 90, 8);
 
-    // 창날 본체 (더 크고 날카로운 지율 신검 스타일 + 번개 컬러)
+    // 검날 본체 (더 크고 날카로운 지율 신검 스타일 + 케데헌 루미 보라색)
     const spearGradient = ctx.createLinearGradient(0, -10, 60, 10);
     spearGradient.addColorStop(0, '#FFD700');                  // 금색
-    spearGradient.addColorStop(0.15, '#87CEEB');               // 스카이 블루
+    spearGradient.addColorStop(0.15, '#DA70D6');               // 오키드
     spearGradient.addColorStop(0.3, '#FFFFFF');                // 백색 (빛나는)
-    spearGradient.addColorStop(0.5, '#00FFFF');                // 시안
-    spearGradient.addColorStop(0.7, '#00BFFF');                // 딥 스카이 블루
-    spearGradient.addColorStop(0.85, '#1E90FF');               // 다저 블루
-    spearGradient.addColorStop(1, 'rgba(0, 191, 255, 0.3)');   // 반투명
+    spearGradient.addColorStop(0.5, '#EE82EE');                // 바이올렛
+    spearGradient.addColorStop(0.7, '#BA55D3');                // 미디엄오키드
+    spearGradient.addColorStop(0.85, '#9932CC');               // 다크오키드
+    spearGradient.addColorStop(1, 'rgba(138, 43, 226, 0.3)');  // 반투명
 
     ctx.fillStyle = spearGradient;
-    ctx.shadowColor = '#00BFFF';
+    ctx.shadowColor = '#BA55D3';
     ctx.shadowBlur = 25;
 
-    // 창날 본체 그리기 (더 길고 날카롭게)
+    // 검날 본체 그리기 (더 길고 날카롭게)
     ctx.beginPath();
-    ctx.moveTo(0, -10);  // 창대 끝 (더 굵게)
+    ctx.moveTo(0, -10);  // 손잡이 끝 (더 굵게)
     ctx.lineTo(45, -6);  // 위쪽 날
     ctx.lineTo(60, 0);   // 뾰족한 끝 (더 길게)
     ctx.lineTo(45, 6);   // 아래쪽 날
-    ctx.lineTo(0, 10);   // 창대 끝
+    ctx.lineTo(0, 10);   // 손잡이 끝
     ctx.closePath();
     ctx.fill();
 
-    // 창날 이중 테두리 (빛나는 효과)
-    ctx.strokeStyle = '#00BFFF';
+    // 검날 이중 테두리 (빛나는 효과)
+    ctx.strokeStyle = '#BA55D3';
     ctx.lineWidth = 2;
-    ctx.shadowColor = '#00BFFF';
+    ctx.shadowColor = '#BA55D3';
     ctx.shadowBlur = 15;
     ctx.stroke();
 
@@ -3848,16 +3848,16 @@ function drawLightningSword(x, y, angle) {
     ctx.lineTo(5, 7);
     ctx.stroke();
 
-    // 번개 스타일 초승달 날 (더 크고 화려하게)
+    // 케데헌 루미 스타일 초승달 날 (더 크고 화려하게)
     const bladeGradient = ctx.createRadialGradient(50, 0, 5, 50, 0, 25);
     bladeGradient.addColorStop(0, '#FFFFFF');                  // 백색 중심
-    bladeGradient.addColorStop(0.3, '#87CEEB');                // 스카이 블루
-    bladeGradient.addColorStop(0.6, '#00BFFF');                // 딥 스카이 블루
-    bladeGradient.addColorStop(0.8, '#1E90FF');                // 다저 블루
-    bladeGradient.addColorStop(1, 'rgba(65, 105, 225, 0.6)');  // 반투명
+    bladeGradient.addColorStop(0.3, '#DA70D6');                // 오키드
+    bladeGradient.addColorStop(0.6, '#BA55D3');                // 미디엄오키드
+    bladeGradient.addColorStop(0.8, '#9932CC');                // 다크오키드
+    bladeGradient.addColorStop(1, 'rgba(138, 43, 226, 0.6)');  // 반투명
 
     ctx.fillStyle = bladeGradient;
-    ctx.shadowColor = '#00BFFF';
+    ctx.shadowColor = '#BA55D3';
     ctx.shadowBlur = 20;
 
     // 위쪽 초승달 날 (더 크고 곡선미 있게)
@@ -3894,8 +3894,8 @@ function drawLightningSword(x, y, angle) {
     ctx.quadraticCurveTo(68, 10, 60, 0);
     ctx.stroke();
 
-    // 외부 번개 테두리
-    ctx.strokeStyle = '#00BFFF';
+    // 외부 보라색 테두리
+    ctx.strokeStyle = '#BA55D3';
     ctx.lineWidth = 0.8;
     ctx.shadowBlur = 8;
     ctx.beginPath();
@@ -3919,8 +3919,8 @@ function drawLightningSword(x, y, angle) {
     ctx.lineTo(58, 0);
     ctx.stroke();
 
-    // 중앙선 번개 오라
-    ctx.strokeStyle = '#00BFFF';
+    // 중앙선 보라색 오라
+    ctx.strokeStyle = '#BA55D3';
     ctx.lineWidth = 5;
     ctx.globalAlpha = 0.3;
     ctx.shadowBlur = 25;
@@ -3930,13 +3930,13 @@ function drawLightningSword(x, y, angle) {
     // 중앙 용의 눈 보석 (더 크고 화려하게)
     const gemGradient = ctx.createRadialGradient(30, 0, 0, 30, 0, 7);
     gemGradient.addColorStop(0, '#FFFFFF');
-    gemGradient.addColorStop(0.2, '#E0FFFF');
-    gemGradient.addColorStop(0.4, '#00BFFF');
-    gemGradient.addColorStop(0.6, '#1E90FF');
-    gemGradient.addColorStop(0.8, '#0000CD');
-    gemGradient.addColorStop(1, '#191970');
+    gemGradient.addColorStop(0.2, '#FFE6FF');
+    gemGradient.addColorStop(0.4, '#BA55D3');
+    gemGradient.addColorStop(0.6, '#9932CC');
+    gemGradient.addColorStop(0.8, '#8B008B');
+    gemGradient.addColorStop(1, '#4B0082');
     ctx.fillStyle = gemGradient;
-    ctx.shadowColor = '#00BFFF';
+    ctx.shadowColor = '#BA55D3';
     ctx.shadowBlur = 25;
     ctx.beginPath();
     ctx.arc(30, 0, 7, 0, Math.PI * 2);
@@ -3961,14 +3961,14 @@ function drawLightningSword(x, y, angle) {
     ctx.stroke();
     ctx.globalAlpha = 1.0;
 
-    // 창대 장식 (더 화려하게)
+    // 손잡이 장식 (더 화려하게)
     for (let i = 0; i < 4; i++) {
         const decorX = -15 - i * 18;
 
         // 장식 구슬 외부 글로우
         const decorOuterGlow = ctx.createRadialGradient(decorX, 0, 0, decorX, 0, 6);
-        decorOuterGlow.addColorStop(0, 'rgba(0, 191, 255, 0.5)');
-        decorOuterGlow.addColorStop(1, 'rgba(0, 191, 255, 0)');
+        decorOuterGlow.addColorStop(0, 'rgba(186, 85, 211, 0.5)');
+        decorOuterGlow.addColorStop(1, 'rgba(186, 85, 211, 0)');
         ctx.fillStyle = decorOuterGlow;
         ctx.shadowBlur = 0;
         ctx.beginPath();
@@ -3978,11 +3978,11 @@ function drawLightningSword(x, y, angle) {
         // 장식 구슬 본체
         const decorGradient = ctx.createRadialGradient(decorX, 0, 0, decorX, 0, 4);
         decorGradient.addColorStop(0, '#FFFFFF');
-        decorGradient.addColorStop(0.3, '#E0FFFF');
-        decorGradient.addColorStop(0.6, '#87CEEB');
-        decorGradient.addColorStop(1, '#4682B4');
+        decorGradient.addColorStop(0.3, '#FFE6FF');
+        decorGradient.addColorStop(0.6, '#DA70D6');
+        decorGradient.addColorStop(1, '#9370DB');
         ctx.fillStyle = decorGradient;
-        ctx.shadowColor = '#87CEEB';
+        ctx.shadowColor = '#DA70D6';
         ctx.shadowBlur = 15;
         ctx.beginPath();
         ctx.arc(decorX, 0, 4, 0, Math.PI * 2);
@@ -3997,11 +3997,11 @@ function drawLightningSword(x, y, angle) {
         ctx.stroke();
     }
 
-    // 번개 효과 (랜덤하게 나타나는 번개의 힘)
+    // 보라색 에너지 효과 (랜덤하게 나타나는 케데헌 루미의 힘)
     if (Math.random() < 0.15) {
-        ctx.strokeStyle = '#00BFFF';
+        ctx.strokeStyle = '#BA55D3';
         ctx.lineWidth = 2;
-        ctx.shadowColor = '#00BFFF';
+        ctx.shadowColor = '#BA55D3';
         ctx.shadowBlur = 20;
         ctx.globalAlpha = 0.7;
         ctx.beginPath();
