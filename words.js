@@ -260,17 +260,22 @@ const BOSS_DATA = [
         difficulty: 1,
         preBattleDialogue: [
             { speaker: '스펠링 장군', text: '크하하하! 나는 영어 제국의 스펠링 장군이다!' },
-            { speaker: '지율', text: '헉! 책이 말을 해?! 그리고 왜 이렇게 웃기게 생겼어?!' },
+            { speaker: '지율', text: '헉! 책이 말을 해?!' },
+            { speaker: '세은', text: '진짜 신기하다! 근데 왜 이렇게 웃기게 생겼어?!' },
             { speaker: '스펠링 장군', text: '뭐?! 웃기다고?! 나는 무섭다고! C-A-T, CAT! 고양이다!' },
-            { speaker: '지율', text: '푸하핫! 그건 나도 알아! 넌 그거 알아? 우리빕 도마뱀 이름은? 정답은 KIWI! 메롱~' },
+            { speaker: '하린', text: '푸하핫! 그건 우리도 알아! 너무 쉬운데?' },
+            { speaker: '지율', text: '맞아! 우리 셋 다 영어 잘하거든!' },
             { speaker: '스펠링 장군', text: '뭐? 감히 나를 무시해?! 탁구공으로 내 책장을 넘겨봐라!' },
-            { speaker: '지율', text: '오케이! 탁구는 내가 잘하거든! 준비됐어?!' }
+            { speaker: '세은', text: '오케이! 우리 셋이 같이 할게!' },
+            { speaker: '하린', text: '준비됐어?! 레쓰고!' }
         ],
         postBattleDialogue: [
             { speaker: '스펠링 장군', text: '아야야야! 내 책장이 다 구겨졌어! 엄마한테 혼나겠다!' },
             { speaker: '지율', text: '푸핫! 엄마한테 혼나? 보스 주제에?!' },
             { speaker: '스펠링 장군', text: '...사실 난 도서관에서 온 책이거든... 반납 기한도 지나서...' },
-            { speaker: '지율', text: '어머! 연체료 내야겠다! 빨리 도서관 가! 파이팅!' }
+            { speaker: '세은', text: '헐! 도서관 책을 여기까지 가져왔어?' },
+            { speaker: '하린', text: '연체료 엄청 나오겠다! 빨리 돌려줘야 해!' },
+            { speaker: '지율', text: '빨리 도서관 가! 파이팅!' }
         ]
     },
     {
@@ -283,18 +288,21 @@ const BOSS_DATA = [
         difficulty: 2,
         preBattleDialogue: [
             { speaker: '문법 마법사', text: '후훗! I AM 문법 마법사! 내 마법을 맛봐라!' },
-            { speaker: '지율', text: '어? 그건 I AM이 아니라 I\'M 아니야? 줄여서?' },
+            { speaker: '세은', text: '어? 그건 I AM이 아니라 I\'M 아니야? 줄여서?' },
             { speaker: '문법 마법사', text: '뭐?! 그, 그거야 내가 격식을 차린 거지! 아무튼!' },
-            { speaker: '지율', text: '근데 마법사 옷 엄청 크다! 치마에 걸려서 넘어지겠는데?!' },
+            { speaker: '하린', text: '근데 마법사 옷 엄청 크다! 치마에 걸려서 넘어지겠는데?!' },
             { speaker: '문법 마법사', text: '이, 이건 마법 로브라고! 멋있다고! 어쨌든 덤벼라!' },
-            { speaker: '지율', text: '알았어 마법사님! 그런데 지팡이가 연필이네? 귀엽다!' }
+            { speaker: '지율', text: '알았어 마법사님! 그런데 지팡이가 연필이네?' },
+            { speaker: '세은', text: '진짜 귀엽다! 히히!' }
         ],
         postBattleDialogue: [
             { speaker: '문법 마법사', text: '크아악! 내 마법이 다 풀렸어! 주어 동사 목적어가 엉망이야!' },
             { speaker: '지율', text: '하하! 탁구가 문법보다 재밌는데?!' },
             { speaker: '문법 마법사', text: '으흑... 사실 나 영어 시험에서 80점 맞아서 마법사 된 거야...' },
-            { speaker: '지율', text: '80점이면 잘한 거잖아! 너무 속상해하지 마!' },
-            { speaker: '문법 마법사', text: '고마워 지율아... 넌 착한 아이구나! 힘내!' }
+            { speaker: '하린', text: '80점이면 잘한 거잖아!' },
+            { speaker: '세은', text: '맞아! 너무 속상해하지 마!' },
+            { speaker: '지율', text: '우리랑 같이 공부하자! 힘내!' },
+            { speaker: '문법 마법사', text: '고마워 얘들아... 너희 모두 착한 아이들이구나!' }
         ]
     },
     {
@@ -307,18 +315,20 @@ const BOSS_DATA = [
         difficulty: 3,
         preBattleDialogue: [
             { speaker: '발음 괴물', text: '쓰리! 띵크! 띵크! 나는 발음이 완벽해! 완벽하다고!' },
-            { speaker: '지율', text: '어? 그건 "씽크"라고 발음하는 건데... 혀를 내밀어야 해!' },
+            { speaker: '하린', text: '어? 그건 "씽크"라고 발음하는 건데... 혀를 내밀어야 해!' },
             { speaker: '발음 괴물', text: '뭐?! 내가 틀렸다고?! 나 발음 괴물인데?! 띵크가 맞아 띵크!' },
-            { speaker: '지율', text: '아니야! 선생님이 TH는 혀를 내밀고 "쓰~"하래! 씽크!' },
+            { speaker: '세은', text: '아니야! 선생님이 TH는 혀를 내밀고 "쓰~"하래!' },
+            { speaker: '지율', text: '맞아! Think는 "씽크"야! 우리가 알려줄게!' },
             { speaker: '발음 괴물', text: '...아 진짜? 내가 계속 틀리게 발음했네! 부끄러워! 어쨌든 싸운다!' },
-            { speaker: '지율', text: '왜 화내! 나도 처음엔 틀렸었는데! 그래도 해보자 레쓰고!' }
+            { speaker: '하린', text: '왜 화내! 우리도 처음엔 틀렸었어! 그래도 해보자 레쓰고!' }
         ],
         postBattleDialogue: [
             { speaker: '발음 괴물', text: '윙윙윙... 아니 하핫... 나 진짜 발음 연습 좀 해야겠다...' },
-            { speaker: '지율', text: '괜찮아! 나도 처음엔 "애플"을 "에이뿔"이라고 했어! 하하!' },
+            { speaker: '지율', text: '괜찮아! 나도 처음엔 "애플"을 "에이뿔"이라고 했어!' },
+            { speaker: '세은', text: '나도! "쓰리"를 "뜨리"라고 했었어! 하하!' },
             { speaker: '발음 괴물', text: '진짜?! 하하하 그럼 나만 못하는 게 아니네!' },
-            { speaker: '지율', text: '응! 천천히 연습하면 돼! 유튜브에 발음 강의 많아!' },
-            { speaker: '발음 괴물', text: '오 좋은 정보! 고마워! 너 진짜 착하다! 마지막 보스 조심해!' }
+            { speaker: '하린', text: '응! 천천히 연습하면 돼! 유튜브에 발음 강의 많아!' },
+            { speaker: '발음 괴물', text: '오 좋은 정보! 고마워 얘들아! 너희 진짜 착하다! 마지막 보스 조심해!' }
         ]
     },
     {
@@ -331,23 +341,28 @@ const BOSS_DATA = [
         difficulty: 4,
         preBattleDialogue: [
             { speaker: 'ABC 대마왕', text: '안녕~ 나는 ABC 대마왕이야! 영어 친구들아 모여라~! 헤헤!' },
-            { speaker: '지율', text: '우와! 너무 귀여워요! 진짜 대마왕이에요?' },
+            { speaker: '지율', text: '우와! 너무 귀여워요!' },
+            { speaker: '세은', text: '진짜 대마왕이에요? 전혀 안 무서운데?' },
             { speaker: 'ABC 대마왕', text: '귀... 귀엽다니?! 나 무서운 대마왕이야! 으르렁~! (><)' },
-            { speaker: '지율', text: '망토에 있는 ABC 무지개색이네요! 너무 예뻐요!' },
+            { speaker: '하린', text: '망토에 있는 ABC 무지개색이네요! 너무 예뻐요!' },
             { speaker: 'ABC 대마왕', text: '헤헤... 이거 내가 좋아하는 색으로 칠했어! 아! 아니야, 무서워해야지!' },
-            { speaker: '지율', text: '영어 제국이 뭐예요? 재밌는 곳이에요?' },
+            { speaker: '세은', text: '영어 제국이 뭐예요? 재밌는 곳이에요?' },
             { speaker: 'ABC 대마왕', text: '응! 모두가 영어로 노래하고 춤추는 곳이야! 탁구도 할 수 있어!' },
-            { speaker: '지율', text: '우와! 완전 재밌겠다! 저도 가고 싶어요!' },
+            { speaker: '지율', text: '우와! 완전 재밌겠다!' },
+            { speaker: '하린', text: '우리도 가고 싶어요!' },
             { speaker: 'ABC 대마왕', text: '정말?! 그럼 먼저 시험 통과해야 해! 준비됐니? 파이팅~!' }
         ],
         postBattleDialogue: [
-            { speaker: 'ABC 대마왕', text: '우왕! 지율이 진짜 잘한다! 내 왕관 떨어졌어! 헤헤!' },
-            { speaker: '지율', text: '하하! 나 탁구 레슨 받으러 가는 중이었어요! 매일 연습해요!' },
+            { speaker: 'ABC 대마왕', text: '우왕! 너희 셋 진짜 잘한다! 내 왕관 떨어졌어! 헤헤!' },
+            { speaker: '지율', text: '하하! 우리 탁구 레슨 받으러 가는 중이었어요!' },
+            { speaker: '세은', text: '매일매일 연습하거든요!' },
             { speaker: 'ABC 대마왕', text: '오오! 탁구 레슨이라니! 나... 사실 탁구 선수가 꿈이었어...' },
-            { speaker: '지율', text: '진짜요?! 그럼 같이 연습해요! 우리 선생님한테 소개시켜 줄게요!' },
-            { speaker: 'ABC 대마왕', text: '헐! 진심?! 나 사실 악당 하기 싫었어! 탁구가 좋아! 지율아 고마워!' },
-            { speaker: '지율', text: '좋아요! 그럼 이제부터 악당 그만하고 같이 탁구 치러 가요!' },
-            { speaker: 'ABC 대마왕', text: '그래! 나 이제부터 탁구 코치 할래! 지율아 내가 가르쳐줄게!' }
+            { speaker: '하린', text: '진짜요?! 그럼 우리랑 같이 연습해요!' },
+            { speaker: '지율', text: '맞아! 우리 선생님한테 소개시켜 줄게요!' },
+            { speaker: 'ABC 대마왕', text: '헐! 진심?! 나 사실 악당 하기 싫었어! 탁구가 좋아!' },
+            { speaker: '세은', text: '좋아요! 그럼 이제부터 악당 그만하고 같이 탁구 치러 가요!' },
+            { speaker: 'ABC 대마왕', text: '그래! 나 이제부터 탁구 코치 할래! 얘들아 내가 가르쳐줄게!' },
+            { speaker: '하린', text: '와! 좋아요! 우리가 영어도 가르쳐 줄게요!' }
         ]
     }
 ];
@@ -381,33 +396,48 @@ function isBossStage(stage) {
 // 오프닝 시퀀스 대화 - 귀엽고 코믹하게!
 const OPENING_DIALOGUE = [
     { speaker: '지율', text: '휴~ 오늘 영어 학원 수업 끝! 이제 탁구 레슨 가야지!' },
-    { speaker: '지율', text: '헤헤~ 오늘 탁구 선생님이 새로운 기술 가르쳐 준대!' },
+    { speaker: '세은', text: '오늘 수업 완전 재밌었어! 지율아, 탁구 레슨 같이 가자!' },
+    { speaker: '하린', text: '나도! 나도! 오늘 선생님이 새로운 스매싱 기술 가르쳐 준대!' },
+    { speaker: '지율', text: '헤헤~ 우리 셋이 함께 연습하면 더 재밌을 거야!' },
     { speaker: '???', text: '반짝반짝✨ 팡팡! (하늘에서 무지개 빛!)' },
-    { speaker: '지율', text: '우와! 무지개다! 근데 왜 알파벳이 떠다니지?' },
+    { speaker: '세은', text: '우와! 무지개다! 진짜 예쁘다!' },
+    { speaker: '하린', text: '어? 저기 알파벳이 떠다닌다! A, B, C...!' },
+    { speaker: '지율', text: '뭐야 뭐야? 무슨 일이야?' },
     { speaker: 'ABC 대마왕', text: '안녕 안녕~! 나는 영어 나라의 ABC 대마왕이야! 헤헤!' },
     { speaker: 'ABC 대마왕', text: '지구에 영어 놀이터 만들러 왔어! 모두 영어로 친구 되자!' },
-    { speaker: '지율', text: '어? 귀여운데? 근데 영어 놀이터면... 탁구는요?' },
+    { speaker: '세은', text: '헐! 말하는 대마왕? 근데 왜 이렇게 귀여워?' },
+    { speaker: '지율', text: '영어 놀이터는 좋은데... 탁구는 칠 수 있어요?' },
     { speaker: 'ABC 대마왕', text: '탁구? 그건 안 돼! 영어만 해야 해! ...근데 탁구가 뭐야? 재밌어?' },
-    { speaker: '지율', text: '엄청 재밌어요! 공을 퐁퐁 치면서 노는 거예요!' },
-    { speaker: '지율', text: '좋아! 영어도 배우고 탁구도 가르쳐 줄게요! 같이 놀아요!' }
+    { speaker: '하린', text: '엄청 재밌어요! 우리 세 명 다 탁구 배우는 중이에요!' },
+    { speaker: '세은', text: '맞아요! 공을 퐁퐁 치면서 노는 거예요! 진짜 신나요!' },
+    { speaker: '지율', text: '좋아! 우리가 영어도 배우고 탁구도 가르쳐 줄게요!' },
+    { speaker: '하린', text: '같이 놀아요! 우리 셋이서 다 보여줄게요!' }
 ];
 
 // 엔딩 시퀀스 대화 - 금메달 & 인터뷰!
 const ENDING_DIALOGUE = [
     { speaker: '나레이션', text: '그로부터 1년 후...' },
-    { speaker: '나레이션', text: '국제 청소년 탁구 대회 결승전!' },
-    { speaker: '심판', text: '금메달! 대한민국 지율 선수!' },
-    { speaker: 'ABC 대마왕', text: '지율아! 잘했어! 내가 가르친 보람이 있네!' },
-    { speaker: '지율', text: '코치님! 감사해요! 매일 연습한 덕분이에요!' },
+    { speaker: '나레이션', text: '국제 청소년 탁구 대회 단체전 결승전!' },
+    { speaker: '심판', text: '금메달! 대한민국 지율, 세은, 하린 선수!' },
+    { speaker: 'ABC 대마왕', text: '애들아! 잘했어! 내가 가르친 보람이 있네!' },
+    { speaker: '지율', text: '코치님! 감사해요! 우리 셋이 열심히 연습했어요!' },
+    { speaker: '세은', text: '매일매일 영어도 배우고 탁구도 연습했어요!' },
+    { speaker: '하린', text: '힘들었지만 재밌었어요! 히히!' },
     { speaker: '외국 기자', text: 'Congratulations! How do you feel?' },
     { speaker: '지율', text: 'I\'m so happy! Thank you everyone!' },
+    { speaker: '세은', text: 'We practiced very hard together!' },
+    { speaker: '하린', text: 'Ping pong is the best! Hehe!' },
     { speaker: '외국 기자', text: 'Who is your coach?' },
     { speaker: '지율', text: 'He is ABC! The best coach in the world!' },
+    { speaker: '세은', text: 'He taught us English and ping pong!' },
     { speaker: 'ABC 대마왕', text: '흐흐... 나 이제 악당 아니고 최고의 코치야!' },
-    { speaker: '지율', text: 'Ping pong is fun! English is fun too!' },
-    { speaker: 'ABC 대마왕', text: '지율아! 다음 대회도 함께 가자!' },
-    { speaker: '지율', text: '네! 코치님! Let\'s go! Hahaha!' },
-    { speaker: '나레이션', text: '이렇게 지율이는 영어도 잘하고 탁구도 잘하는 선수가 되었답니다!' },
+    { speaker: '하린', text: 'Coach ABC is really kind and funny!' },
+    { speaker: 'ABC 대마왕', text: '얘들아! 다음 대회도 함께 가자!' },
+    { speaker: '지율', text: '네! 코치님! Let\'s go!' },
+    { speaker: '세은', text: 'Fighting! We can do it!' },
+    { speaker: '하린', text: 'Hahaha! I love ping pong!' },
+    { speaker: '나레이션', text: '이렇게 지율, 세은, 하린은 영어도 잘하고 탁구도 잘하는 선수가 되었답니다!' },
+    { speaker: '나레이션', text: '세 친구는 앞으로도 함께 꿈을 향해 달려갑니다!' },
     { speaker: '나레이션', text: '- THE END -' }
 ];
 
