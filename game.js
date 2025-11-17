@@ -520,6 +520,12 @@ let monsters = [];
 let potions = [];
 let particles = [];
 
+// 파티클 최적화 설정
+const MAX_PARTICLES = 200;  // 최대 파티클 개수 제한
+
+// 무기 글로우 효과 카운터 (Date.now() 대신 사용)
+let glowPhaseCounter = 0;
+
 // 보스
 let boss = null;
 
@@ -2568,6 +2574,17 @@ function updatePlayer() {
     if (player.y > (canvas.height - offsetY) / GAME_SCALE - player.height) {
         player.y = (canvas.height - offsetY) / GAME_SCALE - player.height;
     }
+
+    // 플레이어 애니메이션 프레임 진행
+    player.frameCounter++;
+    if (player.frameCounter >= player.frameDelay) {
+        player.frameCounter = 0;
+        const spriteData = pixelData[player.sprite];
+        if (spriteData && spriteData[player.animation]) {
+            const animationFrames = spriteData[player.animation];
+            player.frameIndex = (player.frameIndex + 1) % animationFrames.length;
+        }
+    }
 }
 
 // 퀴즈 모드 지율이 업데이트 (위아래로 선택지 이동)
@@ -3018,6 +3035,9 @@ function gameLoop() {
         return;
     }
 
+    // 글로우 효과 카운터 업데이트 (Date.now() 대신)
+    glowPhaseCounter += 0.004;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // 배경 그리기 (스케일 적용 전 - 전체 화면 유지)
@@ -3099,8 +3119,16 @@ function gameLoop() {
                     if (player.weaponAngle >= 0) {  // 3시 방향까지 휘두르기 (4시 근처)
                         player.showWeapon = false;
                         player.animation = 'idle';  // 애니메이션을 idle로 복귀
+                        player.weaponAngle = 0;
+                        player.weaponTimer = 0;
                     }
                 }
+            } else if (currentCharacter === 1 && player.animation === 'casting') {
+                // 무기 애니메이션이 중단되었는데 casting 상태에 갇힌 경우 강제 리셋
+                player.animation = 'idle';
+                player.showWeapon = false;
+                player.weaponAngle = 0;
+                player.weaponTimer = 0;
             }
 
             // 하린이 무기 애니메이션
@@ -3115,8 +3143,16 @@ function gameLoop() {
                     if (player.weaponAngle >= 0) {  // 3시 방향까지 휘두르기
                         player.showWeapon = false;
                         player.animation = 'idle';  // 애니메이션을 idle로 복귀
+                        player.weaponAngle = 0;
+                        player.weaponTimer = 0;
                     }
                 }
+            } else if (currentCharacter === 2 && player.animation === 'casting') {
+                // 무기 애니메이션이 중단되었는데 casting 상태에 갇힌 경우 강제 리셋
+                player.animation = 'idle';
+                player.showWeapon = false;
+                player.weaponAngle = 0;
+                player.weaponTimer = 0;
             }
         } else {
             // 대화 중에도 신검, 토네이도, 번개체인 그리기
@@ -3359,10 +3395,13 @@ function switchCharacter() {
         playerNameElement.textContent = '👤 ' + characterNames[currentCharacter];
     }
 
-    // 애니메이션 초기화 (중요: 각 캐릭터가 가진 애니메이션이 다를 수 있음)
+    // 애니메이션 및 무기 상태 완전 초기화 (중요: 각 캐릭터가 가진 애니메이션이 다를 수 있음)
     player.animation = 'idle';
     player.frameIndex = 0;
+    player.frameCounter = 0;
     player.showWeapon = false;  // 무기도 초기화
+    player.weaponAngle = 0;     // 무기 각도 초기화
+    player.weaponTimer = 0;     // 무기 타이머 초기화
 
     // 캐릭터 전환 효과
     for (let i = 0; i < 20; i++) {
@@ -3456,8 +3495,12 @@ function fireTornado() {
     player.animation = 'casting';  // 캐스팅 애니메이션으로 변경
     player.frameIndex = 0;
 
-    // 발사 효과
-    for (let i = 0; i < 25; i++) {
+    // 발사 효과 (파티클 개수 제한 적용)
+    const particlesToAdd = Math.min(40, MAX_PARTICLES - particles.length);
+    const circleCount = Math.floor(particlesToAdd * 0.625);  // 25/40
+    const starCount = particlesToAdd - circleCount;  // 15/40
+
+    for (let i = 0; i < circleCount; i++) {
         particles.push(new Particle(
             player.x + player.width,
             player.y + player.height / 2,
@@ -3467,7 +3510,7 @@ function fireTornado() {
     }
 
     // 추가 발사 이펙트
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < starCount; i++) {
         particles.push(new Particle(
             player.x + player.width,
             player.y + player.height / 2,
@@ -3497,8 +3540,9 @@ function fireLightningChain() {
     player.animation = 'casting';  // 캐스팅 애니메이션으로 변경
     player.frameIndex = 0;
 
-    // 발사 효과
-    for (let i = 0; i < 25; i++) {
+    // 발사 효과 (파티클 개수 제한 적용)
+    const particlesToAdd = Math.min(25, MAX_PARTICLES - particles.length);
+    for (let i = 0; i < particlesToAdd; i++) {
         particles.push(new Particle(
             player.x + player.width,
             player.y + player.height / 2,
@@ -3514,10 +3558,9 @@ function drawGreenDragonBlade(x, y, angle) {
     ctx.translate(x, y);
     ctx.rotate(angle);
 
-    // 강력한 글로우 효과 (펄스 애니메이션)
-    const glowPhase = Date.now() * 0.004;
-    const dynamicGlowSize = 45 + Math.sin(glowPhase) * 8;
-    const outerGlowSize = 60 + Math.sin(glowPhase * 1.3) * 10;
+    // 강력한 글로우 효과 (펄스 애니메이션) - 프레임 카운터 사용으로 최적화
+    const dynamicGlowSize = 45 + Math.sin(glowPhaseCounter) * 8;
+    const outerGlowSize = 60 + Math.sin(glowPhaseCounter * 1.3) * 10;
 
     // 외부 글로우 (케데헌 미라 오라)
     const outerGlow = ctx.createRadialGradient(20, 0, 0, 20, 0, outerGlowSize);
