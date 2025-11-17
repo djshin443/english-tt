@@ -43,8 +43,8 @@ class StoryScene {
         };
         this.updateSkipButtonPosition();
 
-        // 이벤트 리스너 추가
-        this.setupEventListeners();
+        // 이벤트 리스너는 startOpening/startEnding에서 설정
+        // constructor에서는 설정하지 않음 (타이틀 화면과 충돌 방지)
     }
 
     // SKIP 버튼 위치 업데이트
@@ -522,6 +522,7 @@ class StoryScene {
         return [
             // 씬 1-1: 학원 앞 (배경만)
             {
+                duration: 180, // 3초 자동 진행
                 update: () => {
                     // 하늘 배경
                     this.drawSkyBackground('#87CEEB', '#E0F6FF');
@@ -4019,6 +4020,11 @@ class StoryScene {
     // 애니메이션 시작
     startOpening(onComplete) {
         console.log('🎬 StoryScene.startOpening() called');
+
+        // 먼저 기존 이벤트 리스너 정리 (즉시)
+        this.cleanupEventListeners();
+        console.log('🧹 Event listeners cleaned up');
+
         this.scenes = this.getOpeningScenes();
         console.log('📋 Opening scenes loaded:', this.scenes.length, 'scenes');
         this.currentScene = 0;
@@ -4036,13 +4042,16 @@ class StoryScene {
         setTimeout(() => {
             this.setupEventListeners();
             console.log('✅ Event listeners setup complete');
-        }, 100);
+        }, 200);
 
         console.log('▶️ Starting animation loop...');
         this.animate();
     }
 
     startEnding(onComplete) {
+        // 먼저 기존 이벤트 리스너 정리 (즉시)
+        this.cleanupEventListeners();
+
         this.scenes = this.getEndingScenes();
         this.currentScene = 0;
         this.animationFrame = 0;
@@ -4055,7 +4064,7 @@ class StoryScene {
         // 약간 지연시켜서 이전 이벤트와 충돌 방지
         setTimeout(() => {
             this.setupEventListeners();
-        }, 100);
+        }, 200);
 
         this.animate();
     }
