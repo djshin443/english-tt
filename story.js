@@ -1631,7 +1631,9 @@ class StoryScene {
                     this.drawJiyul(this.canvas.width / 2 - 150, this.canvas.height - 170, 'idle', 0, 4);
 
                     // 세은이 등장 (오른쪽에서 걸어옴)
-                    const seeunX = Math.min(this.canvas.width / 2 + 50, this.canvas.width - 200 - this.animationFrame * 3);
+                    const seeunTargetX = this.canvas.width / 2 - 30;
+                    const seeunStartX = this.canvas.width + 100;
+                    const seeunX = Math.max(seeunTargetX, seeunStartX - this.animationFrame * 4);
                     this.drawSeeun(
                         seeunX,
                         this.canvas.height - 170,
@@ -1642,7 +1644,9 @@ class StoryScene {
                     );
 
                     // 하린이 등장 (세은 뒤에서)
-                    const harinX = Math.min(this.canvas.width / 2 + 150, this.canvas.width - 100 - this.animationFrame * 2.5);
+                    const harinTargetX = this.canvas.width / 2 + 90;
+                    const harinStartX = this.canvas.width + 200;
+                    const harinX = Math.max(harinTargetX, harinStartX - this.animationFrame * 4);
                     this.drawHarin(
                         harinX,
                         this.canvas.height - 170,
@@ -1656,7 +1660,7 @@ class StoryScene {
                     if (this.animationFrame > 60) {
                         this.drawDialogBox(
                             '지율아! 나도 빠질 수 없지!',
-                            this.canvas.width / 2 + 50,
+                            this.canvas.width / 2 - 30,
                             this.canvas.height - 300,
                             '세은'
                         );
@@ -1686,37 +1690,46 @@ class StoryScene {
                     this.drawJiyul(this.canvas.width / 2 - 150, this.canvas.height - 170, 'idle', 0, 4);
 
                     // 세은이 (중앙)
-                    this.drawSeeun(this.canvas.width / 2, this.canvas.height - 170, 'idle', 0, 4);
+                    this.drawSeeun(this.canvas.width / 2 - 30, this.canvas.height - 170, 'idle', 0, 4);
 
                     // 하린이 (오른쪽)
-                    this.drawHarin(this.canvas.width / 2 + 120, this.canvas.height - 170, 'idle', 0, 4);
+                    this.drawHarin(this.canvas.width / 2 + 90, this.canvas.height - 170, 'idle', 0, 4);
 
                     // 하린이 대사
                     this.drawDialogBox(
                         '나도! 나도 빠질 수 없어!',
-                        this.canvas.width / 2 + 120,
+                        this.canvas.width / 2 + 90,
                         this.canvas.height - 300,
                         '하린'
                     );
                 }
             },
 
-            // 씬 5-7: 선제로가 세은에게 청룡언월도 라켓 수여
+            // 씬 5-7: 선제로가 세은에게 곡도 라켓 수여
             {
                 update: () => {
-                    // 초록빛 하늘 (청룡언월도 테마)
+                    // 초록빛 하늘 (곡도 테마)
                     this.drawSkyBackground('#90EE90', '#98FB98');
 
                     // 땅
                     this.drawGround();
 
-                    // 세은이 (중앙에 크게)
-                    this.drawSeeun(this.canvas.width / 2 - 40, this.canvas.height - 220, 'jump', 0, 5);
+                    // 지율이와 하린이 (배경, 작게)
+                    this.drawJiyul(this.canvas.width / 4 - 50, this.canvas.height - 150, 'idle', 0, 3);
+                    this.drawHarin(this.canvas.width * 3 / 4, this.canvas.height - 150, 'idle', 0, 3);
 
-                    // 청룡언월도 (초록색 창 - 세은 위에)
+                    // 세은이 (중앙에 크게)
+                    this.drawSeeun(this.canvas.width / 2 - 32, this.canvas.height - 200, 'jump', 0, 4);
+
+                    // 곡도 (초록색 곡선 검 - 왼쪽에서 등장)
+                    const weaponStartX = -200;
+                    const weaponTargetX = this.canvas.width / 2 + 80;
+                    const weaponX = Math.min(weaponTargetX, weaponStartX + this.animationFrame * 5);
+                    const weaponY = this.canvas.height - 200;
+
                     this.ctx.save();
-                    this.ctx.translate(this.canvas.width / 2, this.canvas.height - 350);
-                    this.ctx.rotate(Math.sin(this.animationFrame * 0.1) * 0.2);
+                    this.ctx.translate(weaponX, weaponY);
+                    this.ctx.rotate(-Math.PI / 4 + Math.sin(this.animationFrame * 0.1) * 0.2);
 
                     // 광채
                     const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 80);
@@ -1727,43 +1740,57 @@ class StoryScene {
                     this.ctx.arc(0, 0, 80, 0, Math.PI * 2);
                     this.ctx.fill();
 
-                    // 창 자루
+                    // 곡도 자루
                     this.ctx.fillStyle = '#8B4513';
-                    this.ctx.fillRect(-5, -40, 10, 80);
+                    this.ctx.fillRect(-5, 20, 10, 40);
 
-                    // 날 (초록색)
-                    const bladeGradient = this.ctx.createLinearGradient(-20, -60, 20, -60);
+                    // 곡도 날 (곡선형)
+                    const bladeGradient = this.ctx.createLinearGradient(-30, -60, 30, -60);
                     bladeGradient.addColorStop(0, '#228B22');
                     bladeGradient.addColorStop(0.5, '#32CD32');
                     bladeGradient.addColorStop(1, '#228B22');
                     this.ctx.fillStyle = bladeGradient;
+
+                    // 곡선형 날
                     this.ctx.beginPath();
-                    this.ctx.moveTo(-20, -50);
-                    this.ctx.lineTo(0, -80);
-                    this.ctx.lineTo(20, -50);
-                    this.ctx.lineTo(0, -45);
+                    this.ctx.moveTo(-5, 20);
+                    this.ctx.quadraticCurveTo(-25, -20, -30, -60);
+                    this.ctx.lineTo(-20, -65);
+                    this.ctx.quadraticCurveTo(-15, -25, 5, 15);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+
+                    // 날 끝 (뾰족하게)
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(-30, -60);
+                    this.ctx.lineTo(-35, -70);
+                    this.ctx.lineTo(-20, -65);
                     this.ctx.closePath();
                     this.ctx.fill();
 
                     this.ctx.restore();
 
                     // 반짝임
-                    for (let i = 0; i < 6; i++) {
-                        const angle = this.animationFrame * 0.05 + i * Math.PI / 3;
-                        const sparkX = this.canvas.width / 2 + Math.cos(angle) * 60;
-                        const sparkY = this.canvas.height - 350 + Math.sin(angle) * 60;
-                        this.ctx.fillStyle = '#00FF00';
-                        this.ctx.font = '20px Arial';
-                        this.ctx.fillText('✨', sparkX, sparkY);
+                    if (weaponX >= weaponTargetX - 10) {
+                        for (let i = 0; i < 6; i++) {
+                            const angle = this.animationFrame * 0.05 + i * Math.PI / 3;
+                            const sparkX = weaponX + Math.cos(angle) * 60;
+                            const sparkY = weaponY + Math.sin(angle) * 60;
+                            this.ctx.fillStyle = '#00FF00';
+                            this.ctx.font = '20px Arial';
+                            this.ctx.fillText('✨', sparkX, sparkY);
+                        }
                     }
 
                     // 대사
-                    this.drawDialogBox(
-                        '청룡언월도 라켓이야!\n휘두르면 토네이도가 생긴단다. 바람처럼 빠르지!',
-                        this.canvas.width / 2,
-                        this.canvas.height - 120,
-                        'sunzero 선생님'
-                    );
+                    if (weaponX >= weaponTargetX - 10) {
+                        this.drawDialogBox(
+                            '곡도 라켓이야!\n휘두르면 토네이도가 생긴단다. 바람처럼 빠르지!',
+                            this.canvas.width / 2,
+                            this.canvas.height - 100,
+                            'sunzero 선생님'
+                        );
+                    }
                 }
             },
 
@@ -1776,13 +1803,22 @@ class StoryScene {
                     // 땅
                     this.drawGround();
 
-                    // 하린이 (중앙에 크게)
-                    this.drawHarin(this.canvas.width / 2 - 40, this.canvas.height - 220, 'jump', 0, 5);
+                    // 지율이와 세은이 (배경, 작게)
+                    this.drawJiyul(this.canvas.width / 4 - 50, this.canvas.height - 150, 'idle', 0, 3);
+                    this.drawSeeun(this.canvas.width * 3 / 4 - 50, this.canvas.height - 150, 'idle', 0, 3);
 
-                    // 사인검 (보라색 검 - 하린 위에)
+                    // 하린이 (중앙에 크게)
+                    this.drawHarin(this.canvas.width / 2 - 32, this.canvas.height - 200, 'jump', 0, 4);
+
+                    // 사인검 (보라색 검 - 왼쪽에서 등장)
+                    const weaponStartX = -200;
+                    const weaponTargetX = this.canvas.width / 2 + 80;
+                    const weaponX = Math.min(weaponTargetX, weaponStartX + this.animationFrame * 5);
+                    const weaponY = this.canvas.height - 200;
+
                     this.ctx.save();
-                    this.ctx.translate(this.canvas.width / 2, this.canvas.height - 350);
-                    this.ctx.rotate(Math.sin(this.animationFrame * 0.1) * 0.3);
+                    this.ctx.translate(weaponX, weaponY);
+                    this.ctx.rotate(-Math.PI / 4 + Math.sin(this.animationFrame * 0.1) * 0.3);
 
                     // 광채
                     const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 80);
@@ -1795,7 +1831,7 @@ class StoryScene {
 
                     // 검 자루
                     this.ctx.fillStyle = '#4B0082';
-                    this.ctx.fillRect(-6, 0, 12, 30);
+                    this.ctx.fillRect(-6, 20, 12, 30);
 
                     // 검날 (보라색)
                     const bladeGradient = this.ctx.createLinearGradient(-15, -60, 15, -60);
@@ -1803,7 +1839,7 @@ class StoryScene {
                     bladeGradient.addColorStop(0.5, '#BA55D3');
                     bladeGradient.addColorStop(1, '#8A2BE2');
                     this.ctx.fillStyle = bladeGradient;
-                    this.ctx.fillRect(-15, -60, 30, 60);
+                    this.ctx.fillRect(-15, -60, 30, 80);
 
                     // 검 끝
                     this.ctx.beginPath();
@@ -1820,28 +1856,32 @@ class StoryScene {
                     this.ctx.moveTo(-10, -50);
                     this.ctx.lineTo(10, -30);
                     this.ctx.moveTo(5, -30);
-                    this.ctx.lineTo(-5, -10);
+                    this.ctx.lineTo(-5, 0);
                     this.ctx.stroke();
 
                     this.ctx.restore();
 
                     // 반짝임
-                    for (let i = 0; i < 6; i++) {
-                        const angle = this.animationFrame * 0.07 + i * Math.PI / 3;
-                        const sparkX = this.canvas.width / 2 + Math.cos(angle) * 60;
-                        const sparkY = this.canvas.height - 350 + Math.sin(angle) * 60;
-                        this.ctx.fillStyle = '#FF00FF';
-                        this.ctx.font = '20px Arial';
-                        this.ctx.fillText('⚡', sparkX, sparkY);
+                    if (weaponX >= weaponTargetX - 10) {
+                        for (let i = 0; i < 6; i++) {
+                            const angle = this.animationFrame * 0.07 + i * Math.PI / 3;
+                            const sparkX = weaponX + Math.cos(angle) * 60;
+                            const sparkY = weaponY + Math.sin(angle) * 60;
+                            this.ctx.fillStyle = '#FF00FF';
+                            this.ctx.font = '20px Arial';
+                            this.ctx.fillText('⚡', sparkX, sparkY);
+                        }
                     }
 
                     // 대사
-                    this.drawDialogBox(
-                        '사인검 라켓이야!\n휘두르면 번개 체인이 찌릿찌릿! 신기하지?',
-                        this.canvas.width / 2,
-                        this.canvas.height - 120,
-                        'sunzero 선생님'
-                    );
+                    if (weaponX >= weaponTargetX - 10) {
+                        this.drawDialogBox(
+                            '사인검 라켓이야!\n휘두르면 번개 체인이 찌릿찌릿! 신기하지?',
+                            this.canvas.width / 2,
+                            this.canvas.height - 100,
+                            'sunzero 선생님'
+                        );
+                    }
                 }
             },
 
