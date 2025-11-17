@@ -4018,7 +4018,9 @@ class StoryScene {
 
     // 애니메이션 시작
     startOpening(onComplete) {
+        console.log('🎬 StoryScene.startOpening() called');
         this.scenes = this.getOpeningScenes();
+        console.log('📋 Opening scenes loaded:', this.scenes.length, 'scenes');
         this.currentScene = 0;
         this.animationFrame = 0;
         this.bgScroll = 0;
@@ -4026,9 +4028,13 @@ class StoryScene {
         this.waitingForInput = false;
         this.canProceed = false;
 
+        console.log('🎨 Canvas size:', this.canvas.width, 'x', this.canvas.height);
+        console.log('🖼️ Canvas display:', this.canvas.style.display);
+
         // 이벤트 리스너 재설정 (오프닝 시작 시)
         this.setupEventListeners();
 
+        console.log('▶️ Starting animation loop...');
         this.animate();
     }
 
@@ -4050,12 +4056,18 @@ class StoryScene {
     // 메인 애니메이션 루프
     animate() {
         if (!this.scenes || this.currentScene >= this.scenes.length) {
+            console.log('✅ Animation complete! Current scene:', this.currentScene, '/', this.scenes ? this.scenes.length : 0);
             this.cleanupEventListeners(); // 이벤트 리스너 정리
             if (this.onComplete) this.onComplete();
             return;
         }
 
         const scene = this.scenes[this.currentScene];
+
+        // 첫 프레임에만 로그
+        if (this.animationFrame === 0) {
+            console.log(`🎞️ Scene ${this.currentScene + 1}/${this.scenes.length} started`);
+        }
 
         // 씬 업데이트 함수 호출 (스케일 없이 전체 화면 사용)
         if (scene.update) {
