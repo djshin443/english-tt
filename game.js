@@ -897,7 +897,7 @@ class Tornado {
             this.waveAmplitude = 0;  // 분열 전에는 직진
             this.waveFrequency = 0;
             this.spiralSpeed = 0;
-            this.lifetime = 60;  // 원본 토네이도: 1초(60프레임)
+            this.lifetime = 120;  // 원본 토네이도: 2초(120프레임) - 1초에 분열, 남은 1초 후 제거
         }
 
         this.radius = 30;
