@@ -1522,7 +1522,7 @@ class StoryScene {
 
                     // 선생님 대사
                     this.drawDialogBox(
-                        '이 신검 라켓을 받아! ABC 대마왕을 물리칠 수 있을 거야!\n멋있게 날아가는 전설의 '탁구 라켓'이란다!',
+                        '이 신검 라켓을 받아! ABC 대마왕을 물리칠 수 있을 거야!\n멋있게 날아가는 전설의 "탁구 라켓"이란다!',
                         this.canvas.width / 2,
                         this.canvas.height - 130,
                         'sunzero 선생님'
