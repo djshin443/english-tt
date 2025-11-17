@@ -461,16 +461,28 @@ function startOpeningSequence() {
     });
 
     console.log('🎭 Starting story.js opening sequence...');
+    console.log('🔍 Checking StoryScene availability...');
+    console.log('   typeof StoryScene:', typeof StoryScene);
+    console.log('   typeof window.StoryScene:', typeof window.StoryScene);
+    console.log('   typeof storyScene:', typeof storyScene);
+    console.log('   storyScene value:', storyScene);
 
     // storyScene이 없으면 초기화
     if (typeof storyScene === 'undefined' || !storyScene) {
         console.log('🔧 Initializing storyScene...');
         const ctx = canvas.getContext('2d');
-        if (typeof StoryScene !== 'undefined') {
-            storyScene = new StoryScene(canvas, ctx);
-            console.log('✅ storyScene initialized');
+
+        // window.StoryScene을 명시적으로 체크
+        const StorySceneClass = window.StoryScene || StoryScene;
+
+        if (typeof StorySceneClass !== 'undefined') {
+            console.log('✅ StoryScene class found, creating instance...');
+            storyScene = new StorySceneClass(canvas, ctx);
+            console.log('✅ storyScene initialized:', storyScene);
         } else {
             console.error('❌ StoryScene class not found!');
+            console.error('   This means story.js did not load properly.');
+            console.error('   Please hard refresh the page (Ctrl+Shift+R or Cmd+Shift+R)');
             // fallback: 바로 게임 시작
             if (typeof startGame === 'function') {
                 startGame();
