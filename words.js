@@ -451,10 +451,10 @@ const ENDING_DIALOGUE = [
     { speaker: '지율', text: '헉! 수호천사?! 진짜 천사다! 날개도 있어!' },
     { speaker: 'SUNZERO', text: '너희 셋의 노력을 지켜봤어. 영어도 배우고 탁구도 열심히 했지.' },
     { speaker: '세은', text: '우와... 정말 예뻐요! 빛이 나요!' },
-    { speaker: 'SUNZERO', text: '이제 새로운 모험이 기다리고 있어. 수학 제국에서 말이야.' },
-    { speaker: '하린', text: '수학 제국? 그게 뭐예요?' },
+    { speaker: 'SUNZERO', text: '이제 새로운 모험이 기다리고 있어...' },
+    { speaker: '하린', text: '새로운 모험? 뭐예요 어떤 모험 신난다!!!' },
     { speaker: 'SUNZERO', text: '후훗... 글쎄~ 그건 직접 가봐야 알 수 있지.' },
-    { speaker: 'ABC 대마왕', text: '설마... 수학 제국의 천사님?! 전설로만 들었는데!' },
+    { speaker: 'ABC 대마왕', text: '설마... 수호천사님?! 전설로만 들었는데!' },
     { speaker: 'SUNZERO', text: '오늘은 푹 쉬렴. 다음 모험에서 또 만나자! 안녕~' },
     { speaker: '나레이션', text: '천사는 금빛 빛과 함께 사라졌습니다...' },
     { speaker: '나레이션', text: '이렇게 지율, 세은, 하린은 영어도 잘하고 탁구도 잘하는 선수가 되었답니다!' },
@@ -481,3 +481,4 @@ function getQuizChoices(correctWord) {
         wrongMeanings: wrongMeanings
     };
 }
+
