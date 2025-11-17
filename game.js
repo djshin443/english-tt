@@ -102,8 +102,9 @@ let ball = null;
 // 신검(Divine Sword) 배열
 let divineSwords = [];
 let tornados = [];
-let currentCharacter = 0;  // 0: 지율, 1: 세은
-const characters = ['jiyul', 'seeun'];
+let lightningChains = [];
+let currentCharacter = 0;  // 0: 지율, 1: 세은, 2: 하린
+const characters = ['jiyul', 'seeun', 'harin'];
 
 // 지율이 스매싱 상태
 let jiyulSmashing = false;
@@ -112,6 +113,7 @@ let smashTimer = 0;
 // 무기 쿨다운
 let divineSwordCooldown = 0;
 let tornadoCooldown = 0;
+let lightningChainCooldown = 0;
 
 // 신검 발사 쿨다운
 let swordCooldown = 0;
@@ -1072,6 +1074,193 @@ class Tornado {
         }
 
         ctx.restore();
+    }
+}
+
+// 번개체인 클래스 - 하린 전용
+class LightningChain {
+    constructor(x, y) {
+        this.startX = x;
+        this.startY = y;
+        this.active = true;
+        this.chainedMonsters = [];  // 연쇄된 몬스터들
+        this.maxChain = 10;  // 최대 10개까지 튕김
+        this.currentChainIndex = 0;
+        this.chainDelay = 5;  // 각 연쇄 사이 딜레이 (프레임)
+        this.chainTimer = 0;
+        this.lightningBolts = [];  // 번개 시각 효과
+        this.toRemove = false;
+    }
+
+    update() {
+        if (this.toRemove) return;
+
+        this.chainTimer++;
+
+        // 첫 번째 몬스터 찾기
+        if (this.chainedMonsters.length === 0) {
+            const firstMonster = this.findNearestMonster(this.startX, this.startY, []);
+            if (firstMonster) {
+                this.addMonsterToChain(firstMonster);
+            } else {
+                // 맞출 몬스터가 없으면 종료
+                this.toRemove = true;
+                return;
+            }
+        }
+
+        // 다음 연쇄 처리
+        if (this.chainTimer >= this.chainDelay && this.currentChainIndex < this.chainedMonsters.length) {
+            const currentMonster = this.chainedMonsters[this.currentChainIndex];
+
+            // 몬스터 제거 및 점수 추가
+            const monsterIndex = monsters.indexOf(currentMonster);
+            if (monsterIndex !== -1) {
+                monsters.splice(monsterIndex, 1);
+                addScore(12);  // 연쇄당 12점
+
+                // 번개 파티클 효과
+                for (let i = 0; i < 15; i++) {
+                    particles.push(new Particle(
+                        currentMonster.x + currentMonster.width / 2,
+                        currentMonster.y + currentMonster.height / 2,
+                        Math.random() > 0.5 ? '#FFD700' : '#FFFFFF',
+                        'star'
+                    ));
+                }
+            }
+
+            this.currentChainIndex++;
+            this.chainTimer = 0;
+
+            // 다음 몬스터 찾기
+            if (this.currentChainIndex < this.maxChain) {
+                const lastMonster = this.chainedMonsters[this.chainedMonsters.length - 1];
+                const nextMonster = this.findNearestMonster(
+                    lastMonster.x + lastMonster.width / 2,
+                    lastMonster.y + lastMonster.height / 2,
+                    this.chainedMonsters
+                );
+
+                if (nextMonster) {
+                    this.addMonsterToChain(nextMonster);
+                } else {
+                    // 더 이상 연쇄할 몬스터가 없으면 종료
+                    this.toRemove = true;
+                }
+            } else {
+                // 최대 연쇄 도달
+                this.toRemove = true;
+            }
+        }
+
+        // 번개 볼트 업데이트
+        this.lightningBolts = this.lightningBolts.filter(bolt => {
+            bolt.lifetime--;
+            return bolt.lifetime > 0;
+        });
+
+        // 모든 연쇄가 끝났으면 종료
+        if (this.currentChainIndex >= this.chainedMonsters.length && this.chainedMonsters.length > 0) {
+            this.toRemove = true;
+        }
+    }
+
+    findNearestMonster(x, y, exclude) {
+        let nearest = null;
+        let minDist = Infinity;
+
+        monsters.forEach(monster => {
+            if (exclude.includes(monster)) return;
+
+            const dx = (monster.x + monster.width / 2) - x;
+            const dy = (monster.y + monster.height / 2) - y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < minDist && dist < 500) {  // 500px 이내만 연쇄
+                minDist = dist;
+                nearest = monster;
+            }
+        });
+
+        return nearest;
+    }
+
+    addMonsterToChain(monster) {
+        this.chainedMonsters.push(monster);
+
+        // 번개 볼트 추가 (이전 지점에서 현재 몬스터로)
+        const prevIndex = this.chainedMonsters.length - 2;
+        let fromX, fromY;
+
+        if (prevIndex < 0) {
+            // 첫 번째 몬스터: 플레이어에서 시작
+            fromX = this.startX;
+            fromY = this.startY;
+        } else {
+            // 이전 몬스터에서 시작
+            const prevMonster = this.chainedMonsters[prevIndex];
+            fromX = prevMonster.x + prevMonster.width / 2;
+            fromY = prevMonster.y + prevMonster.height / 2;
+        }
+
+        this.lightningBolts.push({
+            fromX: fromX,
+            fromY: fromY,
+            toX: monster.x + monster.width / 2,
+            toY: monster.y + monster.height / 2,
+            lifetime: 15  // 15프레임 동안 표시
+        });
+    }
+
+    draw() {
+        if (this.toRemove) return;
+
+        ctx.save();
+
+        // 번개 볼트 그리기
+        this.lightningBolts.forEach(bolt => {
+            const alpha = bolt.lifetime / 15;
+
+            // 메인 번개
+            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.lineWidth = 3;
+            ctx.shadowColor = '#FFD700';
+            ctx.shadowBlur = 20;
+
+            this.drawLightningBolt(bolt.fromX, bolt.fromY, bolt.toX, bolt.toY);
+
+            // 외곽 글로우
+            ctx.strokeStyle = `rgba(255, 215, 0, ${alpha * 0.5})`;
+            ctx.lineWidth = 6;
+            ctx.shadowBlur = 30;
+
+            this.drawLightningBolt(bolt.fromX, bolt.fromY, bolt.toX, bolt.toY);
+        });
+
+        ctx.restore();
+    }
+
+    drawLightningBolt(fromX, fromY, toX, toY) {
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+
+        // 지그재그 번개 효과
+        const segments = 5;
+        for (let i = 1; i <= segments; i++) {
+            const t = i / segments;
+            const x = fromX + (toX - fromX) * t;
+            const y = fromY + (toY - fromY) * t;
+
+            // 랜덤 오프셋 추가
+            const offsetX = (Math.random() - 0.5) * 20;
+            const offsetY = (Math.random() - 0.5) * 20;
+
+            ctx.lineTo(x + offsetX, y + offsetY);
+        }
+
+        ctx.lineTo(toX, toY);
+        ctx.stroke();
     }
 }
 
@@ -2548,6 +2737,15 @@ function drawPlayer() {
             player.weaponAngle
         );
     }
+
+    // 하린이가 무기를 들고 있을 때 번개검 그리기
+    if (currentCharacter === 2 && player.showWeapon) {
+        drawLightningSword(
+            player.x + player.width + 20,
+            player.y + player.height / 2,
+            player.weaponAngle
+        );
+    }
 }
 
 // 배경 그리기 (스테이지별 테마, 스크롤 효과)
@@ -2871,9 +3069,17 @@ function gameLoop() {
             });
             tornados.push(...newTornados);
 
+            // 번개체인 업데이트 및 그리기
+            lightningChains = lightningChains.filter(chain => {
+                chain.update();
+                chain.draw();
+                return chain.active;
+            });
+
             // 무기 쿨다운 업데이트
             if (divineSwordCooldown > 0) divineSwordCooldown--;
             if (tornadoCooldown > 0) tornadoCooldown--;
+            if (lightningChainCooldown > 0) lightningChainCooldown--;
 
             // 세은이 무기 애니메이션
             if (player.showWeapon && currentCharacter === 1) {
@@ -2890,10 +3096,27 @@ function gameLoop() {
                     }
                 }
             }
+
+            // 하린이 무기 애니메이션
+            if (player.showWeapon && currentCharacter === 2) {
+                if (player.weaponTimer > 0) {
+                    player.weaponTimer--;
+                    // 천천히 휘두르기
+                    player.weaponAngle += 0.08;
+                } else {
+                    // 타이머 종료 시 빠르게 휘두르기
+                    player.weaponAngle += 0.3;
+                    if (player.weaponAngle >= 0) {  // 3시 방향까지 휘두르기
+                        player.showWeapon = false;
+                        player.animation = 'idle';  // 애니메이션을 idle로 복귀
+                    }
+                }
+            }
         } else {
-            // 대화 중에도 신검과 토네이도 그리기
+            // 대화 중에도 신검, 토네이도, 번개체인 그리기
             divineSwords.forEach(sword => sword.draw());
             tornados.forEach(tornado => tornado.draw());
+            lightningChains.forEach(chain => chain.draw());
         }
 
         if (!dialogueState.active) {
@@ -3146,9 +3369,12 @@ function fireWeapon() {
     if (currentCharacter === 0) {
         // 지율 - 신검 발사
         fireDivineSword();
-    } else {
+    } else if (currentCharacter === 1) {
         // 세은 - 토네이도 발사
         fireTornado();
+    } else if (currentCharacter === 2) {
+        // 하린 - 번개체인 발사
+        fireLightningChain();
     }
 }
 
@@ -3226,6 +3452,37 @@ function fireTornado() {
             player.x + player.width,
             player.y + player.height / 2,
             '#00CED1',
+            'star'
+        ));
+    }
+}
+
+// 번개체인 발사
+function fireLightningChain() {
+    if (lightningChainCooldown > 0) return;
+
+    // 번개체인 생성 (플레이어 위치에서 시작)
+    const chain = new LightningChain(
+        player.x + player.width,
+        player.y + player.height / 2
+    );
+    lightningChains.push(chain);
+
+    lightningChainCooldown = 60;  // 1초 쿨다운
+
+    // 무기 표시
+    player.showWeapon = true;
+    player.weaponAngle = -Math.PI / 2;  // 12시 방향에서 시작
+    player.weaponTimer = 30;  // 30프레임 동안 유지
+    player.animation = 'casting';  // 캐스팅 애니메이션으로 변경
+    player.frameIndex = 0;
+
+    // 발사 효과
+    for (let i = 0; i < 25; i++) {
+        particles.push(new Particle(
+            player.x + player.width,
+            player.y + player.height / 2,
+            Math.random() > 0.5 ? '#FFD700' : '#FFFFFF',
             'star'
         ));
     }
@@ -3482,6 +3739,271 @@ function drawGreenDragonBlade(x, y, angle) {
         ctx.shadowColor = '#FF00FF';
         ctx.shadowBlur = 20;
         ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(10, -8);
+        ctx.lineTo(15, -5);
+        ctx.lineTo(12, -2);
+        ctx.lineTo(20, 2);
+        ctx.lineTo(17, 5);
+        ctx.lineTo(25, 8);
+        ctx.stroke();
+        ctx.globalAlpha = 1.0;
+    }
+
+    ctx.restore();
+}
+
+// 번개검 그리기 함수 (지율/세은 검 스타일 + 번개 테마)
+function drawLightningSword(x, y, angle) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+
+    // 강력한 번개 글로우 효과
+    const glowPhase = Date.now() * 0.005;
+    const dynamicGlowSize = 45 + Math.sin(glowPhase) * 10;
+    const outerGlowSize = 60 + Math.sin(glowPhase * 1.5) * 12;
+
+    // 외부 글로우 (전기 오라)
+    const outerGlow = ctx.createRadialGradient(20, 0, 0, 20, 0, outerGlowSize);
+    outerGlow.addColorStop(0, 'rgba(0, 191, 255, 0.5)');      // 딥 스카이 블루
+    outerGlow.addColorStop(0.3, 'rgba(30, 144, 255, 0.4)');   // 다저 블루
+    outerGlow.addColorStop(0.6, 'rgba(65, 105, 225, 0.2)');   // 로열 블루
+    outerGlow.addColorStop(1, 'rgba(0, 0, 139, 0)');          // 투명
+    ctx.fillStyle = outerGlow;
+    ctx.beginPath();
+    ctx.arc(20, 0, outerGlowSize, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 내부 글로우 (강렬한 전기)
+    const innerGlow = ctx.createRadialGradient(20, 0, 0, 20, 0, dynamicGlowSize);
+    innerGlow.addColorStop(0, 'rgba(255, 255, 255, 0.9)');    // 백색
+    innerGlow.addColorStop(0.2, 'rgba(135, 206, 250, 0.8)');  // 라이트 스카이 블루
+    innerGlow.addColorStop(0.5, 'rgba(0, 191, 255, 0.6)');    // 딥 스카이 블루
+    innerGlow.addColorStop(1, 'rgba(30, 144, 255, 0)');       // 투명
+    ctx.fillStyle = innerGlow;
+    ctx.beginPath();
+    ctx.arc(20, 0, dynamicGlowSize, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 검 손잡이 (은색 + 금색)
+    const handleGradient = ctx.createLinearGradient(-90, 0, 0, 0);
+    handleGradient.addColorStop(0, '#708090');      // 슬레이트 그레이
+    handleGradient.addColorStop(0.2, '#C0C0C0');    // 실버
+    handleGradient.addColorStop(0.4, '#E0E0E0');    // 밝은 회색
+    handleGradient.addColorStop(0.6, '#C0C0C0');    // 실버
+    handleGradient.addColorStop(0.8, '#A9A9A9');    // 다크 그레이
+    handleGradient.addColorStop(1, '#808080');      // 그레이
+    ctx.fillStyle = handleGradient;
+    ctx.shadowColor = '#87CEEB';
+    ctx.shadowBlur = 15;
+    ctx.fillRect(-90, -4, 90, 8);
+
+    // 손잡이 테두리
+    ctx.strokeStyle = '#2F4F4F';
+    ctx.lineWidth = 1;
+    ctx.shadowBlur = 0;
+    ctx.strokeRect(-90, -4, 90, 8);
+
+    // 검날 본체 (전기 에너지)
+    const bladeGradient = ctx.createLinearGradient(0, -10, 60, 10);
+    bladeGradient.addColorStop(0, '#C0C0C0');                  // 실버
+    bladeGradient.addColorStop(0.15, '#87CEEB');               // 스카이 블루
+    bladeGradient.addColorStop(0.3, '#FFFFFF');                // 백색 (빛나는)
+    bladeGradient.addColorStop(0.5, '#00BFFF');                // 딥 스카이 블루
+    bladeGradient.addColorStop(0.7, '#1E90FF');                // 다저 블루
+    bladeGradient.addColorStop(0.85, '#4169E1');               // 로열 블루
+    bladeGradient.addColorStop(1, 'rgba(0, 191, 255, 0.3)');   // 반투명
+
+    ctx.fillStyle = bladeGradient;
+    ctx.shadowColor = '#00BFFF';
+    ctx.shadowBlur = 25;
+
+    // 검날 본체 그리기
+    ctx.beginPath();
+    ctx.moveTo(0, -10);  // 손잡이 끝
+    ctx.lineTo(45, -6);  // 위쪽 날
+    ctx.lineTo(60, 0);   // 뾰족한 끝
+    ctx.lineTo(45, 6);   // 아래쪽 날
+    ctx.lineTo(0, 10);   // 손잡이 끝
+    ctx.closePath();
+    ctx.fill();
+
+    // 검날 이중 테두리 (전기 효과)
+    ctx.strokeStyle = '#00BFFF';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#00BFFF';
+    ctx.shadowBlur = 15;
+    ctx.stroke();
+
+    // 내부 빛나는 선
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.lineWidth = 1;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.moveTo(5, -7);
+    ctx.lineTo(43, -4);
+    ctx.lineTo(57, 0);
+    ctx.lineTo(43, 4);
+    ctx.lineTo(5, 7);
+    ctx.stroke();
+
+    // 번개 날개 (위쪽)
+    const wingGradient = ctx.createRadialGradient(50, 0, 5, 50, 0, 25);
+    wingGradient.addColorStop(0, '#FFFFFF');                   // 백색 중심
+    wingGradient.addColorStop(0.3, '#87CEEB');                 // 스카이 블루
+    wingGradient.addColorStop(0.6, '#00BFFF');                 // 딥 스카이 블루
+    wingGradient.addColorStop(0.8, '#1E90FF');                 // 다저 블루
+    wingGradient.addColorStop(1, 'rgba(65, 105, 225, 0.6)');   // 반투명
+
+    ctx.fillStyle = wingGradient;
+    ctx.shadowColor = '#00BFFF';
+    ctx.shadowBlur = 20;
+
+    // 위쪽 번개 날개
+    ctx.beginPath();
+    ctx.moveTo(45, -6);
+    ctx.quadraticCurveTo(53, -22, 65, -15);
+    ctx.quadraticCurveTo(68, -10, 60, 0);
+    ctx.lineTo(45, -6);
+    ctx.closePath();
+    ctx.fill();
+
+    // 아래쪽 번개 날개
+    ctx.beginPath();
+    ctx.moveTo(45, 6);
+    ctx.quadraticCurveTo(53, 22, 65, 15);
+    ctx.quadraticCurveTo(68, 10, 60, 0);
+    ctx.lineTo(45, 6);
+    ctx.closePath();
+    ctx.fill();
+
+    // 날개 백색 테두리
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = '#FFFFFF';
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    ctx.moveTo(45, -6);
+    ctx.quadraticCurveTo(53, -22, 65, -15);
+    ctx.quadraticCurveTo(68, -10, 60, 0);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(45, 6);
+    ctx.quadraticCurveTo(53, 22, 65, 15);
+    ctx.quadraticCurveTo(68, 10, 60, 0);
+    ctx.stroke();
+
+    // 외부 전기 테두리
+    ctx.strokeStyle = '#00BFFF';
+    ctx.lineWidth = 0.8;
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.moveTo(45, -6);
+    ctx.quadraticCurveTo(53, -22, 65, -15);
+    ctx.quadraticCurveTo(68, -10, 60, 0);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(45, 6);
+    ctx.quadraticCurveTo(53, 22, 65, 15);
+    ctx.quadraticCurveTo(68, 10, 60, 0);
+    ctx.stroke();
+
+    // 중앙선 (강렬한 전기 선)
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#FFFFFF';
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.moveTo(5, 0);
+    ctx.lineTo(58, 0);
+    ctx.stroke();
+
+    // 중앙선 전기 오라
+    ctx.strokeStyle = '#00BFFF';
+    ctx.lineWidth = 5;
+    ctx.globalAlpha = 0.3;
+    ctx.shadowBlur = 25;
+    ctx.stroke();
+    ctx.globalAlpha = 1.0;
+
+    // 중앙 보석 (번개 에너지)
+    const gemGradient = ctx.createRadialGradient(30, 0, 0, 30, 0, 7);
+    gemGradient.addColorStop(0, '#FFFFFF');
+    gemGradient.addColorStop(0.2, '#E0FFFF');
+    gemGradient.addColorStop(0.4, '#00BFFF');
+    gemGradient.addColorStop(0.6, '#1E90FF');
+    gemGradient.addColorStop(0.8, '#0000CD');
+    gemGradient.addColorStop(1, '#191970');
+    ctx.fillStyle = gemGradient;
+    ctx.shadowColor = '#00BFFF';
+    ctx.shadowBlur = 25;
+    ctx.beginPath();
+    ctx.arc(30, 0, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 보석 은테두리
+    ctx.strokeStyle = '#C0C0C0';
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = '#C0C0C0';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(30, 0, 8, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 보석 빛나는 효과
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.7;
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(30, 0, 9, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1.0;
+
+    // 손잡이 장식 (번개 구슬들)
+    for (let i = 0; i < 4; i++) {
+        const decorX = -15 - i * 18;
+
+        // 장식 구슬 외부 글로우
+        const decorOuterGlow = ctx.createRadialGradient(decorX, 0, 0, decorX, 0, 6);
+        decorOuterGlow.addColorStop(0, 'rgba(0, 191, 255, 0.6)');
+        decorOuterGlow.addColorStop(1, 'rgba(0, 191, 255, 0)');
+        ctx.fillStyle = decorOuterGlow;
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.arc(decorX, 0, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 장식 구슬 본체
+        const decorGradient = ctx.createRadialGradient(decorX, 0, 0, decorX, 0, 4);
+        decorGradient.addColorStop(0, '#FFFFFF');
+        decorGradient.addColorStop(0.3, '#E0FFFF');
+        decorGradient.addColorStop(0.6, '#87CEEB');
+        decorGradient.addColorStop(1, '#4682B4');
+        ctx.fillStyle = decorGradient;
+        ctx.shadowColor = '#87CEEB';
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(decorX, 0, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 장식 은테두리
+        ctx.strokeStyle = '#C0C0C0';
+        ctx.lineWidth = 1;
+        ctx.shadowBlur = 5;
+        ctx.beginPath();
+        ctx.arc(decorX, 0, 4.5, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    // 번개 효과 (랜덤하게 나타나는 전기)
+    if (Math.random() < 0.2) {
+        ctx.strokeStyle = '#00BFFF';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#00BFFF';
+        ctx.shadowBlur = 20;
+        ctx.globalAlpha = 0.8;
         ctx.beginPath();
         ctx.moveTo(10, -8);
         ctx.lineTo(15, -5);
