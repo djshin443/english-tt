@@ -59,7 +59,8 @@ let gameState = {
     mode: GAME_MODE.COLLECTING,
     stageWords: [],  // 20개 스테이지 단어들
     clearedStages: 0,
-    score: 0  // 점수 추가
+    score: 0,  // 점수 추가
+    gameLoopRunning: false  // 게임 루프 실행 여부 추적
 };
 
 // 현재 스테이지 데이터
@@ -3012,7 +3013,10 @@ function gameOver() {
 
 // 게임 루프
 function gameLoop() {
-    if (!gameState.isRunning) return;
+    if (!gameState.isRunning) {
+        gameState.gameLoopRunning = false;
+        return;
+    }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -4056,7 +4060,12 @@ function startGame() {
     showMobileControls();
 
     initGame();
-    gameLoop();
+
+    // 게임 루프가 이미 실행 중이 아닐 때만 시작
+    if (!gameState.gameLoopRunning) {
+        gameState.gameLoopRunning = true;
+        gameLoop();
+    }
 }
 
 // 엔딩 보여주기 (애니메이션)
@@ -4105,7 +4114,12 @@ function restartGame() {
     showMobileControls();
 
     initGame();
-    gameLoop();
+
+    // 게임 루프가 이미 실행 중이 아닐 때만 시작
+    if (!gameState.gameLoopRunning) {
+        gameState.gameLoopRunning = true;
+        gameLoop();
+    }
 }
 
 // 초기 플레이어 위치 조정
