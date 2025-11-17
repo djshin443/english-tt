@@ -105,6 +105,8 @@ let tornados = [];
 let lightningChains = [];
 let currentCharacter = 0;  // 0: 지율, 1: 세은, 2: 하린
 const characters = ['jiyul', 'seeun', 'harin'];
+const characterNames = ['지율', '세은', '하린'];
+const characterEnergies = [10, 10, 10];  // 각 캐릭터의 체력 저장
 
 // 지율이 스매싱 상태
 let jiyulSmashing = false;
@@ -3336,8 +3338,22 @@ function showOpening() {
 
 // 캐릭터 전환 함수
 function switchCharacter() {
+    // 현재 캐릭터의 체력 저장
+    characterEnergies[currentCharacter] = gameState.energy;
+
+    // 다음 캐릭터로 전환
     currentCharacter = (currentCharacter + 1) % characters.length;
     player.sprite = characters[currentCharacter];
+
+    // 새 캐릭터의 체력 복원
+    gameState.energy = characterEnergies[currentCharacter];
+    updateEnergyDisplay();
+
+    // 플레이어 이름 업데이트
+    const playerNameElement = document.getElementById('playerName');
+    if (playerNameElement) {
+        playerNameElement.textContent = '👤 ' + characterNames[currentCharacter];
+    }
 
     // 애니메이션 초기화 (중요: 각 캐릭터가 가진 애니메이션이 다를 수 있음)
     player.animation = 'idle';
@@ -3349,7 +3365,7 @@ function switchCharacter() {
         particles.push(new Particle(
             player.x + player.width / 2,
             player.y + player.height / 2,
-            currentCharacter === 0 ? '#FF69B4' : '#9370DB',
+            currentCharacter === 0 ? '#FF69B4' : (currentCharacter === 1 ? '#9370DB' : '#BA55D3'),
             'star'
         ));
     }
@@ -3786,8 +3802,8 @@ function drawLightningSword(x, y, angle) {
     ctx.arc(20, 0, dynamicGlowSize, 0, Math.PI * 2);
     ctx.fill();
 
-    // 검 손잡이 (더 굵고 화려한 금색)
-    const handleGradient = ctx.createLinearGradient(-90, 0, 0, 0);
+    // 검 손잡이 (짧고 화려한 금색)
+    const handleGradient = ctx.createLinearGradient(-30, 0, 0, 0);
     handleGradient.addColorStop(0, '#B8860B');      // 다크골드
     handleGradient.addColorStop(0.2, '#FFD700');    // 골드
     handleGradient.addColorStop(0.4, '#FFA500');    // 오렌지골드
@@ -3797,13 +3813,13 @@ function drawLightningSword(x, y, angle) {
     ctx.fillStyle = handleGradient;
     ctx.shadowColor = '#FFD700';
     ctx.shadowBlur = 15;
-    ctx.fillRect(-90, -4, 90, 8);
+    ctx.fillRect(-30, -4, 30, 8);
 
     // 손잡이 테두리
     ctx.strokeStyle = '#8B4513';
     ctx.lineWidth = 1;
     ctx.shadowBlur = 0;
-    ctx.strokeRect(-90, -4, 90, 8);
+    ctx.strokeRect(-30, -4, 30, 8);
 
     // 검날 본체 (더 크고 날카로운 지율 신검 스타일 + 케데헌 루미 보라색)
     const spearGradient = ctx.createLinearGradient(0, -10, 60, 10);
@@ -3962,8 +3978,8 @@ function drawLightningSword(x, y, angle) {
     ctx.globalAlpha = 1.0;
 
     // 손잡이 장식 (더 화려하게)
-    for (let i = 0; i < 4; i++) {
-        const decorX = -15 - i * 18;
+    for (let i = 0; i < 3; i++) {
+        const decorX = -8 - i * 8;
 
         // 장식 구슬 외부 글로우
         const decorOuterGlow = ctx.createRadialGradient(decorX, 0, 0, decorX, 0, 6);
