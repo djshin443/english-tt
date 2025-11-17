@@ -105,6 +105,8 @@ let tornados = [];
 let lightningChains = [];
 let currentCharacter = 0;  // 0: 지율, 1: 세은, 2: 하린
 const characters = ['jiyul', 'seeun', 'harin'];
+const characterNames = ['지율', '세은', '하린'];
+const characterEnergies = [10, 10, 10];  // 각 캐릭터의 체력 저장
 
 // 지율이 스매싱 상태
 let jiyulSmashing = false;
@@ -3336,8 +3338,22 @@ function showOpening() {
 
 // 캐릭터 전환 함수
 function switchCharacter() {
+    // 현재 캐릭터의 체력 저장
+    characterEnergies[currentCharacter] = gameState.energy;
+
+    // 다음 캐릭터로 전환
     currentCharacter = (currentCharacter + 1) % characters.length;
     player.sprite = characters[currentCharacter];
+
+    // 새 캐릭터의 체력 복원
+    gameState.energy = characterEnergies[currentCharacter];
+    updateEnergyDisplay();
+
+    // 플레이어 이름 업데이트
+    const playerNameElement = document.getElementById('playerName');
+    if (playerNameElement) {
+        playerNameElement.textContent = '👤 ' + characterNames[currentCharacter];
+    }
 
     // 애니메이션 초기화 (중요: 각 캐릭터가 가진 애니메이션이 다를 수 있음)
     player.animation = 'idle';
@@ -3349,7 +3365,7 @@ function switchCharacter() {
         particles.push(new Particle(
             player.x + player.width / 2,
             player.y + player.height / 2,
-            currentCharacter === 0 ? '#FF69B4' : '#9370DB',
+            currentCharacter === 0 ? '#FF69B4' : (currentCharacter === 1 ? '#9370DB' : '#BA55D3'),
             'star'
         ));
     }
