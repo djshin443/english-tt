@@ -940,11 +940,14 @@ class Tornado {
         if (this.frameCount === 30 && !this.hasSplit && this.depth === 0) {
             this.hasSplit = true;
 
-            // 3개로 분열 (위, 정면, 아래)
+            // 6개로 분열 (넓은 범위로 퍼짐)
             const spreadAngles = [
-                this.angle - Math.PI / 6,    // 위쪽 (30도)
-                this.angle,                   // 정면 (원래 방향)
-                this.angle + Math.PI / 6      // 아래쪽 (30도)
+                this.angle - Math.PI * 5/12,  // -75도 (위쪽 넓게)
+                this.angle - Math.PI / 4,     // -45도 (위쪽)
+                this.angle - Math.PI / 12,    // -15도 (위쪽 약간)
+                this.angle + Math.PI / 12,    // +15도 (아래쪽 약간)
+                this.angle + Math.PI / 4,     // +45도 (아래쪽)
+                this.angle + Math.PI * 5/12   // +75도 (아래쪽 넓게)
             ];
 
             spreadAngles.forEach(angle => {
