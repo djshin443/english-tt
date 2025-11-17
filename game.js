@@ -468,7 +468,12 @@ function updateActionButtons() {
 function showMobileControls() {
     const mobileControls = document.getElementById('mobileControls');
     if (mobileControls) {
-        mobileControls.style.display = 'block';
+        mobileControls.style.display = 'flex';
+        mobileControls.style.position = 'absolute';
+        mobileControls.style.bottom = '0px';
+        mobileControls.style.top = 'auto';
+        mobileControls.style.left = '0';
+        mobileControls.style.right = '0';
     }
 }
 
