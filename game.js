@@ -935,9 +935,9 @@ class Tornado {
             return [];
         }
 
-        // 1초(60프레임) 후 분열
+        // 0.5초(30프레임) 후 분열
         const newTornados = [];
-        if (this.frameCount === 60 && !this.hasSplit && this.depth === 0) {
+        if (this.frameCount === 30 && !this.hasSplit && this.depth === 0) {
             this.hasSplit = true;
 
             // 3개로 분열 (위, 정면, 아래)
