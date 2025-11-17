@@ -391,7 +391,10 @@ function showTitleScreen() {
             if (styleTag) styleTag.remove();
 
             console.log('🎬 Starting opening sequence...');
-            startOpeningSequence();
+            // 타이틀 화면이 완전히 사라진 후 오프닝 시퀀스 시작
+            setTimeout(() => {
+                startOpeningSequence();
+            }, 100);
         }, 800);
     };
 
@@ -479,16 +482,28 @@ function startOpeningSequence() {
     // story.js의 storyScene 사용
     if (storyScene) {
         console.log('🎬 Starting opening with storyScene...');
-        storyScene.startOpening(function() {
-            console.log('✨ Opening sequence completed!');
-            // 오프닝 완료 후 게임 시작
+        console.log('📊 storyScene object:', storyScene);
+        console.log('📊 typeof storyScene.startOpening:', typeof storyScene.startOpening);
+
+        try {
+            storyScene.startOpening(function() {
+                console.log('✨ Opening sequence completed!');
+                // 오프닝 완료 후 게임 시작
+                if (typeof startGame === 'function') {
+                    console.log('🎮 Starting game...');
+                    startGame();
+                } else {
+                    console.error('❌ startGame function not found!');
+                }
+            });
+            console.log('✅ startOpening() called successfully');
+        } catch (error) {
+            console.error('❌ Error calling startOpening():', error);
+            // fallback: 바로 게임 시작
             if (typeof startGame === 'function') {
-                console.log('🎮 Starting game...');
                 startGame();
-            } else {
-                console.error('❌ startGame function not found!');
             }
-        });
+        }
     } else {
         console.error('❌ storyScene still not available! Falling back to startGame...');
         // fallback: 바로 게임 시작
