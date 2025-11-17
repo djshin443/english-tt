@@ -907,8 +907,8 @@ class Tornado {
         this.toRemove = false;
         this.hasSplit = false;  // 분열 여부
 
-        // 토네이도 파티클 초기화 (15개 → 8개로 감소, 메모리 최적화)
-        const particleCount = 8;
+        // 토네이도 파티클 초기화 (15→8→5개로 대폭 감소, 메모리 최적화)
+        const particleCount = 5;  // 아이폰12 최적화를 위해 5개로 감소
         for (let i = 0; i < particleCount; i++) {
             this.particles.push({
                 angle: (Math.PI * 2 / particleCount) * i,
@@ -1021,8 +1021,8 @@ class Tornado {
         ctx.save();
         ctx.translate(this.x, this.y);
 
-        // 용오름 효과 - 나선형 상승 기류
-        const spiralSegments = 20;
+        // 용오름 효과 - 나선형 상승 기류 (최적화: 20→8 세그먼트)
+        const spiralSegments = 8;  // 20→8로 대폭 감소 (60% 렌더링 부하 감소)
         for (let i = 0; i < spiralSegments; i++) {
             const ratio = i / spiralSegments;
             const spiralAngle = this.rotation + (ratio * Math.PI * 4); // 2회전
@@ -1047,14 +1047,6 @@ class Tornado {
             ctx.arc(x, spiralY + z * 0.3, 15 - ratio * 10, 0, Math.PI * 2);
             ctx.fill();
 
-            // 물방울 효과
-            if (i % 3 === 0) {
-                ctx.fillStyle = 'rgba(173, 216, 230, 0.6)';
-                ctx.beginPath();
-                ctx.arc(x * 1.2, spiralY + z * 0.3 - 5, 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
             ctx.restore();
         }
 
@@ -1070,7 +1062,7 @@ class Tornado {
         ctx.ellipse(0, 20, 35, 15, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // 중심 소용돌이 (더 밝고 강렬하게)
+        // 중심 소용돌이 (shadowBlur 제거로 최적화)
         ctx.globalAlpha = 0.9;
         const coreGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 25);
         coreGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');     // 순백색
@@ -1079,15 +1071,14 @@ class Tornado {
         coreGradient.addColorStop(1, 'rgba(70, 130, 180, 0)');      // 투명
 
         ctx.fillStyle = coreGradient;
-        ctx.shadowColor = '#00BFFF';
-        ctx.shadowBlur = 20;
+        // shadowBlur 제거 (성능 저하 주범)
         ctx.beginPath();
         ctx.arc(0, 0, 25, 0, Math.PI * 2);
         ctx.fill();
 
-        // 회전하는 바람 선
-        for (let i = 0; i < 6; i++) {
-            const angle = (Math.PI * 2 / 6) * i + this.rotation * 2;
+        // 회전하는 바람 선 (최적화: 6→4개)
+        for (let i = 0; i < 4; i++) {  // 6→4로 감소
+            const angle = (Math.PI * 2 / 4) * i + this.rotation * 2;
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
             ctx.lineWidth = 2;
             ctx.beginPath();
