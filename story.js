@@ -192,6 +192,50 @@ class StoryScene {
         this.drawPixelSprite(sprite, spriteData.colorMap, x, y, scale, flipH);
     }
 
+    // 세은 캐릭터 그리기
+    drawSeeun(x, y, animation = 'idle', frame = 0, scale = 4, flipH = false) {
+        const spriteData = pixelData.seeun;
+        let sprite;
+
+        switch(animation) {
+            case 'walk':
+                sprite = frame % 2 === 0 ? spriteData.walking1 : spriteData.walking2;
+                break;
+            case 'jump':
+                sprite = spriteData.jump;
+                break;
+            case 'smash':
+                sprite = spriteData.smashing;
+                break;
+            default:
+                sprite = spriteData.idle;
+        }
+
+        this.drawPixelSprite(sprite, spriteData.colorMap, x, y, scale, flipH);
+    }
+
+    // 하린 캐릭터 그리기
+    drawHarin(x, y, animation = 'idle', frame = 0, scale = 4, flipH = false) {
+        const spriteData = pixelData.harin;
+        let sprite;
+
+        switch(animation) {
+            case 'walk':
+                sprite = frame % 2 === 0 ? spriteData.walking1 : spriteData.walking2;
+                break;
+            case 'jump':
+                sprite = spriteData.jump;
+                break;
+            case 'smash':
+                sprite = spriteData.smashing;
+                break;
+            default:
+                sprite = spriteData.idle;
+        }
+
+        this.drawPixelSprite(sprite, spriteData.colorMap, x, y, scale, flipH);
+    }
+
     // 보스 캐릭터 그리기
     drawBossSprite(bossType, x, y, scale = 4, flipH = false) {
         if (typeof bossSprites !== 'undefined' && bossSprites[bossType]) {
@@ -1565,6 +1609,242 @@ class StoryScene {
                 }
             },
 
+            // 씬 5-5: 세은과 하린 등장!
+            {
+                update: () => {
+                    // 신비로운 보라색 하늘
+                    this.drawSkyBackground('#9370DB', '#DDA0DD');
+
+                    // 땅
+                    this.drawGround();
+
+                    // 제니스 영어학원 건물
+                    this.ctx.fillStyle = '#8B7355';
+                    this.ctx.fillRect(50, this.canvas.height - 280, 250, 180);
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.font = 'bold 20px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('제니스 영어학원', 175, this.canvas.height - 230);
+                    this.ctx.textAlign = 'left';
+
+                    // 지율이 (왼쪽)
+                    this.drawJiyul(this.canvas.width / 2 - 150, this.canvas.height - 170, 'idle', 0, 4);
+
+                    // 세은이 등장 (오른쪽에서 걸어옴)
+                    const seeunX = Math.min(this.canvas.width / 2 + 50, this.canvas.width - 200 - this.animationFrame * 3);
+                    this.drawSeeun(
+                        seeunX,
+                        this.canvas.height - 170,
+                        'walk',
+                        Math.floor(this.animationFrame / 8),
+                        4,
+                        true
+                    );
+
+                    // 하린이 등장 (세은 뒤에서)
+                    const harinX = Math.min(this.canvas.width / 2 + 150, this.canvas.width - 100 - this.animationFrame * 2.5);
+                    this.drawHarin(
+                        harinX,
+                        this.canvas.height - 170,
+                        'walk',
+                        Math.floor(this.animationFrame / 8),
+                        4,
+                        true
+                    );
+
+                    // 세은이 대사
+                    if (this.animationFrame > 60) {
+                        this.drawDialogBox(
+                            '지율아! 나도 빠질 수 없지!',
+                            this.canvas.width / 2 + 50,
+                            this.canvas.height - 300,
+                            '세은'
+                        );
+                    }
+                }
+            },
+
+            // 씬 5-6: 하린이 대사
+            {
+                update: () => {
+                    // 신비로운 보라색 하늘
+                    this.drawSkyBackground('#9370DB', '#DDA0DD');
+
+                    // 땅
+                    this.drawGround();
+
+                    // 제니스 영어학원 건물
+                    this.ctx.fillStyle = '#8B7355';
+                    this.ctx.fillRect(50, this.canvas.height - 280, 250, 180);
+                    this.ctx.fillStyle = '#FFFFFF';
+                    this.ctx.font = 'bold 20px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('제니스 영어학원', 175, this.canvas.height - 230);
+                    this.ctx.textAlign = 'left';
+
+                    // 지율이 (왼쪽)
+                    this.drawJiyul(this.canvas.width / 2 - 150, this.canvas.height - 170, 'idle', 0, 4);
+
+                    // 세은이 (중앙)
+                    this.drawSeeun(this.canvas.width / 2, this.canvas.height - 170, 'idle', 0, 4);
+
+                    // 하린이 (오른쪽)
+                    this.drawHarin(this.canvas.width / 2 + 120, this.canvas.height - 170, 'idle', 0, 4);
+
+                    // 하린이 대사
+                    this.drawDialogBox(
+                        '나도! 나도 빠질 수 없어!',
+                        this.canvas.width / 2 + 120,
+                        this.canvas.height - 300,
+                        '하린'
+                    );
+                }
+            },
+
+            // 씬 5-7: 선제로가 세은에게 청룡언월도 라켓 수여
+            {
+                update: () => {
+                    // 초록빛 하늘 (청룡언월도 테마)
+                    this.drawSkyBackground('#90EE90', '#98FB98');
+
+                    // 땅
+                    this.drawGround();
+
+                    // 세은이 (중앙에 크게)
+                    this.drawSeeun(this.canvas.width / 2 - 40, this.canvas.height - 220, 'jump', 0, 5);
+
+                    // 청룡언월도 (초록색 창 - 세은 위에)
+                    this.ctx.save();
+                    this.ctx.translate(this.canvas.width / 2, this.canvas.height - 350);
+                    this.ctx.rotate(Math.sin(this.animationFrame * 0.1) * 0.2);
+
+                    // 광채
+                    const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 80);
+                    gradient.addColorStop(0, 'rgba(34, 139, 34, 0.8)');
+                    gradient.addColorStop(1, 'rgba(34, 139, 34, 0)');
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, 80, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // 창 자루
+                    this.ctx.fillStyle = '#8B4513';
+                    this.ctx.fillRect(-5, -40, 10, 80);
+
+                    // 날 (초록색)
+                    const bladeGradient = this.ctx.createLinearGradient(-20, -60, 20, -60);
+                    bladeGradient.addColorStop(0, '#228B22');
+                    bladeGradient.addColorStop(0.5, '#32CD32');
+                    bladeGradient.addColorStop(1, '#228B22');
+                    this.ctx.fillStyle = bladeGradient;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(-20, -50);
+                    this.ctx.lineTo(0, -80);
+                    this.ctx.lineTo(20, -50);
+                    this.ctx.lineTo(0, -45);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+
+                    this.ctx.restore();
+
+                    // 반짝임
+                    for (let i = 0; i < 6; i++) {
+                        const angle = this.animationFrame * 0.05 + i * Math.PI / 3;
+                        const sparkX = this.canvas.width / 2 + Math.cos(angle) * 60;
+                        const sparkY = this.canvas.height - 350 + Math.sin(angle) * 60;
+                        this.ctx.fillStyle = '#00FF00';
+                        this.ctx.font = '20px Arial';
+                        this.ctx.fillText('✨', sparkX, sparkY);
+                    }
+
+                    // 대사
+                    this.drawDialogBox(
+                        '청룡언월도 라켓이야!\n휘두르면 토네이도가 생긴단다. 바람처럼 빠르지!',
+                        this.canvas.width / 2,
+                        this.canvas.height - 120,
+                        'sunzero 선생님'
+                    );
+                }
+            },
+
+            // 씬 5-8: 선제로가 하린에게 사인검 라켓 수여
+            {
+                update: () => {
+                    // 보라빛 하늘 (사인검 테마)
+                    this.drawSkyBackground('#9370DB', '#BA55D3');
+
+                    // 땅
+                    this.drawGround();
+
+                    // 하린이 (중앙에 크게)
+                    this.drawHarin(this.canvas.width / 2 - 40, this.canvas.height - 220, 'jump', 0, 5);
+
+                    // 사인검 (보라색 검 - 하린 위에)
+                    this.ctx.save();
+                    this.ctx.translate(this.canvas.width / 2, this.canvas.height - 350);
+                    this.ctx.rotate(Math.sin(this.animationFrame * 0.1) * 0.3);
+
+                    // 광채
+                    const gradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 80);
+                    gradient.addColorStop(0, 'rgba(138, 43, 226, 0.8)');
+                    gradient.addColorStop(1, 'rgba(138, 43, 226, 0)');
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(0, 0, 80, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // 검 자루
+                    this.ctx.fillStyle = '#4B0082';
+                    this.ctx.fillRect(-6, 0, 12, 30);
+
+                    // 검날 (보라색)
+                    const bladeGradient = this.ctx.createLinearGradient(-15, -60, 15, -60);
+                    bladeGradient.addColorStop(0, '#8A2BE2');
+                    bladeGradient.addColorStop(0.5, '#BA55D3');
+                    bladeGradient.addColorStop(1, '#8A2BE2');
+                    this.ctx.fillStyle = bladeGradient;
+                    this.ctx.fillRect(-15, -60, 30, 60);
+
+                    // 검 끝
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(-15, -60);
+                    this.ctx.lineTo(0, -75);
+                    this.ctx.lineTo(15, -60);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+
+                    // 번개 효과
+                    this.ctx.strokeStyle = '#FFFF00';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(-10, -50);
+                    this.ctx.lineTo(10, -30);
+                    this.ctx.moveTo(5, -30);
+                    this.ctx.lineTo(-5, -10);
+                    this.ctx.stroke();
+
+                    this.ctx.restore();
+
+                    // 반짝임
+                    for (let i = 0; i < 6; i++) {
+                        const angle = this.animationFrame * 0.07 + i * Math.PI / 3;
+                        const sparkX = this.canvas.width / 2 + Math.cos(angle) * 60;
+                        const sparkY = this.canvas.height - 350 + Math.sin(angle) * 60;
+                        this.ctx.fillStyle = '#FF00FF';
+                        this.ctx.font = '20px Arial';
+                        this.ctx.fillText('⚡', sparkX, sparkY);
+                    }
+
+                    // 대사
+                    this.drawDialogBox(
+                        '사인검 라켓이야!\n휘두르면 번개 체인이 찌릿찌릿! 신기하지?',
+                        this.canvas.width / 2,
+                        this.canvas.height - 120,
+                        'sunzero 선생님'
+                    );
+                }
+            },
+
             // 씬 6: 신검 파워업 & 결전 준비!
             {
                 duration: 200,
@@ -2771,6 +3051,283 @@ class StoryScene {
                     this.ctx.shadowColor = '#000000';
                     this.ctx.shadowBlur = 10;
                     this.ctx.fillText('🏆 CHAMPION! 🏆', this.canvas.width / 2, 80);
+                }
+            },
+
+            // 씬 3-1: 솔뜰 캠핑장 - 캠프파이어
+            {
+                update: () => {
+                    // 밤하늘 배경
+                    this.drawSkyBackground('#001433', '#1a237e');
+
+                    // 반짝이는 별들
+                    for (let i = 0; i < 50; i++) {
+                        const x = (i * 73) % this.canvas.width;
+                        const y = (i * 47) % (this.canvas.height / 2);
+                        const twinkle = Math.sin(this.animationFrame * 0.05 + i) * 0.5 + 0.5;
+                        this.ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
+                        this.ctx.fillRect(x, y, 2, 2);
+                    }
+
+                    // 땅
+                    this.ctx.fillStyle = '#2d5016';
+                    this.ctx.fillRect(0, this.canvas.height - 100, this.canvas.width, 100);
+
+                    // 캠핑장 간판
+                    this.ctx.fillStyle = '#8B4513';
+                    this.ctx.fillRect(50, this.canvas.height - 400, 180, 60);
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.font = 'bold 24px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('솔뜰 캠핑장', 140, this.canvas.height - 365);
+                    this.ctx.textAlign = 'left';
+
+                    // 캠프파이어 (중앙)
+                    const fireX = this.canvas.width / 2;
+                    const fireY = this.canvas.height - 150;
+
+                    // 장작
+                    this.ctx.fillStyle = '#8B4513';
+                    for (let i = 0; i < 3; i++) {
+                        const angle = (i * Math.PI * 2 / 3) + Math.PI / 2;
+                        const x = fireX + Math.cos(angle) * 20;
+                        const y = fireY + Math.sin(angle) * 20;
+                        this.ctx.save();
+                        this.ctx.translate(x, y);
+                        this.ctx.rotate(angle);
+                        this.ctx.fillRect(-15, -5, 30, 10);
+                        this.ctx.restore();
+                    }
+
+                    // 불꽃
+                    for (let i = 0; i < 5; i++) {
+                        const flameHeight = (Math.sin(this.animationFrame * 0.1 + i) * 10 + 30);
+                        const flameY = fireY - flameHeight;
+                        const flameX = fireX + Math.sin(this.animationFrame * 0.15 + i) * 10;
+
+                        const gradient = this.ctx.createRadialGradient(flameX, flameY, 0, flameX, flameY, 15);
+                        gradient.addColorStop(0, '#FFFF00');
+                        gradient.addColorStop(0.5, '#FF6600');
+                        gradient.addColorStop(1, '#FF0000');
+                        this.ctx.fillStyle = gradient;
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(flameX, flameY, 10, 15, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+
+                    // 불빛 반사
+                    const glowGradient = this.ctx.createRadialGradient(fireX, fireY, 0, fireX, fireY, 150);
+                    glowGradient.addColorStop(0, 'rgba(255, 165, 0, 0.3)');
+                    glowGradient.addColorStop(1, 'rgba(255, 165, 0, 0)');
+                    this.ctx.fillStyle = glowGradient;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    // 지율이 (왼쪽)
+                    this.drawJiyul(
+                        this.canvas.width / 2 - 150,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    // 세은이 (중간)
+                    this.drawSeeun(
+                        this.canvas.width / 2 - 30,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    // 하린이 (오른쪽)
+                    this.drawHarin(
+                        this.canvas.width / 2 + 90,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    // 금메달 (목에 걸고)
+                    for (let i = 0; i < 3; i++) {
+                        const medalX = this.canvas.width / 2 - 150 + i * 120;
+                        const medalY = this.canvas.height - 140;
+
+                        // 메달
+                        this.ctx.fillStyle = '#FFD700';
+                        this.ctx.beginPath();
+                        this.ctx.arc(medalX + 32, medalY, 8, 0, Math.PI * 2);
+                        this.ctx.fill();
+
+                        // 리본
+                        this.ctx.strokeStyle = '#FF0000';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(medalX + 32, medalY - 8);
+                        this.ctx.lineTo(medalX + 32, medalY - 20);
+                        this.ctx.stroke();
+                    }
+
+                    // 대화
+                    if (this.animationFrame > 60) {
+                        this.drawDialogBox(
+                            '와! 캠프파이어다! 불 보니까 완전 따뜻해!\n오늘 하루 진짜 재밌었어! 금메달도 땄고!',
+                            this.canvas.width / 2,
+                            this.canvas.height - 350,
+                            '지율'
+                        );
+                    }
+                }
+            },
+
+            // 씬 3-2: SUNZERO 등장
+            {
+                update: () => {
+                    // 밤하늘 배경
+                    this.drawSkyBackground('#001433', '#1a237e');
+
+                    // 반짝이는 별들 (더 많이)
+                    for (let i = 0; i < 80; i++) {
+                        const x = (i * 73) % this.canvas.width;
+                        const y = (i * 47) % (this.canvas.height / 2);
+                        const twinkle = Math.sin(this.animationFrame * 0.05 + i) * 0.5 + 0.5;
+                        this.ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
+                        this.ctx.fillRect(x, y, 3, 3);
+                    }
+
+                    // 땅
+                    this.ctx.fillStyle = '#2d5016';
+                    this.ctx.fillRect(0, this.canvas.height - 100, this.canvas.width, 100);
+
+                    // 캠프파이어
+                    const fireX = this.canvas.width / 2;
+                    const fireY = this.canvas.height - 150;
+
+                    // 장작
+                    this.ctx.fillStyle = '#8B4513';
+                    for (let i = 0; i < 3; i++) {
+                        const angle = (i * Math.PI * 2 / 3) + Math.PI / 2;
+                        const x = fireX + Math.cos(angle) * 20;
+                        const y = fireY + Math.sin(angle) * 20;
+                        this.ctx.save();
+                        this.ctx.translate(x, y);
+                        this.ctx.rotate(angle);
+                        this.ctx.fillRect(-15, -5, 30, 10);
+                        this.ctx.restore();
+                    }
+
+                    // 불꽃
+                    for (let i = 0; i < 5; i++) {
+                        const flameHeight = (Math.sin(this.animationFrame * 0.1 + i) * 10 + 30);
+                        const flameY = fireY - flameHeight;
+                        const flameX = fireX + Math.sin(this.animationFrame * 0.15 + i) * 10;
+
+                        const gradient = this.ctx.createRadialGradient(flameX, flameY, 0, flameX, flameY, 15);
+                        gradient.addColorStop(0, '#FFFF00');
+                        gradient.addColorStop(0.5, '#FF6600');
+                        gradient.addColorStop(1, '#FF0000');
+                        this.ctx.fillStyle = gradient;
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(flameX, flameY, 10, 15, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+
+                    // 지율이 (왼쪽 아래)
+                    this.drawJiyul(
+                        this.canvas.width / 2 - 150,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        3
+                    );
+
+                    // 세은이 (중앙 아래)
+                    this.drawSeeun(
+                        this.canvas.width / 2 - 30,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        3
+                    );
+
+                    // 하린이 (오른쪽 아래)
+                    this.drawHarin(
+                        this.canvas.width / 2 + 70,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        3
+                    );
+
+                    // SUNZERO 천사 등장 (위에서 내려옴)
+                    const sunzeroY = Math.max(100, 600 - this.animationFrame * 3);
+
+                    // 금빛 빛줄기
+                    const beamGradient = this.ctx.createLinearGradient(
+                        this.canvas.width / 2, 0,
+                        this.canvas.width / 2, sunzeroY
+                    );
+                    beamGradient.addColorStop(0, 'rgba(255, 215, 0, 0)');
+                    beamGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.3)');
+                    beamGradient.addColorStop(1, 'rgba(255, 215, 0, 0.6)');
+                    this.ctx.fillStyle = beamGradient;
+                    this.ctx.fillRect(this.canvas.width / 2 - 50, 0, 100, sunzeroY);
+
+                    // SUNZERO (간단한 천사)
+                    if (sunzeroY <= 200) {
+                        // 광채
+                        const haloGradient = this.ctx.createRadialGradient(
+                            this.canvas.width / 2, sunzeroY,
+                            0,
+                            this.canvas.width / 2, sunzeroY,
+                            60
+                        );
+                        haloGradient.addColorStop(0, 'rgba(255, 215, 0, 0.8)');
+                        haloGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+                        this.ctx.fillStyle = haloGradient;
+                        this.ctx.beginPath();
+                        this.ctx.arc(this.canvas.width / 2, sunzeroY, 60, 0, Math.PI * 2);
+                        this.ctx.fill();
+
+                        // 날개
+                        this.ctx.fillStyle = '#FFFFFF';
+                        // 왼쪽 날개
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(this.canvas.width / 2 - 40, sunzeroY + 10, 30, 20, -Math.PI / 6, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        // 오른쪽 날개
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(this.canvas.width / 2 + 40, sunzeroY + 10, 30, 20, Math.PI / 6, 0, Math.PI * 2);
+                        this.ctx.fill();
+
+                        // 몸
+                        this.ctx.fillStyle = '#FFD700';
+                        this.ctx.fillRect(this.canvas.width / 2 - 15, sunzeroY, 30, 40);
+
+                        // 머리
+                        this.ctx.fillStyle = '#FFE0BD';
+                        this.ctx.beginPath();
+                        this.ctx.arc(this.canvas.width / 2, sunzeroY - 10, 20, 0, Math.PI * 2);
+                        this.ctx.fill();
+
+                        // 광환 (머리 위)
+                        this.ctx.strokeStyle = '#FFD700';
+                        this.ctx.lineWidth = 3;
+                        this.ctx.beginPath();
+                        this.ctx.arc(this.canvas.width / 2, sunzeroY - 30, 15, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+
+                    // 대화
+                    if (sunzeroY <= 150) {
+                        this.drawDialogBox(
+                            '안녕, 지율아. 나는 너의 수호천사 SUNZERO야.\n너희 셋의 노력을 지켜봤어. 영어도 배우고 탁구도 열심히 했지.',
+                            this.canvas.width / 2,
+                            300,
+                            'SUNZERO'
+                        );
+                    }
                 }
             },
 
