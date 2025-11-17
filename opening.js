@@ -452,41 +452,57 @@ function startOpeningSequence() {
 
     console.log('🎭 Starting story.js opening sequence...');
 
-    // storyScene이 없으면 초기화
-    if (typeof storyScene === 'undefined' || !storyScene) {
-        console.log('🔧 Initializing storyScene...');
-        const ctx = canvas.getContext('2d');
+    // StoryScene 클래스가 로드될 때까지 기다리기
+    function waitForStoryScene(attempts = 0) {
         if (typeof StoryScene !== 'undefined') {
-            storyScene = new StoryScene(canvas, ctx);
-            console.log('✅ storyScene initialized');
-        } else {
-            console.error('❌ StoryScene class not found!');
-            // fallback: 바로 게임 시작
-            if (typeof startGame === 'function') {
-                startGame();
+            console.log('✅ StoryScene class found!');
+
+            // storyScene이 없으면 초기화
+            if (typeof storyScene === 'undefined' || !storyScene) {
+                console.log('🔧 Initializing storyScene...');
+                const ctx = canvas.getContext('2d');
+                storyScene = new StoryScene(canvas, ctx);
+                console.log('✅ storyScene initialized');
             }
-            return;
+
+            // story.js의 storyScene 사용
+            if (storyScene) {
+                console.log('🎬 Starting opening with storyScene...');
+                storyScene.startOpening(function() {
+                    console.log('✨ Opening sequence completed!');
+                    // 오프닝 완료 후 게임 시작
+                    if (typeof startGame === 'function') {
+                        console.log('🎮 Starting game...');
+                        startGame();
+                    } else {
+                        console.error('❌ startGame function not found!');
+                    }
+                });
+            } else {
+                console.error('❌ storyScene initialization failed!');
+                // fallback: 바로 게임 시작
+                if (typeof startGame === 'function') {
+                    startGame();
+                }
+            }
+        } else {
+            // StoryScene 클래스가 아직 로드되지 않음
+            if (attempts < 20) {  // 최대 2초 대기 (20 * 100ms)
+                console.log(`⏳ Waiting for StoryScene class... (attempt ${attempts + 1}/20)`);
+                setTimeout(() => waitForStoryScene(attempts + 1), 100);
+            } else {
+                console.error('❌ StoryScene class not found after 2 seconds! story.js may have failed to load.');
+                console.error('❌ Falling back to startGame...');
+                // fallback: 바로 게임 시작
+                if (typeof startGame === 'function') {
+                    startGame();
+                } else {
+                    console.error('❌ startGame function also not found!');
+                }
+            }
         }
     }
 
-    // story.js의 storyScene 사용
-    if (storyScene) {
-        console.log('🎬 Starting opening with storyScene...');
-        storyScene.startOpening(function() {
-            console.log('✨ Opening sequence completed!');
-            // 오프닝 완료 후 게임 시작
-            if (typeof startGame === 'function') {
-                console.log('🎮 Starting game...');
-                startGame();
-            } else {
-                console.error('❌ startGame function not found!');
-            }
-        });
-    } else {
-        console.error('❌ storyScene still not available! Falling back to startGame...');
-        // fallback: 바로 게임 시작
-        if (typeof startGame === 'function') {
-            startGame();
-        }
-    }
+    // StoryScene 대기 시작
+    waitForStoryScene();
 }
