@@ -3786,8 +3786,8 @@ function drawLightningSword(x, y, angle) {
     ctx.arc(20, 0, dynamicGlowSize, 0, Math.PI * 2);
     ctx.fill();
 
-    // 검 손잡이 (더 굵고 화려한 금색)
-    const handleGradient = ctx.createLinearGradient(-90, 0, 0, 0);
+    // 검 손잡이 (짧고 화려한 금색)
+    const handleGradient = ctx.createLinearGradient(-30, 0, 0, 0);
     handleGradient.addColorStop(0, '#B8860B');      // 다크골드
     handleGradient.addColorStop(0.2, '#FFD700');    // 골드
     handleGradient.addColorStop(0.4, '#FFA500');    // 오렌지골드
@@ -3797,13 +3797,13 @@ function drawLightningSword(x, y, angle) {
     ctx.fillStyle = handleGradient;
     ctx.shadowColor = '#FFD700';
     ctx.shadowBlur = 15;
-    ctx.fillRect(-90, -4, 90, 8);
+    ctx.fillRect(-30, -4, 30, 8);
 
     // 손잡이 테두리
     ctx.strokeStyle = '#8B4513';
     ctx.lineWidth = 1;
     ctx.shadowBlur = 0;
-    ctx.strokeRect(-90, -4, 90, 8);
+    ctx.strokeRect(-30, -4, 30, 8);
 
     // 검날 본체 (더 크고 날카로운 지율 신검 스타일 + 케데헌 루미 보라색)
     const spearGradient = ctx.createLinearGradient(0, -10, 60, 10);
@@ -3962,8 +3962,8 @@ function drawLightningSword(x, y, angle) {
     ctx.globalAlpha = 1.0;
 
     // 손잡이 장식 (더 화려하게)
-    for (let i = 0; i < 4; i++) {
-        const decorX = -15 - i * 18;
+    for (let i = 0; i < 3; i++) {
+        const decorX = -8 - i * 8;
 
         // 장식 구슬 외부 글로우
         const decorOuterGlow = ctx.createRadialGradient(decorX, 0, 0, decorX, 0, 6);
