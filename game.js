@@ -842,6 +842,10 @@ class DivineSword {
         ctx.closePath();
         ctx.fill();
 
+        // 그림자 초기화 (중요: 캐릭터에 그림자가 적용되지 않도록)
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = 'transparent';
+
         // 검 테두리 (금색)
         ctx.strokeStyle = '#FFD700';
         ctx.lineWidth = 1.5;

@@ -2343,7 +2343,7 @@ class StoryScene {
 
                     // 반짝이는 별 장식 (배경)
                     for (let i = 0; i < 20; i++) {
-                        const starX = (i * 40 + this.animationFrame * 0.5) % this.canvas.width;
+                        const starX = (i * 80 + this.animationFrame * 0.5) % this.canvas.width;
                         const starY = 105 + (i % 5) * 35;
                         this.ctx.fillStyle = i % 2 === 0 ? '#FFD700' : '#FFFFFF';
                         this.ctx.font = '12px Arial';
@@ -2407,19 +2407,19 @@ class StoryScene {
                         }
                     ];
 
-                    // 관중들 그리기 (전체 가득 채우기!)
-                    const totalCols = Math.floor(this.canvas.width / 27);
-                    for (let row = 0; row < 5; row++) {
+                    // 관중들 그리기 (가득 채우기)
+                    const totalCols = Math.floor(this.canvas.width / 18); // 간격 더 좁게
+                    for (let row = 0; row < 6; row++) { // 5줄 → 6줄
                         for (let col = 0; col < totalCols; col++) {
-                            const x = col * 27 + 5;
-                            const y = 105 + row * 32;
+                            const x = col * 18 + 2; // 간격 27 → 18
+                            const y = 105 + row * 28; // 간격 32 → 28
 
                             // 랜덤하게 캐릭터 타입 선택 (시드 사용해서 매번 같은 위치에 같은 캐릭터)
                             const seed = row * 100 + col;
                             const typeIndex = seed % audienceTypes.length;
                             const audience = audienceTypes[typeIndex];
 
-                            const scale = 3;
+                            const scale = 2.5; // 크기 3 → 2.5로 줄여서 더 많이 배치
 
                             // 픽셀 스프라이트 그리기
                             for (let r = 0; r < audience.sprite.length; r++) {
@@ -2704,7 +2704,9 @@ class StoryScene {
                     this.ctx.shadowColor = '#FFFFFF';
                     this.ctx.shadowBlur = 10;
                     this.ctx.fillText('11 : 9', this.canvas.width / 2, scoreboardY + 40);
+                    // 그림자 완전히 초기화
                     this.ctx.shadowBlur = 0;
+                    this.ctx.shadowColor = 'transparent';
 
                     // 하트 장식
                     this.ctx.font = '25px Arial';
@@ -2734,7 +2736,9 @@ class StoryScene {
                     this.ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
                     this.ctx.shadowBlur = 4;
                     this.ctx.fillText('🏆 세기의 탁구 대회 결승전 🏆', this.canvas.width / 2, bannerY - 10);
+                    // 그림자 완전히 초기화
                     this.ctx.shadowBlur = 0;
+                    this.ctx.shadowColor = 'transparent';
 
                     // 특별한 설명
                     this.ctx.fillStyle = '#4169E1';
@@ -2798,11 +2802,13 @@ class StoryScene {
                     this.ctx.shadowColor = '#FFFF00';
                     this.ctx.shadowBlur = 15;
                     this.ctx.fillText(commentary, 0, 0);
+                    // 그림자 완전히 초기화
                     this.ctx.shadowBlur = 0;
+                    this.ctx.shadowColor = 'transparent';
 
                     this.ctx.restore();
 
-                    // 응원 파티클 효과 (GPU 태우기!)
+                    // 응원 파티클 효과
                     for (let i = 0; i < 30; i++) {
                         const x = (this.animationFrame * 3 + i * 30) % this.canvas.width;
                         const y = commentaryY - 20 - Math.abs(Math.sin(this.animationFrame * 0.05 + i)) * 30;
@@ -2828,7 +2834,7 @@ class StoryScene {
 
                     // 관중석에서 날아오는 응원 풍선들
                     for (let i = 0; i < 15; i++) {
-                        const balloonX = 50 + (i * 50 + this.animationFrame * 2) % (this.canvas.width - 100);
+                        const balloonX = 50 + (i * 150 + this.animationFrame * 2) % (this.canvas.width - 100);
                         const balloonY = 100 + Math.sin(this.animationFrame * 0.05 + i) * 30;
                         const balloonColors = ['#FF69B4', '#87CEEB', '#FFD700', '#90EE90'];
 
@@ -2899,8 +2905,8 @@ class StoryScene {
                     }
 
                     // 축하 장식 (하트와 별)
-                    for (let i = 0; i < 15; i++) {
-                        const decorX = (i * 50 + this.animationFrame * 0.3) % this.canvas.width;
+                    for (let i = 0; i < 25; i++) {
+                        const decorX = (i * 80 + this.animationFrame * 0.3) % this.canvas.width;
                         const decorY = 110 + (i % 6) * 28;
                         if (i % 3 === 0) {
                             this.ctx.fillStyle = '#FF69B4';
@@ -2973,17 +2979,17 @@ class StoryScene {
                         }
                     ];
 
-                    // 관중들 그리기 (전체 가득 채우기!)
-                    const totalColsAudience = Math.floor(this.canvas.width / 22);
-                    for (let row = 0; row < 6; row++) {
+                    // 관중들 그리기 (가득 채우기)
+                    const totalColsAudience = Math.floor(this.canvas.width / 15); // 간격 더 좁게
+                    for (let row = 0; row < 7; row++) { // 6줄 → 7줄
                         for (let col = 0; col < totalColsAudience; col++) {
-                            const x = col * 22 + 5;
-                            const y = 120 + row * 25;
+                            const x = col * 15 + 2; // 간격 22 → 15
+                            const y = 120 + row * 23; // 간격 25 → 23
 
                             const seed = row * 100 + col;
                             const typeIndex = seed % audienceTypes.length;
                             const audience = audienceTypes[typeIndex];
-                            const scale = 2;
+                            const scale = 2; // 크기 유지
 
                             // 픽셀 스프라이트 그리기
                             for (let r = 0; r < audience.sprite.length; r++) {
@@ -3057,7 +3063,9 @@ class StoryScene {
                     this.ctx.fillText('1', 0, 0);
 
                     // 번호 외곽선
+                    // 그림자 완전히 초기화
                     this.ctx.shadowBlur = 0;
+                    this.ctx.shadowColor = 'transparent';
                     this.ctx.strokeStyle = '#FF0000';
                     this.ctx.lineWidth = 5;
                     this.ctx.strokeText('1', 0, 0);
@@ -3307,287 +3315,14 @@ class StoryScene {
                     this.ctx.shadowColor = '#000000';
                     this.ctx.shadowBlur = 10;
                     this.ctx.fillText('🏆 CHAMPION! 🏆', this.canvas.width / 2, 80);
+
+                    // 그림자 효과 초기화 (중요!)
+                    this.ctx.shadowBlur = 0;
+                    this.ctx.shadowColor = 'transparent';
                 }
             },
 
-            // 씬 3-1: 솔뜰 캠핑장 - 캠프파이어
-            {
-                update: () => {
-                    // 밤하늘 배경
-                    this.drawSkyBackground('#001433', '#1a237e');
-
-                    // 반짝이는 별들
-                    for (let i = 0; i < 50; i++) {
-                        const x = (i * 73) % this.canvas.width;
-                        const y = (i * 47) % (this.canvas.height / 2);
-                        const twinkle = Math.sin(this.animationFrame * 0.05 + i) * 0.5 + 0.5;
-                        this.ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
-                        this.ctx.fillRect(x, y, 2, 2);
-                    }
-
-                    // 땅
-                    this.ctx.fillStyle = '#2d5016';
-                    this.ctx.fillRect(0, this.canvas.height - 100, this.canvas.width, 100);
-
-                    // 캠핑장 간판
-                    this.ctx.fillStyle = '#8B4513';
-                    this.ctx.fillRect(50, this.canvas.height - 400, 180, 60);
-                    this.ctx.fillStyle = '#FFD700';
-                    this.ctx.font = 'bold 24px Arial';
-                    this.ctx.textAlign = 'center';
-                    this.ctx.fillText('솔뜰 캠핑장', 140, this.canvas.height - 365);
-                    this.ctx.textAlign = 'left';
-
-                    // 캠프파이어 (중앙)
-                    const fireX = this.canvas.width / 2;
-                    const fireY = this.canvas.height - 150;
-
-                    // 장작
-                    this.ctx.fillStyle = '#8B4513';
-                    for (let i = 0; i < 3; i++) {
-                        const angle = (i * Math.PI * 2 / 3) + Math.PI / 2;
-                        const x = fireX + Math.cos(angle) * 20;
-                        const y = fireY + Math.sin(angle) * 20;
-                        this.ctx.save();
-                        this.ctx.translate(x, y);
-                        this.ctx.rotate(angle);
-                        this.ctx.fillRect(-15, -5, 30, 10);
-                        this.ctx.restore();
-                    }
-
-                    // 불꽃
-                    for (let i = 0; i < 5; i++) {
-                        const flameHeight = (Math.sin(this.animationFrame * 0.1 + i) * 10 + 30);
-                        const flameY = fireY - flameHeight;
-                        const flameX = fireX + Math.sin(this.animationFrame * 0.15 + i) * 10;
-
-                        const gradient = this.ctx.createRadialGradient(flameX, flameY, 0, flameX, flameY, 15);
-                        gradient.addColorStop(0, '#FFFF00');
-                        gradient.addColorStop(0.5, '#FF6600');
-                        gradient.addColorStop(1, '#FF0000');
-                        this.ctx.fillStyle = gradient;
-                        this.ctx.beginPath();
-                        this.ctx.ellipse(flameX, flameY, 10, 15, 0, 0, Math.PI * 2);
-                        this.ctx.fill();
-                    }
-
-                    // 불빛 반사
-                    const glowGradient = this.ctx.createRadialGradient(fireX, fireY, 0, fireX, fireY, 150);
-                    glowGradient.addColorStop(0, 'rgba(255, 165, 0, 0.3)');
-                    glowGradient.addColorStop(1, 'rgba(255, 165, 0, 0)');
-                    this.ctx.fillStyle = glowGradient;
-                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-                    // 지율이 (왼쪽)
-                    this.drawJiyul(
-                        this.canvas.width / 2 - 150,
-                        this.canvas.height - 170,
-                        'idle',
-                        0,
-                        4
-                    );
-
-                    // 세은이 (중간)
-                    this.drawSeeun(
-                        this.canvas.width / 2 - 30,
-                        this.canvas.height - 170,
-                        'idle',
-                        0,
-                        4
-                    );
-
-                    // 하린이 (오른쪽)
-                    this.drawHarin(
-                        this.canvas.width / 2 + 90,
-                        this.canvas.height - 170,
-                        'idle',
-                        0,
-                        4
-                    );
-
-                    // 금메달 (목에 걸고)
-                    for (let i = 0; i < 3; i++) {
-                        const medalX = this.canvas.width / 2 - 150 + i * 120;
-                        const medalY = this.canvas.height - 140;
-
-                        // 메달
-                        this.ctx.fillStyle = '#FFD700';
-                        this.ctx.beginPath();
-                        this.ctx.arc(medalX + 32, medalY, 8, 0, Math.PI * 2);
-                        this.ctx.fill();
-
-                        // 리본
-                        this.ctx.strokeStyle = '#FF0000';
-                        this.ctx.lineWidth = 2;
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(medalX + 32, medalY - 8);
-                        this.ctx.lineTo(medalX + 32, medalY - 20);
-                        this.ctx.stroke();
-                    }
-
-                    // 대화
-                    if (this.animationFrame > 60) {
-                        this.drawDialogBox(
-                            '와! 캠프파이어다! 불 보니까 완전 따뜻해!\n오늘 하루 진짜 재밌었어! 금메달도 땄고!',
-                            this.canvas.width / 2,
-                            this.canvas.height - 350,
-                            '지율'
-                        );
-                    }
-                }
-            },
-
-            // 씬 3-2: SUNZERO 등장
-            {
-                update: () => {
-                    // 밤하늘 배경
-                    this.drawSkyBackground('#001433', '#1a237e');
-
-                    // 반짝이는 별들 (더 많이)
-                    for (let i = 0; i < 80; i++) {
-                        const x = (i * 73) % this.canvas.width;
-                        const y = (i * 47) % (this.canvas.height / 2);
-                        const twinkle = Math.sin(this.animationFrame * 0.05 + i) * 0.5 + 0.5;
-                        this.ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
-                        this.ctx.fillRect(x, y, 3, 3);
-                    }
-
-                    // 땅
-                    this.ctx.fillStyle = '#2d5016';
-                    this.ctx.fillRect(0, this.canvas.height - 100, this.canvas.width, 100);
-
-                    // 캠프파이어
-                    const fireX = this.canvas.width / 2;
-                    const fireY = this.canvas.height - 150;
-
-                    // 장작
-                    this.ctx.fillStyle = '#8B4513';
-                    for (let i = 0; i < 3; i++) {
-                        const angle = (i * Math.PI * 2 / 3) + Math.PI / 2;
-                        const x = fireX + Math.cos(angle) * 20;
-                        const y = fireY + Math.sin(angle) * 20;
-                        this.ctx.save();
-                        this.ctx.translate(x, y);
-                        this.ctx.rotate(angle);
-                        this.ctx.fillRect(-15, -5, 30, 10);
-                        this.ctx.restore();
-                    }
-
-                    // 불꽃
-                    for (let i = 0; i < 5; i++) {
-                        const flameHeight = (Math.sin(this.animationFrame * 0.1 + i) * 10 + 30);
-                        const flameY = fireY - flameHeight;
-                        const flameX = fireX + Math.sin(this.animationFrame * 0.15 + i) * 10;
-
-                        const gradient = this.ctx.createRadialGradient(flameX, flameY, 0, flameX, flameY, 15);
-                        gradient.addColorStop(0, '#FFFF00');
-                        gradient.addColorStop(0.5, '#FF6600');
-                        gradient.addColorStop(1, '#FF0000');
-                        this.ctx.fillStyle = gradient;
-                        this.ctx.beginPath();
-                        this.ctx.ellipse(flameX, flameY, 10, 15, 0, 0, Math.PI * 2);
-                        this.ctx.fill();
-                    }
-
-                    // 지율이 (왼쪽 아래)
-                    this.drawJiyul(
-                        this.canvas.width / 2 - 150,
-                        this.canvas.height - 170,
-                        'idle',
-                        0,
-                        3
-                    );
-
-                    // 세은이 (중앙 아래)
-                    this.drawSeeun(
-                        this.canvas.width / 2 - 30,
-                        this.canvas.height - 170,
-                        'idle',
-                        0,
-                        3
-                    );
-
-                    // 하린이 (오른쪽 아래)
-                    this.drawHarin(
-                        this.canvas.width / 2 + 70,
-                        this.canvas.height - 170,
-                        'idle',
-                        0,
-                        3
-                    );
-
-                    // SUNZERO 천사 등장 (위에서 내려옴)
-                    const sunzeroY = Math.max(100, 600 - this.animationFrame * 3);
-
-                    // 금빛 빛줄기
-                    const beamGradient = this.ctx.createLinearGradient(
-                        this.canvas.width / 2, 0,
-                        this.canvas.width / 2, sunzeroY
-                    );
-                    beamGradient.addColorStop(0, 'rgba(255, 215, 0, 0)');
-                    beamGradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.3)');
-                    beamGradient.addColorStop(1, 'rgba(255, 215, 0, 0.6)');
-                    this.ctx.fillStyle = beamGradient;
-                    this.ctx.fillRect(this.canvas.width / 2 - 50, 0, 100, sunzeroY);
-
-                    // SUNZERO (간단한 천사)
-                    if (sunzeroY <= 200) {
-                        // 광채
-                        const haloGradient = this.ctx.createRadialGradient(
-                            this.canvas.width / 2, sunzeroY,
-                            0,
-                            this.canvas.width / 2, sunzeroY,
-                            60
-                        );
-                        haloGradient.addColorStop(0, 'rgba(255, 215, 0, 0.8)');
-                        haloGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
-                        this.ctx.fillStyle = haloGradient;
-                        this.ctx.beginPath();
-                        this.ctx.arc(this.canvas.width / 2, sunzeroY, 60, 0, Math.PI * 2);
-                        this.ctx.fill();
-
-                        // 날개
-                        this.ctx.fillStyle = '#FFFFFF';
-                        // 왼쪽 날개
-                        this.ctx.beginPath();
-                        this.ctx.ellipse(this.canvas.width / 2 - 40, sunzeroY + 10, 30, 20, -Math.PI / 6, 0, Math.PI * 2);
-                        this.ctx.fill();
-                        // 오른쪽 날개
-                        this.ctx.beginPath();
-                        this.ctx.ellipse(this.canvas.width / 2 + 40, sunzeroY + 10, 30, 20, Math.PI / 6, 0, Math.PI * 2);
-                        this.ctx.fill();
-
-                        // 몸
-                        this.ctx.fillStyle = '#FFD700';
-                        this.ctx.fillRect(this.canvas.width / 2 - 15, sunzeroY, 30, 40);
-
-                        // 머리
-                        this.ctx.fillStyle = '#FFE0BD';
-                        this.ctx.beginPath();
-                        this.ctx.arc(this.canvas.width / 2, sunzeroY - 10, 20, 0, Math.PI * 2);
-                        this.ctx.fill();
-
-                        // 광환 (머리 위)
-                        this.ctx.strokeStyle = '#FFD700';
-                        this.ctx.lineWidth = 3;
-                        this.ctx.beginPath();
-                        this.ctx.arc(this.canvas.width / 2, sunzeroY - 30, 15, 0, Math.PI * 2);
-                        this.ctx.stroke();
-                    }
-
-                    // 대화
-                    if (sunzeroY <= 150) {
-                        this.drawDialogBox(
-                            '안녕, 지율아. 나는 너의 수호천사 SUNZERO야.\n너희 셋의 노력을 지켜봤어. 영어도 배우고 탁구도 열심히 했지.',
-                            this.canvas.width / 2,
-                            300,
-                            'SUNZERO'
-                        );
-                    }
-                }
-            },
-
-            // 씬 4: 대마왕이 코치가 됨 - 지율이 대화
+            // 씬 3-1: ABC 대마왕이 패배 후 개심 - 지율이 대화
             {
                 update: () => {
                     // 화목한 배경
@@ -3642,7 +3377,7 @@ class StoryScene {
                 }
             },
 
-            // 씬 5: ABC 코치의 대답
+            // 씬 3-2: ABC 코치의 대답
             {
                 update: () => {
                     // 화목한 배경
@@ -3697,7 +3432,788 @@ class StoryScene {
                 }
             },
 
-            // 씬 6: THE END
+            // 씬 4-1: 솔뜰 캠핑장 - 캠프파이어 (개선된 배경)
+            {
+                update: () => {
+                    // 아름다운 밤하늘 배경 (그라디언트 강화)
+                    const skyGradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                    skyGradient.addColorStop(0, '#0a0e27');  // 짙은 남색
+                    skyGradient.addColorStop(0.3, '#162447');  // 어두운 파랑
+                    skyGradient.addColorStop(0.6, '#1f4068');  // 중간 파랑
+                    skyGradient.addColorStop(1, '#1a237e');  // 밝은 남색
+                    this.ctx.fillStyle = skyGradient;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    // 은하수 효과
+                    const milkyWay = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height / 2);
+                    milkyWay.addColorStop(0, 'rgba(100, 100, 150, 0)');
+                    milkyWay.addColorStop(0.5, 'rgba(150, 150, 200, 0.3)');
+                    milkyWay.addColorStop(1, 'rgba(100, 100, 150, 0)');
+                    this.ctx.fillStyle = milkyWay;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height / 2);
+
+                    // 크고 작은 별들 (더 많이, 다양하게)
+                    for (let i = 0; i < 100; i++) {
+                        const x = (i * 73) % this.canvas.width;
+                        const y = (i * 47) % (this.canvas.height / 2);
+                        const twinkle = Math.sin(this.animationFrame * 0.05 + i) * 0.5 + 0.5;
+                        const size = (i % 3 === 0) ? 3 : 2;  // 일부 별은 더 크게
+                        this.ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
+                        this.ctx.fillRect(x, y, size, size);
+
+                        // 반짝이는 별 효과
+                        if (i % 10 === 0 && twinkle > 0.8) {
+                            this.ctx.fillStyle = `rgba(255, 255, 150, ${twinkle * 0.5})`;
+                            this.ctx.fillRect(x - 1, y - 1, size + 2, size + 2);
+                        }
+                    }
+
+                    // 달 (오른쪽 위)
+                    const moonX = this.canvas.width - 150;
+                    const moonY = 100;
+                    const moonGlow = this.ctx.createRadialGradient(moonX, moonY, 30, moonX, moonY, 60);
+                    moonGlow.addColorStop(0, 'rgba(255, 255, 200, 0.8)');
+                    moonGlow.addColorStop(0.5, 'rgba(255, 255, 200, 0.4)');
+                    moonGlow.addColorStop(1, 'rgba(255, 255, 200, 0)');
+                    this.ctx.fillStyle = moonGlow;
+                    this.ctx.beginPath();
+                    this.ctx.arc(moonX, moonY, 60, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // 달 본체
+                    this.ctx.fillStyle = '#FFF8DC';
+                    this.ctx.beginPath();
+                    this.ctx.arc(moonX, moonY, 30, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // 달 크레이터
+                    this.ctx.fillStyle = 'rgba(200, 200, 180, 0.3)';
+                    this.ctx.beginPath();
+                    this.ctx.arc(moonX - 8, moonY - 5, 8, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.beginPath();
+                    this.ctx.arc(moonX + 10, moonY + 8, 5, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    // 풍성한 잔디 땅
+                    const grassGradient = this.ctx.createLinearGradient(0, this.canvas.height - 100, 0, this.canvas.height);
+                    grassGradient.addColorStop(0, '#2d5016');
+                    grassGradient.addColorStop(0.5, '#3d6d26');
+                    grassGradient.addColorStop(1, '#1a3d0a');
+                    this.ctx.fillStyle = grassGradient;
+                    this.ctx.fillRect(0, this.canvas.height - 100, this.canvas.width, 100);
+
+                    // 잔디 디테일
+                    for (let i = 0; i < 30; i++) {
+                        const grassX = (i * 40 + this.animationFrame * 0.1) % this.canvas.width;
+                        this.ctx.fillStyle = 'rgba(80, 140, 50, 0.5)';
+                        this.ctx.fillRect(grassX, this.canvas.height - 100, 2, 5);
+                        this.ctx.fillRect(grassX + 5, this.canvas.height - 100, 2, 7);
+                        this.ctx.fillRect(grassX + 10, this.canvas.height - 100, 2, 4);
+                    }
+
+                    // 캠핑장 간판 (더 예쁘게)
+                    const signX = 50;
+                    const signY = this.canvas.height - 420;
+
+                    // 간판 기둥
+                    this.ctx.fillStyle = '#654321';
+                    this.ctx.fillRect(signX + 75, signY + 60, 10, 80);
+                    this.ctx.fillRect(signX + 95, signY + 60, 10, 80);
+
+                    // 간판 배경 (그라디언트)
+                    const signGradient = this.ctx.createLinearGradient(signX, signY, signX, signY + 60);
+                    signGradient.addColorStop(0, '#A0522D');
+                    signGradient.addColorStop(0.5, '#8B4513');
+                    signGradient.addColorStop(1, '#6B3410');
+                    this.ctx.fillStyle = signGradient;
+                    this.ctx.fillRect(signX, signY, 180, 60);
+
+                    // 간판 테두리
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.strokeRect(signX, signY, 180, 60);
+
+                    // 간판 글자
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.font = 'bold 24px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.shadowColor = '#000000';
+                    this.ctx.shadowBlur = 5;
+                    this.ctx.fillText('솔뜰 캠핑장', signX + 90, signY + 38);
+                    this.ctx.shadowBlur = 0;
+                    this.ctx.shadowColor = 'transparent';
+                    this.ctx.textAlign = 'left';
+
+                    // 캠프파이어 (중앙) - 더 역동적으로
+                    const fireX = this.canvas.width / 2;
+                    const fireY = this.canvas.height - 150;
+
+                    // 장작 (더 입체적으로)
+                    this.ctx.fillStyle = '#6B4423';
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * Math.PI * 2 / 5) + Math.PI / 2;
+                        const x = fireX + Math.cos(angle) * 25;
+                        const y = fireY + Math.sin(angle) * 15;
+                        this.ctx.save();
+                        this.ctx.translate(x, y);
+                        this.ctx.rotate(angle);
+
+                        // 그림자
+                        this.ctx.fillStyle = '#3d2817';
+                        this.ctx.fillRect(-18, -8, 36, 16);
+
+                        // 장작 본체
+                        const logGradient = this.ctx.createLinearGradient(-18, -8, -18, 8);
+                        logGradient.addColorStop(0, '#8B6F47');
+                        logGradient.addColorStop(0.5, '#6B4423');
+                        logGradient.addColorStop(1, '#4d3319');
+                        this.ctx.fillStyle = logGradient;
+                        this.ctx.fillRect(-18, -7, 36, 14);
+
+                        // 나이테
+                        this.ctx.strokeStyle = '#4d3319';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.beginPath();
+                        this.ctx.arc(16, 0, 3, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                        this.ctx.beginPath();
+                        this.ctx.arc(16, 0, 5, 0, Math.PI * 2);
+                        this.ctx.stroke();
+
+                        this.ctx.restore();
+                    }
+
+                    // 역동적인 불꽃
+                    for (let i = 0; i < 8; i++) {
+                        const flameHeight = (Math.sin(this.animationFrame * 0.15 + i * 0.5) * 15 + 40);
+                        const flameY = fireY - flameHeight;
+                        const flameX = fireX + Math.sin(this.animationFrame * 0.2 + i * 0.7) * 15;
+                        const flameWidth = 12 - (flameHeight - 30) / 5;
+
+                        const gradient = this.ctx.createRadialGradient(flameX, flameY, 0, flameX, flameY, 20);
+                        gradient.addColorStop(0, '#FFFFE0');
+                        gradient.addColorStop(0.3, '#FFFF00');
+                        gradient.addColorStop(0.6, '#FFA500');
+                        gradient.addColorStop(0.8, '#FF4500');
+                        gradient.addColorStop(1, '#8B0000');
+                        this.ctx.fillStyle = gradient;
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(flameX, flameY, flameWidth, flameHeight / 2, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+
+                    // 불똥 효과
+                    for (let i = 0; i < 15; i++) {
+                        const sparkX = fireX + Math.sin(this.animationFrame * 0.1 + i) * 40;
+                        const sparkY = fireY - 60 - (this.animationFrame + i * 10) % 100;
+                        const sparkSize = 2 + Math.random() * 2;
+                        const sparkAlpha = 1 - ((this.animationFrame + i * 10) % 100) / 100;
+                        this.ctx.fillStyle = `rgba(255, 150, 0, ${sparkAlpha})`;
+                        this.ctx.fillRect(sparkX, sparkY, sparkSize, sparkSize);
+                    }
+
+                    // 불빛 반사 (더 강하게)
+                    const glowGradient = this.ctx.createRadialGradient(fireX, fireY, 0, fireX, fireY, 200);
+                    glowGradient.addColorStop(0, 'rgba(255, 140, 0, 0.5)');
+                    glowGradient.addColorStop(0.5, 'rgba(255, 100, 0, 0.3)');
+                    glowGradient.addColorStop(1, 'rgba(255, 80, 0, 0)');
+                    this.ctx.fillStyle = glowGradient;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    // 텐트 (왼쪽 배경에 작게)
+                    const tentX = 100;
+                    const tentY = this.canvas.height - 200;
+                    this.ctx.fillStyle = '#8B4513';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(tentX, tentY);
+                    this.ctx.lineTo(tentX + 40, tentY - 40);
+                    this.ctx.lineTo(tentX + 80, tentY);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                    this.ctx.strokeStyle = '#654321';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.stroke();
+
+                    // 텐트 입구
+                    this.ctx.fillStyle = '#654321';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(tentX + 35, tentY);
+                    this.ctx.lineTo(tentX + 40, tentY - 30);
+                    this.ctx.lineTo(tentX + 45, tentY);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+
+                    // 지율이 (왼쪽)
+                    this.drawJiyul(
+                        this.canvas.width / 2 - 150,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    // 세은이 (중간)
+                    this.drawSeeun(
+                        this.canvas.width / 2 - 30,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    // 하린이 (오른쪽)
+                    this.drawHarin(
+                        this.canvas.width / 2 + 90,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    // 금메달 (목에 걸고)
+                    for (let i = 0; i < 3; i++) {
+                        const medalX = this.canvas.width / 2 - 150 + i * 120;
+                        const medalY = this.canvas.height - 140;
+
+                        // 메달 반짝임
+                        const medalGlow = Math.sin(this.animationFrame * 0.1 + i) * 0.3 + 0.7;
+                        this.ctx.fillStyle = `rgba(255, 215, 0, ${medalGlow * 0.3})`;
+                        this.ctx.beginPath();
+                        this.ctx.arc(medalX + 32, medalY, 12, 0, Math.PI * 2);
+                        this.ctx.fill();
+
+                        // 메달
+                        this.ctx.fillStyle = '#FFD700';
+                        this.ctx.beginPath();
+                        this.ctx.arc(medalX + 32, medalY, 8, 0, Math.PI * 2);
+                        this.ctx.fill();
+
+                        // 메달 테두리
+                        this.ctx.strokeStyle = '#FFA500';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.stroke();
+
+                        // 리본
+                        this.ctx.strokeStyle = '#FF0000';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(medalX + 32, medalY - 8);
+                        this.ctx.lineTo(medalX + 32, medalY - 20);
+                        this.ctx.stroke();
+                    }
+
+                    // 대화 (코믹하고 유쾌하게)
+                    if (this.animationFrame > 60) {
+                        this.drawDialogBox(
+                            '와! 캠프파이어다! 불 보니까 완전 따뜻해!\n오늘 하루 진짜 재밌었어! 금메달도 땄고!',
+                            this.canvas.width / 2 - 150,
+                            this.canvas.height - 370,
+                            '지율'
+                        );
+                    }
+                }
+            },
+
+            // 씬 4-2: 솔뜰 캠핑장 - 세은이 대화
+            {
+                update: () => {
+                    // 배경 재사용 (이전 씬과 동일)
+                    const skyGradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                    skyGradient.addColorStop(0, '#0a0e27');
+                    skyGradient.addColorStop(0.3, '#162447');
+                    skyGradient.addColorStop(0.6, '#1f4068');
+                    skyGradient.addColorStop(1, '#1a237e');
+                    this.ctx.fillStyle = skyGradient;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    const milkyWay = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height / 2);
+                    milkyWay.addColorStop(0, 'rgba(100, 100, 150, 0)');
+                    milkyWay.addColorStop(0.5, 'rgba(150, 150, 200, 0.3)');
+                    milkyWay.addColorStop(1, 'rgba(100, 100, 150, 0)');
+                    this.ctx.fillStyle = milkyWay;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height / 2);
+
+                    for (let i = 0; i < 100; i++) {
+                        const x = (i * 73) % this.canvas.width;
+                        const y = (i * 47) % (this.canvas.height / 2);
+                        const twinkle = Math.sin(this.animationFrame * 0.05 + i) * 0.5 + 0.5;
+                        const size = (i % 3 === 0) ? 3 : 2;
+                        this.ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
+                        this.ctx.fillRect(x, y, size, size);
+
+                        if (i % 10 === 0 && twinkle > 0.8) {
+                            this.ctx.fillStyle = `rgba(255, 255, 150, ${twinkle * 0.5})`;
+                            this.ctx.fillRect(x - 1, y - 1, size + 2, size + 2);
+                        }
+                    }
+
+                    const moonX = this.canvas.width - 150;
+                    const moonY = 100;
+                    const moonGlow = this.ctx.createRadialGradient(moonX, moonY, 30, moonX, moonY, 60);
+                    moonGlow.addColorStop(0, 'rgba(255, 255, 200, 0.8)');
+                    moonGlow.addColorStop(0.5, 'rgba(255, 255, 200, 0.4)');
+                    moonGlow.addColorStop(1, 'rgba(255, 255, 200, 0)');
+                    this.ctx.fillStyle = moonGlow;
+                    this.ctx.beginPath();
+                    this.ctx.arc(moonX, moonY, 60, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    this.ctx.fillStyle = '#FFF8DC';
+                    this.ctx.beginPath();
+                    this.ctx.arc(moonX, moonY, 30, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    this.ctx.fillStyle = 'rgba(200, 200, 180, 0.3)';
+                    this.ctx.beginPath();
+                    this.ctx.arc(moonX - 8, moonY - 5, 8, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.beginPath();
+                    this.ctx.arc(moonX + 10, moonY + 8, 5, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    const grassGradient = this.ctx.createLinearGradient(0, this.canvas.height - 100, 0, this.canvas.height);
+                    grassGradient.addColorStop(0, '#2d5016');
+                    grassGradient.addColorStop(0.5, '#3d6d26');
+                    grassGradient.addColorStop(1, '#1a3d0a');
+                    this.ctx.fillStyle = grassGradient;
+                    this.ctx.fillRect(0, this.canvas.height - 100, this.canvas.width, 100);
+
+                    for (let i = 0; i < 30; i++) {
+                        const grassX = (i * 40 + this.animationFrame * 0.1) % this.canvas.width;
+                        this.ctx.fillStyle = 'rgba(80, 140, 50, 0.5)';
+                        this.ctx.fillRect(grassX, this.canvas.height - 100, 2, 5);
+                        this.ctx.fillRect(grassX + 5, this.canvas.height - 100, 2, 7);
+                        this.ctx.fillRect(grassX + 10, this.canvas.height - 100, 2, 4);
+                    }
+
+                    const signX = 50;
+                    const signY = this.canvas.height - 420;
+                    this.ctx.fillStyle = '#654321';
+                    this.ctx.fillRect(signX + 75, signY + 60, 10, 80);
+                    this.ctx.fillRect(signX + 95, signY + 60, 10, 80);
+
+                    const signGradient = this.ctx.createLinearGradient(signX, signY, signX, signY + 60);
+                    signGradient.addColorStop(0, '#A0522D');
+                    signGradient.addColorStop(0.5, '#8B4513');
+                    signGradient.addColorStop(1, '#6B3410');
+                    this.ctx.fillStyle = signGradient;
+                    this.ctx.fillRect(signX, signY, 180, 60);
+
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.strokeRect(signX, signY, 180, 60);
+
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.font = 'bold 24px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.shadowColor = '#000000';
+                    this.ctx.shadowBlur = 5;
+                    this.ctx.fillText('솔뜰 캠핑장', signX + 90, signY + 38);
+                    this.ctx.shadowBlur = 0;
+                    this.ctx.shadowColor = 'transparent';
+                    this.ctx.textAlign = 'left';
+
+                    const fireX = this.canvas.width / 2;
+                    const fireY = this.canvas.height - 150;
+
+                    this.ctx.fillStyle = '#6B4423';
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * Math.PI * 2 / 5) + Math.PI / 2;
+                        const x = fireX + Math.cos(angle) * 25;
+                        const y = fireY + Math.sin(angle) * 15;
+                        this.ctx.save();
+                        this.ctx.translate(x, y);
+                        this.ctx.rotate(angle);
+
+                        this.ctx.fillStyle = '#3d2817';
+                        this.ctx.fillRect(-18, -8, 36, 16);
+
+                        const logGradient = this.ctx.createLinearGradient(-18, -8, -18, 8);
+                        logGradient.addColorStop(0, '#8B6F47');
+                        logGradient.addColorStop(0.5, '#6B4423');
+                        logGradient.addColorStop(1, '#4d3319');
+                        this.ctx.fillStyle = logGradient;
+                        this.ctx.fillRect(-18, -7, 36, 14);
+
+                        this.ctx.strokeStyle = '#4d3319';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.beginPath();
+                        this.ctx.arc(16, 0, 3, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                        this.ctx.beginPath();
+                        this.ctx.arc(16, 0, 5, 0, Math.PI * 2);
+                        this.ctx.stroke();
+
+                        this.ctx.restore();
+                    }
+
+                    for (let i = 0; i < 8; i++) {
+                        const flameHeight = (Math.sin(this.animationFrame * 0.15 + i * 0.5) * 15 + 40);
+                        const flameY = fireY - flameHeight;
+                        const flameX = fireX + Math.sin(this.animationFrame * 0.2 + i * 0.7) * 15;
+                        const flameWidth = 12 - (flameHeight - 30) / 5;
+
+                        const gradient = this.ctx.createRadialGradient(flameX, flameY, 0, flameX, flameY, 20);
+                        gradient.addColorStop(0, '#FFFFE0');
+                        gradient.addColorStop(0.3, '#FFFF00');
+                        gradient.addColorStop(0.6, '#FFA500');
+                        gradient.addColorStop(0.8, '#FF4500');
+                        gradient.addColorStop(1, '#8B0000');
+                        this.ctx.fillStyle = gradient;
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(flameX, flameY, flameWidth, flameHeight / 2, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+
+                    for (let i = 0; i < 15; i++) {
+                        const sparkX = fireX + Math.sin(this.animationFrame * 0.1 + i) * 40;
+                        const sparkY = fireY - 60 - (this.animationFrame + i * 10) % 100;
+                        const sparkSize = 2 + Math.random() * 2;
+                        const sparkAlpha = 1 - ((this.animationFrame + i * 10) % 100) / 100;
+                        this.ctx.fillStyle = `rgba(255, 150, 0, ${sparkAlpha})`;
+                        this.ctx.fillRect(sparkX, sparkY, sparkSize, sparkSize);
+                    }
+
+                    const glowGradient = this.ctx.createRadialGradient(fireX, fireY, 0, fireX, fireY, 200);
+                    glowGradient.addColorStop(0, 'rgba(255, 140, 0, 0.5)');
+                    glowGradient.addColorStop(0.5, 'rgba(255, 100, 0, 0.3)');
+                    glowGradient.addColorStop(1, 'rgba(255, 80, 0, 0)');
+                    this.ctx.fillStyle = glowGradient;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    const tentX = 100;
+                    const tentY = this.canvas.height - 200;
+                    this.ctx.fillStyle = '#8B4513';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(tentX, tentY);
+                    this.ctx.lineTo(tentX + 40, tentY - 40);
+                    this.ctx.lineTo(tentX + 80, tentY);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                    this.ctx.strokeStyle = '#654321';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.stroke();
+
+                    this.ctx.fillStyle = '#654321';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(tentX + 35, tentY);
+                    this.ctx.lineTo(tentX + 40, tentY - 30);
+                    this.ctx.lineTo(tentX + 45, tentY);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+
+                    this.drawJiyul(
+                        this.canvas.width / 2 - 150,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    this.drawSeeun(
+                        this.canvas.width / 2 - 30,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    this.drawHarin(
+                        this.canvas.width / 2 + 90,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    for (let i = 0; i < 3; i++) {
+                        const medalX = this.canvas.width / 2 - 150 + i * 120;
+                        const medalY = this.canvas.height - 140;
+
+                        const medalGlow = Math.sin(this.animationFrame * 0.1 + i) * 0.3 + 0.7;
+                        this.ctx.fillStyle = `rgba(255, 215, 0, ${medalGlow * 0.3})`;
+                        this.ctx.beginPath();
+                        this.ctx.arc(medalX + 32, medalY, 12, 0, Math.PI * 2);
+                        this.ctx.fill();
+
+                        this.ctx.fillStyle = '#FFD700';
+                        this.ctx.beginPath();
+                        this.ctx.arc(medalX + 32, medalY, 8, 0, Math.PI * 2);
+                        this.ctx.fill();
+
+                        this.ctx.strokeStyle = '#FFA500';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.stroke();
+
+                        this.ctx.strokeStyle = '#FF0000';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(medalX + 32, medalY - 8);
+                        this.ctx.lineTo(medalX + 32, medalY - 20);
+                        this.ctx.stroke();
+                    }
+
+                    // 세은이 대화
+                    this.drawDialogBox(
+                        '하하! 나도 너무 재밌었어! 별도 진짜 예쁘다~\n다음엔 또 같이 캠핑 오자!',
+                        this.canvas.width / 2 - 30,
+                        this.canvas.height - 370,
+                        '세은'
+                    );
+                }
+            },
+
+            // 씬 4-3: 솔뜰 캠핑장 - 하린이 대화
+            {
+                update: () => {
+                    // 배경 재사용
+                    const skyGradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                    skyGradient.addColorStop(0, '#0a0e27');
+                    skyGradient.addColorStop(0.3, '#162447');
+                    skyGradient.addColorStop(0.6, '#1f4068');
+                    skyGradient.addColorStop(1, '#1a237e');
+                    this.ctx.fillStyle = skyGradient;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    const milkyWay = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height / 2);
+                    milkyWay.addColorStop(0, 'rgba(100, 100, 150, 0)');
+                    milkyWay.addColorStop(0.5, 'rgba(150, 150, 200, 0.3)');
+                    milkyWay.addColorStop(1, 'rgba(100, 100, 150, 0)');
+                    this.ctx.fillStyle = milkyWay;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height / 2);
+
+                    for (let i = 0; i < 100; i++) {
+                        const x = (i * 73) % this.canvas.width;
+                        const y = (i * 47) % (this.canvas.height / 2);
+                        const twinkle = Math.sin(this.animationFrame * 0.05 + i) * 0.5 + 0.5;
+                        const size = (i % 3 === 0) ? 3 : 2;
+                        this.ctx.fillStyle = `rgba(255, 255, 255, ${twinkle})`;
+                        this.ctx.fillRect(x, y, size, size);
+
+                        if (i % 10 === 0 && twinkle > 0.8) {
+                            this.ctx.fillStyle = `rgba(255, 255, 150, ${twinkle * 0.5})`;
+                            this.ctx.fillRect(x - 1, y - 1, size + 2, size + 2);
+                        }
+                    }
+
+                    const moonX = this.canvas.width - 150;
+                    const moonY = 100;
+                    const moonGlow = this.ctx.createRadialGradient(moonX, moonY, 30, moonX, moonY, 60);
+                    moonGlow.addColorStop(0, 'rgba(255, 255, 200, 0.8)');
+                    moonGlow.addColorStop(0.5, 'rgba(255, 255, 200, 0.4)');
+                    moonGlow.addColorStop(1, 'rgba(255, 255, 200, 0)');
+                    this.ctx.fillStyle = moonGlow;
+                    this.ctx.beginPath();
+                    this.ctx.arc(moonX, moonY, 60, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    this.ctx.fillStyle = '#FFF8DC';
+                    this.ctx.beginPath();
+                    this.ctx.arc(moonX, moonY, 30, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    this.ctx.fillStyle = 'rgba(200, 200, 180, 0.3)';
+                    this.ctx.beginPath();
+                    this.ctx.arc(moonX - 8, moonY - 5, 8, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.beginPath();
+                    this.ctx.arc(moonX + 10, moonY + 8, 5, 0, Math.PI * 2);
+                    this.ctx.fill();
+
+                    const grassGradient = this.ctx.createLinearGradient(0, this.canvas.height - 100, 0, this.canvas.height);
+                    grassGradient.addColorStop(0, '#2d5016');
+                    grassGradient.addColorStop(0.5, '#3d6d26');
+                    grassGradient.addColorStop(1, '#1a3d0a');
+                    this.ctx.fillStyle = grassGradient;
+                    this.ctx.fillRect(0, this.canvas.height - 100, this.canvas.width, 100);
+
+                    for (let i = 0; i < 30; i++) {
+                        const grassX = (i * 40 + this.animationFrame * 0.1) % this.canvas.width;
+                        this.ctx.fillStyle = 'rgba(80, 140, 50, 0.5)';
+                        this.ctx.fillRect(grassX, this.canvas.height - 100, 2, 5);
+                        this.ctx.fillRect(grassX + 5, this.canvas.height - 100, 2, 7);
+                        this.ctx.fillRect(grassX + 10, this.canvas.height - 100, 2, 4);
+                    }
+
+                    const signX = 50;
+                    const signY = this.canvas.height - 420;
+                    this.ctx.fillStyle = '#654321';
+                    this.ctx.fillRect(signX + 75, signY + 60, 10, 80);
+                    this.ctx.fillRect(signX + 95, signY + 60, 10, 80);
+
+                    const signGradient = this.ctx.createLinearGradient(signX, signY, signX, signY + 60);
+                    signGradient.addColorStop(0, '#A0522D');
+                    signGradient.addColorStop(0.5, '#8B4513');
+                    signGradient.addColorStop(1, '#6B3410');
+                    this.ctx.fillStyle = signGradient;
+                    this.ctx.fillRect(signX, signY, 180, 60);
+
+                    this.ctx.strokeStyle = '#FFD700';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.strokeRect(signX, signY, 180, 60);
+
+                    this.ctx.fillStyle = '#FFD700';
+                    this.ctx.font = 'bold 24px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.shadowColor = '#000000';
+                    this.ctx.shadowBlur = 5;
+                    this.ctx.fillText('솔뜰 캠핑장', signX + 90, signY + 38);
+                    this.ctx.shadowBlur = 0;
+                    this.ctx.shadowColor = 'transparent';
+                    this.ctx.textAlign = 'left';
+
+                    const fireX = this.canvas.width / 2;
+                    const fireY = this.canvas.height - 150;
+
+                    this.ctx.fillStyle = '#6B4423';
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * Math.PI * 2 / 5) + Math.PI / 2;
+                        const x = fireX + Math.cos(angle) * 25;
+                        const y = fireY + Math.sin(angle) * 15;
+                        this.ctx.save();
+                        this.ctx.translate(x, y);
+                        this.ctx.rotate(angle);
+
+                        this.ctx.fillStyle = '#3d2817';
+                        this.ctx.fillRect(-18, -8, 36, 16);
+
+                        const logGradient = this.ctx.createLinearGradient(-18, -8, -18, 8);
+                        logGradient.addColorStop(0, '#8B6F47');
+                        logGradient.addColorStop(0.5, '#6B4423');
+                        logGradient.addColorStop(1, '#4d3319');
+                        this.ctx.fillStyle = logGradient;
+                        this.ctx.fillRect(-18, -7, 36, 14);
+
+                        this.ctx.strokeStyle = '#4d3319';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.beginPath();
+                        this.ctx.arc(16, 0, 3, 0, Math.PI * 2);
+                        this.ctx.stroke();
+                        this.ctx.beginPath();
+                        this.ctx.arc(16, 0, 5, 0, Math.PI * 2);
+                        this.ctx.stroke();
+
+                        this.ctx.restore();
+                    }
+
+                    for (let i = 0; i < 8; i++) {
+                        const flameHeight = (Math.sin(this.animationFrame * 0.15 + i * 0.5) * 15 + 40);
+                        const flameY = fireY - flameHeight;
+                        const flameX = fireX + Math.sin(this.animationFrame * 0.2 + i * 0.7) * 15;
+                        const flameWidth = 12 - (flameHeight - 30) / 5;
+
+                        const gradient = this.ctx.createRadialGradient(flameX, flameY, 0, flameX, flameY, 20);
+                        gradient.addColorStop(0, '#FFFFE0');
+                        gradient.addColorStop(0.3, '#FFFF00');
+                        gradient.addColorStop(0.6, '#FFA500');
+                        gradient.addColorStop(0.8, '#FF4500');
+                        gradient.addColorStop(1, '#8B0000');
+                        this.ctx.fillStyle = gradient;
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(flameX, flameY, flameWidth, flameHeight / 2, 0, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+
+                    for (let i = 0; i < 15; i++) {
+                        const sparkX = fireX + Math.sin(this.animationFrame * 0.1 + i) * 40;
+                        const sparkY = fireY - 60 - (this.animationFrame + i * 10) % 100;
+                        const sparkSize = 2 + Math.random() * 2;
+                        const sparkAlpha = 1 - ((this.animationFrame + i * 10) % 100) / 100;
+                        this.ctx.fillStyle = `rgba(255, 150, 0, ${sparkAlpha})`;
+                        this.ctx.fillRect(sparkX, sparkY, sparkSize, sparkSize);
+                    }
+
+                    const glowGradient = this.ctx.createRadialGradient(fireX, fireY, 0, fireX, fireY, 200);
+                    glowGradient.addColorStop(0, 'rgba(255, 140, 0, 0.5)');
+                    glowGradient.addColorStop(0.5, 'rgba(255, 100, 0, 0.3)');
+                    glowGradient.addColorStop(1, 'rgba(255, 80, 0, 0)');
+                    this.ctx.fillStyle = glowGradient;
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                    const tentX = 100;
+                    const tentY = this.canvas.height - 200;
+                    this.ctx.fillStyle = '#8B4513';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(tentX, tentY);
+                    this.ctx.lineTo(tentX + 40, tentY - 40);
+                    this.ctx.lineTo(tentX + 80, tentY);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+                    this.ctx.strokeStyle = '#654321';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.stroke();
+
+                    this.ctx.fillStyle = '#654321';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(tentX + 35, tentY);
+                    this.ctx.lineTo(tentX + 40, tentY - 30);
+                    this.ctx.lineTo(tentX + 45, tentY);
+                    this.ctx.closePath();
+                    this.ctx.fill();
+
+                    this.drawJiyul(
+                        this.canvas.width / 2 - 150,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    this.drawSeeun(
+                        this.canvas.width / 2 - 30,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    this.drawHarin(
+                        this.canvas.width / 2 + 90,
+                        this.canvas.height - 170,
+                        'idle',
+                        0,
+                        4
+                    );
+
+                    for (let i = 0; i < 3; i++) {
+                        const medalX = this.canvas.width / 2 - 150 + i * 120;
+                        const medalY = this.canvas.height - 140;
+
+                        const medalGlow = Math.sin(this.animationFrame * 0.1 + i) * 0.3 + 0.7;
+                        this.ctx.fillStyle = `rgba(255, 215, 0, ${medalGlow * 0.3})`;
+                        this.ctx.beginPath();
+                        this.ctx.arc(medalX + 32, medalY, 12, 0, Math.PI * 2);
+                        this.ctx.fill();
+
+                        this.ctx.fillStyle = '#FFD700';
+                        this.ctx.beginPath();
+                        this.ctx.arc(medalX + 32, medalY, 8, 0, Math.PI * 2);
+                        this.ctx.fill();
+
+                        this.ctx.strokeStyle = '#FFA500';
+                        this.ctx.lineWidth = 1;
+                        this.ctx.stroke();
+
+                        this.ctx.strokeStyle = '#FF0000';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(medalX + 32, medalY - 8);
+                        this.ctx.lineTo(medalX + 32, medalY - 20);
+                        this.ctx.stroke();
+                    }
+
+                    // 하린이 대화
+                    this.drawDialogBox(
+                        '맞아! 오늘 ABC 코치님도 우리 축하해주셨잖아!\n영어도 탁구도 완전 재밌어졌어! 호호호~',
+                        this.canvas.width / 2 + 90,
+                        this.canvas.height - 370,
+                        '하린'
+                    );
+                }
+            },
+
+            // 씬 5: THE END
             {
                 update: () => {
                     // 무지개 배경
@@ -3763,6 +4279,7 @@ class StoryScene {
                     this.ctx.shadowBlur = 5;
                     this.ctx.fillText('나는 너의 수호천사, sunzero...', this.canvas.width / 2, this.canvas.height - 150);
                     this.ctx.shadowBlur = 0;
+                    this.ctx.shadowColor = 'transparent';
                 }
             },
 
@@ -3780,6 +4297,7 @@ class StoryScene {
                     this.ctx.fillText('지율아, 넌 이제 영어를 마스터했어.', this.canvas.width / 2, this.canvas.height - 180);
                     this.ctx.fillText('하지만 이것은 시작에 불과하지...', this.canvas.width / 2, this.canvas.height - 140);
                     this.ctx.shadowBlur = 0;
+                    this.ctx.shadowColor = 'transparent';
                 }
             },
 
@@ -3799,6 +4317,7 @@ class StoryScene {
                     this.ctx.font = 'bold 22px Arial';
                     this.ctx.fillText('그때가 오면, 진짜 싸움이 시작되는 거지...', this.canvas.width / 2, this.canvas.height - 140);
                     this.ctx.shadowBlur = 0;
+                    this.ctx.shadowColor = 'transparent';
                 }
             },
 
