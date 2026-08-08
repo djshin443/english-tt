@@ -258,27 +258,76 @@ class StoryScene {
 
     // 배경 그리기 (하늘)
     drawSkyBackground(color1 = '#87CEEB', color2 = '#E0F6FF') {
-        // 전체 캔버스 크기 사용 (스케일 없음)
+        // 그라데이션 대신 픽셀 색 밴드 + 경계 디더링 (메탈슬러그풍)
         const canvasWidth = this.canvas.width;
         const canvasHeight = this.canvas.height;
-        const gradient = this.ctx.createLinearGradient(0, 0, 0, canvasHeight);
-        gradient.addColorStop(0, color1);
-        gradient.addColorStop(1, color2);
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        const steps = 6;
+        const c1 = this.hexToRgb(color1), c2 = this.hexToRgb(color2);
+        const bandH = Math.ceil(canvasHeight / steps);
+        const bands = [];
+        for (let i = 0; i < steps; i++) {
+            const t = i / (steps - 1);
+            bands.push(`rgb(${Math.round(c1.r + (c2.r - c1.r) * t)},${Math.round(c1.g + (c2.g - c1.g) * t)},${Math.round(c1.b + (c2.b - c1.b) * t)})`);
+        }
+        bands.forEach((color, i) => {
+            this.ctx.fillStyle = color;
+            this.ctx.fillRect(0, i * bandH, canvasWidth, bandH + 1);
+        });
+        // 밴드 경계 체커 디더링
+        const dp = 6;
+        for (let i = 1; i < steps; i++) {
+            this.ctx.fillStyle = bands[i - 1];
+            const by = i * bandH;
+            for (let x = 0; x < canvasWidth; x += dp * 2) {
+                this.ctx.fillRect(x + ((i % 2) ? dp : 0), by, dp, dp);
+            }
+        }
+    }
+
+    // #RRGGBB → {r,g,b}
+    hexToRgb(hex) {
+        const n = parseInt(String(hex).replace('#', ''), 16);
+        return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    }
+
+    // 도트 별 (이모지 ✨ 대체) - 십자 + 대각 스파클
+    drawPixelStar(x, y, size = 20, color = '#FFE55A') {
+        const s = Math.max(2, Math.round(size / 6));
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(x - s / 2, y - s * 2, s, s * 4);
+        this.ctx.fillRect(x - s * 2, y - s / 2, s * 4, s);
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(x - s / 2, y - s * 3, s, s);
+        this.ctx.fillRect(x - s / 2, y + s * 2, s, s);
+        this.ctx.fillRect(x - s * 3, y - s / 2, s, s);
+        this.ctx.fillRect(x + s * 2, y - s / 2, s, s);
+    }
+
+    // 도트 음표 (이모지 ♪ 대체)
+    drawPixelNote(x, y, size = 20) {
+        const s = Math.max(2, Math.round(size / 7));
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(x, y - s * 5, s, s * 5);          // 기둥
+        this.ctx.fillRect(x + s, y - s * 5, s * 2, s);      // 깃발
+        this.ctx.fillRect(x - s * 2, y, s * 3, s * 2);      // 머리
+        this.ctx.fillStyle = '#FFC22B';
+        this.ctx.fillRect(x - s * 2, y, s, s);              // 하이라이트
     }
 
     // 구름 그리기
     drawCloud(x, y, size = 1) {
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        // 구름 몸체
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, 20 * size, 0, Math.PI * 2);
-        this.ctx.arc(x + 25 * size, y, 25 * size, 0, Math.PI * 2);
-        this.ctx.arc(x + 50 * size, y, 20 * size, 0, Math.PI * 2);
-        this.ctx.arc(x + 15 * size, y - 15 * size, 15 * size, 0, Math.PI * 2);
-        this.ctx.arc(x + 35 * size, y - 15 * size, 15 * size, 0, Math.PI * 2);
-        this.ctx.fill();
+        // 도트 구름 스프라이트 (외곽선 + 명암 포함)
+        const CLOUD = [
+            [0,0,0,1,1,1,1,0,0,0,0,0,0,0],
+            [0,1,1,2,2,2,2,1,1,0,0,1,1,0],
+            [1,2,2,2,2,2,2,2,2,1,1,2,2,1],
+            [1,2,2,2,2,2,2,2,2,2,2,2,2,1],
+            [0,1,1,2,2,2,2,2,2,2,2,1,1,0],
+            [0,0,0,1,1,1,1,1,1,1,1,0,0,0]
+        ];
+        const COLORS = { 0: null, 1: '#C8D4E0', 2: '#FFFFFF' };
+        const scale = Math.max(2, Math.round(5 * size));
+        this.drawPixelSprite(CLOUD, COLORS, Math.round(x - 7 * scale), Math.round(y - 3 * scale), scale, false);
     }
 
     // 땅 그리기
@@ -287,24 +336,30 @@ class StoryScene {
         const canvasWidth = this.canvas.width;
         const canvasHeight = this.canvas.height;
 
-        // 잔디
-        this.ctx.fillStyle = '#228B22';
-        this.ctx.fillRect(0, canvasHeight - 100, canvasWidth, 100);
-
-        // 흙
-        this.ctx.fillStyle = '#8B4513';
-        this.ctx.fillRect(0, canvasHeight - 80, canvasWidth, 80);
-
-        // 잔디 디테일
-        this.ctx.strokeStyle = '#006400';
-        this.ctx.lineWidth = 2;
-        for (let i = 0; i < canvasWidth; i += 20) {
-            this.ctx.beginPath();
-            this.ctx.moveTo(i, canvasHeight - 100);
-            this.ctx.lineTo(i + 5, canvasHeight - 105);
-            this.ctx.lineTo(i + 10, canvasHeight - 100);
-            this.ctx.stroke();
+        // 픽셀 타일 지면 (풀 / 흙 / 자갈 3층, 고정 해시 배치)
+        const gp = 8;
+        const groundTop = canvasHeight - 100;
+        const hash2 = (ix, iy) => ((ix * 73856093) ^ (iy * 19349663)) >>> 0;
+        for (let gy = groundTop; gy < canvasHeight; gy += gp) {
+            const iy = Math.floor((gy - groundTop) / gp);
+            for (let gx = 0; gx < canvasWidth; gx += gp) {
+                const ix = Math.floor(gx / gp);
+                let color;
+                if (iy < 2) {
+                    color = (hash2(ix, iy) % 4 === 0) ? '#5FA33C' : '#3E7C2F';   // 풀
+                } else if (iy === 2) {
+                    color = '#6B4A2B';
+                } else {
+                    const r = hash2(ix, iy) % 9;
+                    color = r === 0 ? '#7C5836' : (r === 1 ? '#4A3018' : '#58391F');
+                }
+                this.ctx.fillStyle = color;
+                this.ctx.fillRect(gx, gy, gp, gp);
+            }
         }
+        // 지면 상단 어두운 경계선
+        this.ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        this.ctx.fillRect(0, groundTop, canvasWidth, 3);
     }
 
     // UFO 그리기 (픽셀 아트 스타일)
@@ -788,7 +843,7 @@ class StoryScene {
                     for (let i = 0; i < 3; i++) {
                         const noteY = this.canvas.height - 200 - Math.sin(this.animationFrame * 0.05 + i) * 20;
                         this.ctx.font = '20px Arial';
-                        this.ctx.fillText('♪', this.canvas.width / 2 + 50 + i * 20, noteY);
+                        this.drawPixelNote(this.canvas.width / 2 + 50 + i * 20, noteY, 20);
                     }
                 }
             },
@@ -999,7 +1054,7 @@ class StoryScene {
                             const starX = this.canvas.width / 2 + Math.random() * 100 - 50;
                             const starY = bossY - 20 + Math.random() * 40;
                             this.ctx.font = '20px Arial';
-                            this.ctx.fillText('✨', starX, starY);
+                            this.drawPixelStar(starX, starY, 20);
                         }
                     }
 
@@ -1098,7 +1153,7 @@ class StoryScene {
                             const starX = this.canvas.width / 2 + Math.random() * 100 - 50;
                             const starY = bossY - 20 + Math.random() * 40;
                             this.ctx.font = '20px Arial';
-                            this.ctx.fillText('✨', starX, starY);
+                            this.drawPixelStar(starX, starY, 20);
                         }
                     }
 
@@ -1197,7 +1252,7 @@ class StoryScene {
                             const starX = this.canvas.width / 2 + Math.random() * 100 - 50;
                             const starY = bossY - 20 + Math.random() * 40;
                             this.ctx.font = '20px Arial';
-                            this.ctx.fillText('✨', starX, starY);
+                            this.drawPixelStar(starX, starY, 20);
                         }
                     }
 
@@ -1240,7 +1295,7 @@ class StoryScene {
                         const y = 50 + Math.sin(this.animationFrame * 0.05 + i) * 30;
                         this.ctx.fillStyle = '#FFD700';
                         this.ctx.font = '20px Arial';
-                        this.ctx.fillText('✨', x, y);
+                        this.drawPixelStar(x, y, 20);
                     }
 
                     // 땅
@@ -1425,7 +1480,7 @@ class StoryScene {
                             const sparkY = swordY + Math.sin(angle) * 70;
                             this.ctx.fillStyle = ['#FFD700', '#FF69B4', '#BA55D3'][i % 3];
                             this.ctx.font = '20px Arial';
-                            this.ctx.fillText('✨', sparkX, sparkY);
+                            this.drawPixelStar(sparkX, sparkY, 20);
                         }
                     }
 
@@ -1451,7 +1506,7 @@ class StoryScene {
                         const y = 50 + Math.sin(this.animationFrame * 0.05 + i) * 30;
                         this.ctx.fillStyle = '#FFD700';
                         this.ctx.font = '20px Arial';
-                        this.ctx.fillText('✨', x, y);
+                        this.drawPixelStar(x, y, 20);
                     }
 
                     // 땅
@@ -1531,7 +1586,7 @@ class StoryScene {
                         const y = 50 + Math.sin(this.animationFrame * 0.05 + i) * 30;
                         this.ctx.fillStyle = '#FFD700';
                         this.ctx.font = '20px Arial';
-                        this.ctx.fillText('✨', x, y);
+                        this.drawPixelStar(x, y, 20);
                     }
 
                     // 땅
@@ -1643,7 +1698,7 @@ class StoryScene {
                         const sparkY = swordY + Math.sin(angle) * 70;
                         this.ctx.fillStyle = ['#FFD700', '#FF69B4', '#BA55D3'][i % 3];
                         this.ctx.font = '20px Arial';
-                        this.ctx.fillText('✨', sparkX, sparkY);
+                        this.drawPixelStar(sparkX, sparkY, 20);
                     }
 
                     // 선생님 대사
@@ -1668,7 +1723,7 @@ class StoryScene {
                         const y = 50 + Math.sin(this.animationFrame * 0.05 + i) * 30;
                         this.ctx.fillStyle = '#FFD700';
                         this.ctx.font = '20px Arial';
-                        this.ctx.fillText('✨', x, y);
+                        this.drawPixelStar(x, y, 20);
                     }
 
                     // 땅
@@ -1989,7 +2044,7 @@ class StoryScene {
                             const sparkY = weaponY + Math.sin(angle) * 60;
                             this.ctx.fillStyle = '#00FF00';
                             this.ctx.font = '20px Arial';
-                            this.ctx.fillText('✨', sparkX, sparkY);
+                            this.drawPixelStar(sparkX, sparkY, 20);
                         }
                     }
 
@@ -2817,8 +2872,8 @@ class StoryScene {
 
                     // 반짝이는 별 (점수판 장식)
                     this.ctx.font = '20px Arial';
-                    this.ctx.fillText('✨', scoreboardX + 15, scoreboardY + 25);
-                    this.ctx.fillText('✨', scoreboardX + 215, scoreboardY + 25);
+                    this.drawPixelStar(scoreboardX + 15, scoreboardY + 25, 20);
+                    this.drawPixelStar(scoreboardX + 215, scoreboardY + 25, 20);
 
                     // 점수 텍스트
                     this.ctx.fillStyle = '#FF1493';
@@ -4658,7 +4713,7 @@ class StoryScene {
             this.ctx.fillStyle = `rgba(255, 255, 255, ${starAlpha})`;
             this.ctx.font = '20px Arial';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('✨', sx, sy);
+            this.drawPixelStar(sx, sy, 20);
         }
     }
 
@@ -4798,71 +4853,59 @@ class StoryScene {
             const btnX = canvasWidth - btnWidth - 30;
             const btnY = canvasHeight - btnHeight - 30;
 
-            // 애니메이션 효과 (깜빡임)
-            const alpha = 0.7 + Math.sin(this.animationFrame * 0.1) * 0.3;
-
-            // 버튼 배경
-            this.ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`; // 황금색
+            // 도트 버튼 (깜빡임)
+            const px = 4;
+            const blink = Math.floor(this.animationFrame / 20) % 2 === 0;
+            this.ctx.fillStyle = blink ? '#FFC22B' : '#B8860B';
             this.ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
-
-            // 버튼 테두리
-            this.ctx.strokeStyle = '#FFFFFF';
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
-
-            // 버튼 텍스트
-            this.ctx.fillStyle = '#000000';
-            this.ctx.font = 'bold 18px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.fillText('Click', btnX + btnWidth/2, btnY + btnHeight/2);
+            this.ctx.fillStyle = '#1A1206';
+            for (let bx = 0; bx < btnWidth; bx += px * 2) {
+                this.ctx.fillRect(btnX + bx, btnY, px, px);
+                this.ctx.fillRect(btnX + bx, btnY + btnHeight - px, px, px);
+            }
+            for (let by = 0; by < btnHeight; by += px * 2) {
+                this.ctx.fillRect(btnX, btnY + by, px, px);
+                this.ctx.fillRect(btnX + btnWidth - px, btnY + by, px, px);
+            }
+            if (window.PixelText) {
+                // 버튼 폭에 맞게 자동 축소
+                const cOpts = { fontPx: 12, scale: 2, palette: 'white' };
+                const cm = PixelText.measure('▶ 계속', cOpts);
+                const cs = Math.min(0.7, (btnWidth - 24) / cm.width);
+                PixelText.draw(this.ctx, '▶ 계속', btnX + btnWidth / 2, btnY + 11, {
+                    ...cOpts, drawScale: cs, shadowOffset: 2
+                });
+            }
         }
 
-        // SKIP 버튼 그리기 (오른쪽 상단)
-        const skipBtnGradient = this.ctx.createLinearGradient(
-            this.skipButton.x,
-            this.skipButton.y,
-            this.skipButton.x + this.skipButton.width,
-            this.skipButton.y + this.skipButton.height
-        );
-
-        if (this.skipButton.hovered) {
-            skipBtnGradient.addColorStop(0, 'rgba(200, 100, 250, 0.9)');
-            skipBtnGradient.addColorStop(1, 'rgba(250, 150, 250, 0.9)');
-        } else {
-            skipBtnGradient.addColorStop(0, 'rgba(147, 112, 219, 0.8)');
-            skipBtnGradient.addColorStop(1, 'rgba(221, 160, 221, 0.8)');
+        // SKIP 버튼 (강판 도트 패널 + 스프라이트 텍스트)
+        const sb = this.skipButton;
+        const sp = 3;
+        this.ctx.fillStyle = sb.hovered ? 'rgba(40, 46, 30, 0.95)' : 'rgba(18, 22, 14, 0.9)';
+        this.ctx.fillRect(sb.x, sb.y, sb.width, sb.height);
+        this.ctx.fillStyle = sb.hovered ? '#FFE55A' : '#FFC22B';
+        for (let bx = 0; bx < sb.width; bx += sp * 2) {
+            this.ctx.fillRect(sb.x + bx, sb.y, sp, sp);
+            this.ctx.fillRect(sb.x + bx, sb.y + sb.height - sp, sp, sp);
         }
-
-        // 버튼 배경
-        this.ctx.fillStyle = skipBtnGradient;
-        this.ctx.fillRect(
-            this.skipButton.x,
-            this.skipButton.y,
-            this.skipButton.width,
-            this.skipButton.height
-        );
-
-        // 버튼 테두리
-        this.ctx.strokeStyle = '#FFFFFF';
-        this.ctx.lineWidth = 3;
-        this.ctx.strokeRect(
-            this.skipButton.x,
-            this.skipButton.y,
-            this.skipButton.width,
-            this.skipButton.height
-        );
-
-        // 버튼 텍스트
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.font = 'bold 16px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillText(
-            'SKIP ⏭',
-            this.skipButton.x + this.skipButton.width / 2,
-            this.skipButton.y + this.skipButton.height / 2
-        );
+        for (let by = 0; by < sb.height; by += sp * 2) {
+            this.ctx.fillRect(sb.x, sb.y + by, sp, sp);
+            this.ctx.fillRect(sb.x + sb.width - sp, sb.y + by, sp, sp);
+        }
+        if (window.PixelText) {
+            PixelText.draw(this.ctx, 'SKIP', sb.x + sb.width / 2 - 8, sb.y + sb.height / 2 - 9, {
+                fontPx: 12, scale: 2, palette: 'gold', drawScale: 0.75, shadowOffset: 2
+            });
+            // 도트 더블 화살표 (⏭ 대체)
+            const ax = sb.x + sb.width - 22, ay = sb.y + sb.height / 2;
+            this.ctx.fillStyle = '#FFFFFF';
+            for (let k = 0; k < 2; k++) {
+                const ox = ax + k * 7;
+                for (let i = 0; i < 4; i++) {
+                    this.ctx.fillRect(ox + i * 1.5, ay - 4 + i, 2, Math.max(2, 8 - i * 2));
+                }
+            }
+        }
     }
 
     // 스킵
