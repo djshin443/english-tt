@@ -376,8 +376,33 @@ class StoryScene {
         });
     }
 
+    // 장면 전체를 저해상도 → 최근접 확대로 재샘플링해 도트 그래픽화
+    pixelatePass() {
+        const factor = 3;
+        if (!this._pixCanvas) {
+            this._pixCanvas = document.createElement('canvas');
+        }
+        const pc = this._pixCanvas;
+        const w = this.canvas.width, h = this.canvas.height;
+        if (w < factor || h < factor) return;
+        pc.width = Math.max(1, Math.floor(w / factor));
+        pc.height = Math.max(1, Math.floor(h / factor));
+        const pctx = pc.getContext('2d');
+        pctx.imageSmoothingEnabled = false;
+        pctx.drawImage(this.canvas, 0, 0, pc.width, pc.height);
+        this.ctx.save();
+        this.ctx.imageSmoothingEnabled = false;
+        this.ctx.drawImage(pc, 0, 0, pc.width, pc.height, 0, 0, w, h);
+        this.ctx.restore();
+    }
+
     // 대화 상자 그리기 (픽셀 스타일)
     drawDialogBox(text, x, y, speaker = '') {
+        // 픽셀레이트 패스 이후에 선명하게 그리도록 지연 큐에 적재
+        if (this._deferDialogs) {
+            this._dialogQueue.push([text, x, y, speaker]);
+            return;
+        }
         // 컨텍스트 상태 저장
         this.ctx.save();
 
@@ -406,33 +431,53 @@ class StoryScene {
         // 화면 밖으로 나가지 않도록 조정
         const finalBoxX = Math.max(10, Math.min(boxX, this.canvas.width - boxWidth - 10));
 
-        // 박스 배경
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+        // 메탈슬러그풍 픽셀 패널: 어두운 강판 배경 + 금색 도트 테두리 + 리벳
+        const px = 4; // 도트 크기
+        this.ctx.fillStyle = 'rgba(18, 22, 14, 0.92)';   // 다크 올리브 강판
         this.ctx.fillRect(finalBoxX, boxY, boxWidth, boxHeight);
+        this.ctx.fillStyle = '#FFC22B';                   // 금색 도트 테두리
+        for (let bx = 0; bx < boxWidth; bx += px * 2) {
+            this.ctx.fillRect(finalBoxX + bx, boxY, px, px);
+            this.ctx.fillRect(finalBoxX + bx, boxY + boxHeight - px, px, px);
+        }
+        for (let by = 0; by < boxHeight; by += px * 2) {
+            this.ctx.fillRect(finalBoxX, boxY + by, px, px);
+            this.ctx.fillRect(finalBoxX + boxWidth - px, boxY + by, px, px);
+        }
+        // 모서리 리벳
+        this.ctx.fillStyle = '#8A9A6A';
+        [[px, px], [boxWidth - px * 2, px], [px, boxHeight - px * 2], [boxWidth - px * 2, boxHeight - px * 2]].forEach(([rx, ry]) => {
+            this.ctx.fillRect(finalBoxX + rx, boxY + ry, px, px);
+        });
 
-        // 테두리
-        this.ctx.strokeStyle = '#FFFFFF';
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(finalBoxX + 2, boxY + 2, boxWidth - 4, boxHeight - 4);
-
-        // 화자 이름
+        // 화자 이름 (스프라이트 텍스트)
         let textY = boxY + padding;
         if (speaker) {
-            this.ctx.fillStyle = '#FFD700';
-            this.ctx.font = 'bold 16px Arial';
-            this.ctx.fillText(speaker, finalBoxX + padding, textY + 15);
+            if (window.PixelText) {
+                PixelText.draw(this.ctx, speaker, finalBoxX + padding, textY, {
+                    fontPx: 12, scale: 2, palette: 'gold', drawScale: 0.8,
+                    align: 'left', shadowOffset: 2
+                });
+            } else {
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.font = 'bold 16px Arial';
+                this.ctx.fillText(speaker, finalBoxX + padding, textY + 15);
+            }
             textY += nameHeight;
         }
 
-        // 대화 내용
-        this.ctx.fillStyle = '#FFFFFF';
-        this.ctx.font = '14px Arial';
+        // 대화 내용 (스프라이트 텍스트 - 줄 단위 캐싱)
         lines.forEach((line, index) => {
-            this.ctx.fillText(
-                line,
-                finalBoxX + padding,
-                textY + 15 + index * lineHeight
-            );
+            if (window.PixelText && line.trim()) {
+                PixelText.draw(this.ctx, line, finalBoxX + padding, textY + 4 + index * lineHeight, {
+                    fontPx: 12, scale: 2, palette: 'white', drawScale: 0.65,
+                    align: 'left'
+                });
+            } else if (line.trim()) {
+                this.ctx.fillStyle = '#FFFFFF';
+                this.ctx.font = '14px Arial';
+                this.ctx.fillText(line, finalBoxX + padding, textY + 15 + index * lineHeight);
+            }
         });
 
         // 컨텍스트 상태 복원
@@ -541,7 +586,7 @@ class StoryScene {
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('영어학원', 150, this.canvas.height - 200);
+                    if (window.PixelText) { PixelText.draw(this.ctx, '영어학원', 150, this.canvas.height - 212, { fontPx: 12, scale: 2, palette: 'steel', drawScale: 0.9, shadowOffset: 2 }); } else { this.ctx.fillText('영어학원', 150, this.canvas.height - 200); }
                     this.ctx.textAlign = 'left';
 
                     // 지율이 (걸어나오는 애니메이션)
@@ -578,7 +623,7 @@ class StoryScene {
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('영어학원', 150, this.canvas.height - 200);
+                    if (window.PixelText) { PixelText.draw(this.ctx, '영어학원', 150, this.canvas.height - 212, { fontPx: 12, scale: 2, palette: 'steel', drawScale: 0.9, shadowOffset: 2 }); } else { this.ctx.fillText('영어학원', 150, this.canvas.height - 200); }
                     this.ctx.textAlign = 'left';
 
                     // 지율이
@@ -592,7 +637,7 @@ class StoryScene {
 
                     // 대화
                     this.drawDialogBox(
-                        '휴~ 오늘도 영어 공부 끝!\n이제 탁구 레슨 가야지!',
+                        '오늘의 영어 훈련 임무 완료!\n다음 작전은 탁구 특훈이다, 출발!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
                         '지율'
@@ -704,7 +749,7 @@ class StoryScene {
 
                     // 대화
                     this.drawDialogBox(
-                        '오늘은 스매싱 기술 배운대!\n완전 기대된다!',
+                        '오늘은 필살 스매싱 훈련의 날!\n작전 개시다. 가자!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
                         '지율'
@@ -756,7 +801,7 @@ class StoryScene {
 
                     // 대화
                     this.drawDialogBox(
-                        '으악! 뭐야 저거?! UFO?!',
+                        '비상!! 상공에 미확인 비행물체!\n...UFO다! 적기 출현!!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
                         '지율'
@@ -797,7 +842,7 @@ class StoryScene {
 
                     // 대화
                     this.drawDialogBox(
-                        '쿠하하하! 우리는 영어 제국에서 왔다!',
+                        '쿠하하하! 영어 제국 침공군이 도착했다!\n이 마을은 이제 우리 영토다!',
                         this.canvas.width / 2,
                         50,
                         '???'
@@ -896,7 +941,7 @@ class StoryScene {
 
                     // ABC 대마왕 첫 번째 대사
                     this.drawDialogBox(
-                        '안녕~! 나는 ABC 대마왕!\n영어 친구들아 모여라! 크크크!',
+                        '나는 영어 제국 총사령관, ABC 대마왕!\n알파벳 군단이여, 총공격하라! 크크크!',
                         this.canvas.width / 2,
                         this.canvas.height - 250,
                         'ABC 대마왕'
@@ -995,7 +1040,7 @@ class StoryScene {
 
                     // ABC 대마왕 두 번째 대사
                     this.drawDialogBox(
-                        '이제부터 너희는 영어만 공부해야 해!\n탁구는 금지! 오직 영어 공부만! 하하하!',
+                        '지금부터 탁구 금지령을 선포한다!\n모두 영어 문제집만 풀어라! 하하하!',
                         this.canvas.width / 2,
                         this.canvas.height - 250,
                         'ABC 대마왕'
@@ -1094,7 +1139,7 @@ class StoryScene {
 
                     // 지율이 대사
                     this.drawDialogBox(
-                        '뭐라고?! 탁구는 내 생명인데!\n절대 포기 못 해!',
+                        '뭐라고?! 탁구는 내 심장이다!\n침략자들, 절대 용서 못 해!',
                         this.canvas.width / 4,
                         this.canvas.height - 300,
                         '지율'
@@ -1139,7 +1184,7 @@ class StoryScene {
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275);
+                    if (window.PixelText) { PixelText.draw(this.ctx, '제니스 저항군 기지', 175, this.canvas.height - 288, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 }); } else { this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275); }
                     this.ctx.textAlign = 'left';
 
                     // 지율이 (놀란 모습)
@@ -1305,7 +1350,7 @@ class StoryScene {
 
                     // 지율이 대사
                     this.drawDialogBox(
-                        '헉! 누구세요?!',
+                        '누, 누구냐! 정체를 밝혀라!',
                         this.canvas.width / 4,
                         this.canvas.height - 120,
                         '지율'
@@ -1350,7 +1395,7 @@ class StoryScene {
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275);
+                    if (window.PixelText) { PixelText.draw(this.ctx, '제니스 저항군 기지', 175, this.canvas.height - 288, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 }); } else { this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275); }
                     this.ctx.textAlign = 'left';
 
                     // 지율이
@@ -1385,7 +1430,7 @@ class StoryScene {
 
                     // 선생님 대사
                     this.drawDialogBox(
-                        '안녕 지율아! 나는 제니스 영어학원의\nsunzero 선생님이야. 너를 도와주러 왔어!',
+                        '나는 제니스 저항군 사령관 sunzero다!\n지율 대원, 너를 특공대로 스카우트하러 왔다!',
                         this.canvas.width * 3 / 4,
                         this.canvas.height - 150,
                         'sunzero 선생님'
@@ -1430,7 +1475,7 @@ class StoryScene {
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275);
+                    if (window.PixelText) { PixelText.draw(this.ctx, '제니스 저항군 기지', 175, this.canvas.height - 288, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 }); } else { this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275); }
                     this.ctx.textAlign = 'left';
 
                     // 지율이
@@ -1522,7 +1567,7 @@ class StoryScene {
 
                     // 선생님 대사
                     this.drawDialogBox(
-                        '이 신검 라켓을 받아! ABC 대마왕을 물리칠 수 있을 거야!\n멋있게 날아가는 전설의 "탁구 라켓"이란다!',
+                        '작전명 [메탈 스매시]! 전설의 신검 라켓을 지급한다!\nABC 대마왕의 본진을 격파할 유일한 무기다!',
                         this.canvas.width / 2,
                         this.canvas.height - 130,
                         'sunzero 선생님'
@@ -1567,7 +1612,7 @@ class StoryScene {
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275);
+                    if (window.PixelText) { PixelText.draw(this.ctx, '제니스 저항군 기지', 175, this.canvas.height - 288, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 }); } else { this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275); }
                     this.ctx.textAlign = 'left';
 
                     // 지율이
@@ -1602,7 +1647,7 @@ class StoryScene {
 
                     // 지율이 대사
                     this.drawDialogBox(
-                        '와! 감사합니다 선생님!\nABC 대마왕을 무찌르고 탁구를 지킬게요!',
+                        '임무 접수 완료!\nABC 대마왕을 격파하고 탁구를 되찾겠습니다!',
                         this.canvas.width / 4,
                         this.canvas.height - 140,
                         '지율'
@@ -1660,7 +1705,7 @@ class StoryScene {
                     // 세은이 대사
                     if (this.animationFrame > 60) {
                         this.drawDialogBox(
-                            '지율아! 나도 빠질 수 없지!',
+                            '지율 대원! 2번 대원 세은, 작전에 합류한다!',
                             this.canvas.width / 2 - 30,
                             this.canvas.height - 300,
                             '세은'
@@ -1698,7 +1743,7 @@ class StoryScene {
 
                     // 하린이 대사
                     this.drawDialogBox(
-                        '나도! 나도 빠질 수 없어!',
+                        '3번 대원 하린, 전투 준비 완료!',
                         this.canvas.width / 2 + 90,
                         this.canvas.height - 300,
                         '하린'
@@ -1870,7 +1915,7 @@ class StoryScene {
                     // 대사
                     if (weaponX >= weaponTargetX - 10) {
                         this.drawDialogBox(
-                            '곡도 라켓이야!\n휘두르면 토네이도가 생긴단다. 바람처럼 빠르지!',
+                            '세은 대원에게는 곡도 라켓을 지급한다!\n휘두르면 토네이도가 적진을 쓸어버린다!',
                             this.canvas.width / 2,
                             this.canvas.height - 100,
                             'sunzero 선생님'
@@ -2092,7 +2137,7 @@ class StoryScene {
                     // 대사
                     if (weaponX >= weaponTargetX - 10) {
                         this.drawDialogBox(
-                            '사인검 라켓이야!\n휘두르면 번개 체인이 찌릿찌릿! 신기하지?',
+                            '하린 대원에게는 사인검 라켓을 지급한다!\n번개 체인이 적을 찌릿찌릿 관통한다!',
                             this.canvas.width / 2,
                             this.canvas.height - 100,
                             'sunzero 선생님'
@@ -2247,7 +2292,7 @@ class StoryScene {
 
                     // 결의의 대사
                     this.drawDialogBox(
-                        '좋아! 신검과 탁구 라켓!\nABC 대마왕을 무찌르고 탁구를 지킬 거야!!',
+                        '탁구 특공대, 출격!!\nABC 대마왕을 무찌르고 탁구를 되찾는다! GO GO GO!',
                         this.canvas.width / 2,
                         this.canvas.height - 200,
                         '지율'
@@ -3362,7 +3407,7 @@ class StoryScene {
 
                     // 지율이 대화
                     this.drawDialogBox(
-                        '코치님! 덕분에 금메달 땄어요!',
+                        '사령관님! 작전 대성공!\n금메달 획득 완료했습니다!',
                         this.canvas.width / 2 - 100,
                         this.canvas.height - 250,
                         '지율'
@@ -3417,7 +3462,7 @@ class StoryScene {
 
                     // ABC 코치 대화
                     this.drawDialogBox(
-                        '자랑스럽다!\n이제 영어도 탁구도 최고야!',
+                        '훌륭하다, 탁구 특공대!\n영어도 탁구도 이제 너희가 최강이다!',
                         this.canvas.width / 2 + 100,
                         this.canvas.height - 280,
                         'ABC 코치'
@@ -3706,7 +3751,7 @@ class StoryScene {
                     // 대화 (코믹하고 유쾌하게)
                     if (this.animationFrame > 60) {
                         this.drawDialogBox(
-                            '와! 캠프파이어다! 불 보니까 완전 따뜻해!\n오늘 하루 진짜 재밌었어! 금메달도 땄고!',
+                            '작전 종료! 캠프파이어 점화!\n오늘 작전 진짜 최고였어. 금메달도 땄고!',
                             this.canvas.width / 2 - 150,
                             this.canvas.height - 370,
                             '지율'
@@ -3956,7 +4001,7 @@ class StoryScene {
 
                     // 세은이 대화
                     this.drawDialogBox(
-                        '하하! 나도 너무 재밌었어! 별도 진짜 예쁘다~\n다음엔 또 같이 캠핑 오자!',
+                        '하하! 최고의 작전이었어! 별도 진짜 예쁘다~\n다음 임무도 셋이 같이 가는 거다?',
                         this.canvas.width / 2 - 30,
                         this.canvas.height - 370,
                         '세은'
@@ -4205,7 +4250,7 @@ class StoryScene {
 
                     // 하린이 대화
                     this.drawDialogBox(
-                        '맞아! 오늘 ABC 코치님도 우리 축하해주셨잖아!\n영어도 탁구도 완전 재밌어졌어! 호호호~',
+                        '맞아! ABC 코치님도 우리를 축하해 주셨잖아!\n영어도 탁구도 완전 정복이야! 호호호~',
                         this.canvas.width / 2 + 90,
                         this.canvas.height - 370,
                         '하린'
@@ -4605,9 +4650,20 @@ class StoryScene {
         }
 
         // 씬 업데이트 함수 호출 (스케일 없이 전체 화면 사용)
+        // 대화창은 픽셀레이트 이후에 그리도록 지연시킨다 (텍스트 선명도 유지)
+        this._dialogQueue = [];
+        this._deferDialogs = true;
         if (scene.update) {
             scene.update();
         }
+        this._deferDialogs = false;
+
+        // 컷씬 도트화: 장면 전체를 저해상도로 재샘플링해 픽셀 아트화
+        this.pixelatePass();
+
+        // 지연된 대화창을 선명하게 그리기
+        this._dialogQueue.forEach(args => this.drawDialogBox(args[0], args[1], args[2], args[3]));
+        this._dialogQueue = [];
 
         // 스킵 안내 및 진행 버튼
         this.drawControls();

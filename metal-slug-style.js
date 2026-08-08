@@ -112,6 +112,25 @@
                 if (sprite) {
                     drawPixelSprite(sprite, spriteData.colorMap, player.x, player.y, PIXEL_SCALE);
                 }
+
+                // 공격 모션 중 메탈슬러그풍 도트 섬광 (머즐 플래시)
+                if (player.animation === 'casting' || player.animation === 'smashing') {
+                    const fx = player.x + player.width + 6;
+                    const fy = player.y + player.height / 2 - 6;
+                    const t = Math.floor(Date.now() / 60) % 3;
+                    const flashColors = ['#FFFFFF', '#FFE55A', '#FF8C1A'];
+                    const s = PIXEL_SCALE;
+                    // 십자 + 대각 도트 섬광 (프레임마다 회전하는 느낌)
+                    ctx.fillStyle = flashColors[t];
+                    ctx.fillRect(fx, fy - s * 2, s, s * 5);
+                    ctx.fillRect(fx - s * 2, fy, s * 5, s);
+                    if (t !== 1) {
+                        ctx.fillRect(fx - s, fy - s, s, s);
+                        ctx.fillRect(fx + s, fy + s, s, s);
+                        ctx.fillRect(fx + s, fy - s, s, s);
+                        ctx.fillRect(fx - s, fy + s, s, s);
+                    }
+                }
             }
 
             // 세은/하린 무기 렌더링은 원본 로직 유지
@@ -129,6 +148,121 @@
                     player.weaponAngle
                 );
             }
+        };
+    }
+
+    // ---- 인게임 대화창을 메탈슬러그풍 픽셀 패널로 교체 ----
+    // (어두운 강판 배경 + 금색 도트 테두리 + 리벳 + 스프라이트 텍스트)
+    if (typeof drawDialogue === 'function' && typeof dialogueState !== 'undefined') {
+        drawDialogue = function () {
+            if (!dialogueState.active) return;
+
+            const dialogue = dialogueState.dialogues[dialogueState.currentIndex];
+            const dialogueHeight = Math.min(180, canvas.height * 0.3);
+            const padding = Math.max(10, canvas.width * 0.0125);
+            const fontSize = Math.max(14, Math.min(18, canvas.width * 0.0225));
+            const px = 4;
+            const top = canvas.height - dialogueHeight;
+
+            // 강판 배경
+            ctx.fillStyle = 'rgba(18, 22, 14, 0.92)';
+            ctx.fillRect(0, top, canvas.width, dialogueHeight);
+            // 금색 도트 테두리 (상단만 두르고 좌우는 안쪽 패널 느낌)
+            ctx.fillStyle = '#FFC22B';
+            for (let bx = 0; bx < canvas.width; bx += px * 2) {
+                ctx.fillRect(bx, top, px, px);
+            }
+            const inX = padding, inY = top + padding;
+            const inW = canvas.width - padding * 2, inH = dialogueHeight - padding * 2;
+            for (let bx = 0; bx < inW; bx += px * 2) {
+                ctx.fillRect(inX + bx, inY, px, px);
+                ctx.fillRect(inX + bx, inY + inH - px, px, px);
+            }
+            for (let by = 0; by < inH; by += px * 2) {
+                ctx.fillRect(inX, inY + by, px, px);
+                ctx.fillRect(inX + inW - px, inY + by, px, px);
+            }
+            // 모서리 리벳
+            ctx.fillStyle = '#8A9A6A';
+            [[inX + px, inY + px], [inX + inW - px * 2, inY + px],
+             [inX + px, inY + inH - px * 2], [inX + inW - px * 2, inY + inH - px * 2]].forEach(([rx, ry]) => {
+                ctx.fillRect(rx, ry, px, px);
+            });
+
+            // 화자 이름 (스프라이트 텍스트)
+            const hasPT = typeof PixelText !== 'undefined';
+            if (hasPT) {
+                PixelText.draw(ctx, dialogue.speaker, padding * 2, top + padding * 2, {
+                    fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.85,
+                    align: 'left', shadowOffset: 2
+                });
+            } else {
+                ctx.fillStyle = '#FFD700';
+                ctx.font = `bold ${fontSize + 2}px Arial`;
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.fillText(dialogue.speaker, padding * 2, top + padding * 2);
+            }
+
+            // 본문 줄바꿈 (측정은 캔버스 폰트 기준)
+            ctx.font = `${fontSize}px Arial`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            const maxWidth = canvas.width - padding * 4;
+            const btnHeight = 40;
+            const maxY = canvas.height - btnHeight - padding;
+            const lineHeight = fontSize + 8;
+            let line = '';
+            let y = top + padding * 2 + fontSize + 16;
+            const flush = (text, yy) => {
+                if (!text.length || yy >= maxY) return;
+                if (hasPT) {
+                    PixelText.draw(ctx, text, padding * 2, yy, {
+                        fontPx: 12, scale: 2, palette: 'white', drawScale: 0.62, align: 'left'
+                    });
+                } else {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillText(text, padding * 2, yy);
+                }
+            };
+            for (let i = 0; i < dialogue.text.length; i++) {
+                const testLine = line + dialogue.text[i];
+                if (ctx.measureText(testLine).width > maxWidth && line.length > 0) {
+                    flush(line, y);
+                    y += lineHeight;
+                    line = dialogue.text[i];
+                    if (y >= maxY) break;
+                } else {
+                    line = testLine;
+                }
+            }
+            flush(line, y);
+
+            // 진행 버튼 (도트 스타일, 깜빡임)
+            const btnWidth = 100;
+            const btnX = canvas.width - btnWidth - padding * 3;
+            const btnY = canvas.height - btnHeight - padding * 2;
+            const blink = Math.floor(Date.now() / 400) % 2 === 0;
+            ctx.fillStyle = blink ? '#FFC22B' : '#B8860B';
+            ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
+            ctx.fillStyle = '#1A1206';
+            for (let bx = 0; bx < btnWidth; bx += px * 2) {
+                ctx.fillRect(btnX + bx, btnY, px, px);
+                ctx.fillRect(btnX + bx, btnY + btnHeight - px, px, px);
+            }
+            if (hasPT) {
+                PixelText.draw(ctx, '▶ 계속', btnX + btnWidth / 2, btnY + 10, {
+                    fontPx: 12, scale: 2, palette: 'white', drawScale: 0.7, shadowOffset: 2
+                });
+            } else {
+                ctx.fillStyle = '#000000';
+                ctx.font = `bold ${Math.max(16, fontSize)}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('Click', btnX + btnWidth / 2, btnY + btnHeight / 2);
+            }
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
         };
     }
 })();
