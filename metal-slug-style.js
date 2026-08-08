@@ -179,31 +179,81 @@
         });
     }
 
-    // 픽셀 하트 (체력 표시)
-    const HEART = [
-        [0,1,1,0,1,1,0],
-        [1,2,2,1,2,2,1],
-        [1,2,2,2,2,2,1],
-        [0,1,2,2,2,1,0],
-        [0,0,1,2,1,0,0]
-    ];
-    function drawPixelHeart(x, y, s, filled) {
-        const colors = filled
-            ? { 1: '#3A0A10', 2: '#E83848' }
-            : { 1: '#22242C', 2: '#3A3E4A' };
-        for (let r = 0; r < HEART.length; r++) {
-            for (let c = 0; c < HEART[r].length; c++) {
-                const v = HEART[r][c];
-                if (!v) continue;
-                ctx.fillStyle = colors[v];
-                ctx.fillRect(x + c * s, y + r * s, s, s);
+    // 분절형 도트 게이지 바 (메탈슬러그 에너지 게이지 스타일)
+    // 체력 구간에 따라 색이 초록 → 노랑 → 빨강으로 바뀌고, 잔량이 적으면 깜빡인다
+    function drawPixelGauge(x, y, w, h, ratio, segments) {
+        const r = Math.max(0, Math.min(1, ratio));
+        // 게이지 프레임 (어두운 인셋 + 밝은 테두리)
+        ctx.fillStyle = '#0A0C08';
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = '#8A9A6A';
+        ctx.fillRect(x, y, w, 2);
+        ctx.fillRect(x, y + h - 2, w, 2);
+        ctx.fillRect(x, y, 2, h);
+        ctx.fillRect(x + w - 2, y, 2, h);
+
+        // 구간별 색상
+        let base, light, dark;
+        if (r > 0.6)      { base = '#5FD03A'; light = '#A8F07A'; dark = '#2E7C1E'; }
+        else if (r > 0.3) { base = '#FFC22B'; light = '#FFE55A'; dark = '#B87A0A'; }
+        else              { base = '#E83848'; light = '#FF8090'; dark = '#901824'; }
+
+        // 잔량 위험 시 깜빡임
+        const critical = r > 0 && r <= 0.3;
+        const blinkOff = critical && Math.floor(Date.now() / 220) % 2 === 0;
+
+        const innerX = x + 3, innerY = y + 3;
+        const innerW = w - 6, innerH = h - 6;
+        const segW = innerW / segments;
+        const filledSegs = Math.ceil(r * segments);
+
+        for (let i = 0; i < segments; i++) {
+            const sx = Math.round(innerX + i * segW);
+            const sw = Math.round(innerX + (i + 1) * segW) - sx - 1; // 1px 분절 간격
+            if (i < filledSegs && !blinkOff) {
+                ctx.fillStyle = base;
+                ctx.fillRect(sx, innerY, sw, innerH);
+                // 상단 하이라이트 / 하단 셰이드 (도트 입체감)
+                ctx.fillStyle = light;
+                ctx.fillRect(sx, innerY, sw, 2);
+                ctx.fillStyle = dark;
+                ctx.fillRect(sx, innerY + innerH - 2, sw, 2);
+            } else {
+                ctx.fillStyle = '#1E2218';
+                ctx.fillRect(sx, innerY, sw, innerH);
             }
         }
-        // 상단 하이라이트
-        if (filled) {
-            ctx.fillStyle = 'rgba(255,255,255,0.5)';
-            ctx.fillRect(x + s, y + s, s, s);
-        }
+    }
+
+    // ---- 아케이드 크레딧 시스템 ----
+    // 게임 오버마다 1씩 차감되며, 0이 되면 게임 종료(재시작 시 초기화)
+    const CREDIT_START = 8;
+    if (typeof window.gameCredits !== 'number') {
+        window.gameCredits = CREDIT_START;
+    }
+    if (typeof gameOver === 'function') {
+        const originalGameOver = gameOver;
+        gameOver = function () {
+            window.gameCredits = Math.max(0, window.gameCredits - 1);
+            originalGameOver();
+            // 게임 오버 패널에 남은 크레딧 안내 추가
+            const msg = document.getElementById('gameOverMessage');
+            if (msg) {
+                msg.textContent += window.gameCredits > 0
+                    ? ` / CREDIT ${String(window.gameCredits).padStart(2, '0')} 남음`
+                    : ' / CREDIT 소진!';
+            }
+        };
+    }
+    if (typeof restartGame === 'function') {
+        const originalRestart = restartGame;
+        restartGame = function () {
+            // 크레딧이 모두 소진되면 새 판으로 크레딧 보충
+            if (window.gameCredits <= 0) {
+                window.gameCredits = CREDIT_START;
+            }
+            originalRestart();
+        };
     }
 
     // 도트 HUD 그리기 (매 프레임, 스케일 밖 화면 좌표)
@@ -236,21 +286,37 @@
                     slotX + (slotW - 16 * ps) / 2, slotY + (slotH - 16 * ps) / 2, ps);
             }
 
-            // 초상 오른쪽에 하트/이름/점수
+            // 초상 오른쪽: 에너지 게이지 바 + 이름 + 점수
             const infoX = slotX + slotW + 10;
-            const hs = 3; // 하트 도트 크기
-            for (let i = 0; i < gameState.maxEnergy; i++) {
-                drawPixelHeart(infoX + i * (7 * hs + 1), pyt + 12, hs, i < gameState.energy);
-            }
+            const infoW = pw - (infoX - pxl) - 12;
+
+            // 게이지 라벨 + 바
+            PixelText.draw(ctx, 'ENERGY', infoX, pyt + 8, {
+                fontPx: 11, scale: 2, palette: 'gold', drawScale: 0.55, align: 'left'
+            });
+            drawPixelGauge(infoX, pyt + 22, infoW, 16,
+                gameState.energy / gameState.maxEnergy, gameState.maxEnergy);
+
             const name = (typeof characterNames !== 'undefined' && typeof currentCharacter !== 'undefined')
                 ? characterNames[currentCharacter] : '지율';
-            PixelText.draw(ctx, name, infoX, pyt + 36, {
-                fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.8, align: 'left', shadowOffset: 2
+            PixelText.draw(ctx, name, infoX, pyt + 44, {
+                fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.75, align: 'left', shadowOffset: 2
             });
-            PixelText.draw(ctx, '점수 ' + (gameState.score || 0), infoX, pyt + 60, {
-                fontPx: 13, scale: 2, palette: 'white', drawScale: 0.7, align: 'left'
+            PixelText.draw(ctx, 'SCORE ' + (gameState.score || 0), infoX, pyt + 66, {
+                fontPx: 12, scale: 2, palette: 'white', drawScale: 0.62, align: 'left'
             });
         }
+
+        // ---- 하단 중앙: 아케이드 크레딧 표시 (모든 모드 공통) ----
+        // 좌우 하단은 조이스틱/액션 버튼이 차지하므로 중앙에 배치
+        const credits = String(window.gameCredits || 0).padStart(2, '0');
+        const cw = 156, ch = 30;
+        const cx = Math.round((canvas.width - cw) / 2), cy = canvas.height - ch - 8;
+        drawPixelPanel(cx, cy, cw, ch);
+        PixelText.draw(ctx, 'CREDIT ' + credits, cx + cw / 2, cy + 8, {
+            fontPx: 12, scale: 2, palette: window.gameCredits > 2 ? 'gold' : 'fire',
+            drawScale: 0.7, shadowOffset: 2
+        });
 
         // ---- 스테이지 / 단어 패널 ----
         // 수집 모드: 우측 상단, 퀴즈/보스 모드: 좌측 상단 (선택지와 겹침 방지)
