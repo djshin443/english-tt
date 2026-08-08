@@ -1942,7 +1942,7 @@ function startCollectingStage(stageNum) {
     const wordIndex = stageNum - 1;
     currentStageData.wordData = gameState.stageWords[wordIndex];
     currentStageData.word = currentStageData.wordData.word;
-    currentStageData.collectedLetters = [];  // 순서 없이 수집
+    currentStageData.collectedLetters = [];  // 단어 순서대로 수집
 
     // 플레이어 초기화
     player.x = 100;
@@ -2287,17 +2287,19 @@ function startBossStage(stageNum) {
     }
 }
 
+// 현재 순서상 수집해야 할 다음 알파벳 (순서대로 수집 규칙)
+function getNextRequiredLetter() {
+    if (!currentStageData || !currentStageData.word) return null;
+    const idx = currentStageData.collectedLetters.length;
+    if (idx >= currentStageData.word.length) return null;
+    return currentStageData.word[idx];
+}
+
 // 다음 글자 생성 (A~Z 랜덤하게, 중복 방지)
 function spawnNextLetter() {
-    // 아직 수집하지 않은 알파벳 찾기 (중복 고려)
-    const neededLetters = currentStageData.word.split('').filter(char => {
-        const needed = currentStageData.word.split('').filter(c => c === char).length;
-        const collected = currentStageData.collectedLetters.filter(c => c === char).length;
-        return collected < needed;
-    });
-
-    // 모두 수집했으면 더 이상 생성하지 않음
-    if (neededLetters.length === 0) return;
+    // 순서상 다음에 필요한 알파벳 (없으면 단어 완성됨)
+    const nextRequired = getNextRequiredLetter();
+    if (!nextRequired) return;
 
     // 현재 화면에 있는 알파벳 목록 (중복 방지용)
     const existingLetters = letters.map(l => l.letter);
@@ -2306,8 +2308,8 @@ function spawnNextLetter() {
     const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     const numCards = 2 + Math.floor(Math.random() * 2);  // 2~3개
 
-    // 필요한 알파벳 중 하나를 포함시킬지 결정 (80% 확률)
-    const includeNeeded = Math.random() < 0.8 && neededLetters.length > 0;
+    // 순서상 다음 알파벳이 화면에 없으면 반드시 포함시킨다
+    const includeNeeded = !existingLetters.includes(nextRequired);
 
     const usedLetters = [...existingLetters];  // 이미 화면에 있는 알파벳 + 이번에 생성할 알파벳
 
@@ -2316,11 +2318,8 @@ function spawnNextLetter() {
         let attempts = 0;
 
         if (i === 0 && includeNeeded) {
-            // 첫 번째는 필요한 알파벳 중 랜덤 (중복 체크)
-            do {
-                letter = neededLetters[Math.floor(Math.random() * neededLetters.length)];
-                attempts++;
-            } while (usedLetters.includes(letter) && attempts < 10);
+            // 첫 번째는 순서상 다음에 필요한 알파벳
+            letter = nextRequired;
         } else {
             // 나머지는 랜덤 (중복 체크)
             do {
@@ -2813,52 +2812,40 @@ function checkCollisions() {
     // 알파벳 카드 충돌
     letters.forEach((letter, index) => {
         if (!letter.collected && letter.checkCollision(player.x, player.y, player.width, player.height)) {
-            // 이 알파벳이 단어에 포함되어 있는지 체크
-            if (currentStageData.word.includes(letter.letter)) {
-                // 아직 필요한 개수만큼 수집했는지 체크 (중복 알파벳 처리)
-                const neededCount = currentStageData.word.split('').filter(c => c === letter.letter).length;
-                const collectedCount = currentStageData.collectedLetters.filter(c => c === letter.letter).length;
+            // 순서대로 수집 규칙: 지금 필요한 알파벳과 일치해야 정답
+            const nextRequired = getNextRequiredLetter();
 
-                if (collectedCount < neededCount) {
-                    // 정답! (아직 이 알파벳을 더 수집해야 함)
-                    letter.collected = true;
-                    currentStageData.collectedLetters.push(letter.letter);
-                    addScore(20); // 알파벳 수집 +20점
+            if (nextRequired && letter.letter === nextRequired) {
+                // 정답! (순서에 맞는 알파벳)
+                letter.collected = true;
+                currentStageData.collectedLetters.push(letter.letter);
+                addScore(20); // 알파벳 수집 +20점
 
-                    // 파티클 효과 (파티클 제한 적용)
-                    const colors = ['#FFD700', '#FFA500', '#FF69B4'];
-                    for (let i = 0; i < 15; i++) {  // 30개 → 15개로 감소
-                        addParticle(letter.x + letter.width / 2, letter.y + letter.height / 2, colors[Math.floor(Math.random() * colors.length)], 'star');
-                    }
+                // 파티클 효과 (파티클 제한 적용)
+                const colors = ['#FFD700', '#FFA500', '#FF69B4'];
+                for (let i = 0; i < 15; i++) {  // 30개 → 15개로 감소
+                    addParticle(letter.x + letter.width / 2, letter.y + letter.height / 2, colors[Math.floor(Math.random() * colors.length)], 'star');
+                }
 
-                    updateUI();
+                updateUI();
 
-                    // 단어 완성 체크 (모든 알파벳을 개수에 맞게 모았는지)
-                    const allCollected = currentStageData.word.split('').every(char => {
-                        const needed = currentStageData.word.split('').filter(c => c === char).length;
-                        const collected = currentStageData.collectedLetters.filter(c => c === char).length;
-                        return collected >= needed;
-                    });
-
-                    if (allCollected) {
-                        // 퀴즈 모드로 전환
-                        setTimeout(() => {
-                            startQuizStage();
-                        }, 500);
-                    } else {
-                        // 아직 모두 수집하지 않았으면 새 카드 생성
-                        if (letters.length < 3) {
-                            spawnNextLetter();
-                        }
-                    }
+                // 단어 완성 체크 (순서대로 전부 모았는지)
+                if (currentStageData.collectedLetters.length >= currentStageData.word.length) {
+                    // 퀴즈 모드로 전환
+                    setTimeout(() => {
+                        startQuizStage();
+                    }, 500);
                 } else {
-                    // 이미 필요한 개수만큼 수집한 알파벳
-                    letter.collected = true;
+                    // 아직 모두 수집하지 않았으면 새 카드 생성
+                    if (letters.length < 3) {
+                        spawnNextLetter();
+                    }
                 }
             } else {
-                // 틀렸을 때 (단어에 없는 알파벳)
+                // 순서가 틀렸거나 단어에 없는 알파벳 → 패널티
                 letter.collected = true;
                 loseEnergy();
+                showOrderPenalty(letter, nextRequired);
 
                 // 파티클 효과 (파티클 제한 적용)
                 for (let i = 0; i < 10; i++) {  // 20개 → 10개로 감소
@@ -2896,6 +2883,17 @@ function checkCollisions() {
             }
         }
     });
+}
+
+// 순서 오류 패널티 안내 상태 (도트 경고 토스트는 metal-slug-style.js에서 렌더링)
+let orderPenalty = { active: false, until: 0, expected: '', got: '' };
+function showOrderPenalty(letter, expected) {
+    orderPenalty = {
+        active: true,
+        until: Date.now() + 1300,
+        expected: expected || '',
+        got: letter ? letter.letter : ''
+    };
 }
 
 // 에너지 감소
@@ -2979,22 +2977,20 @@ function updateUI() {
     if (gameState.mode === GAME_MODE.COLLECTING) {
         wordDisplay.textContent = '목표: ' + currentStageData.word;
 
-        // 각 알파벳을 표시하되, 수집한 것은 초록색으로 표시 (중복 고려)
+        // 순서대로 수집: 모은 글자는 초록, 지금 차례는 노랑, 이후는 회색 밑줄
         let displayText = '';
         const wordArray = currentStageData.word.split('');
-        const collectedCopy = [...currentStageData.collectedLetters];
+        const doneCount = currentStageData.collectedLetters.length;
 
-        for (let char of wordArray) {
-            const index = collectedCopy.indexOf(char);
-            if (index !== -1) {
-                // 수집한 알파벳 (초록색)
+        wordArray.forEach((char, i) => {
+            if (i < doneCount) {
                 displayText += `<span style="color: #00FF00; font-weight: bold;">${char}</span>`;
-                collectedCopy.splice(index, 1); // 사용한 것 제거
+            } else if (i === doneCount) {
+                displayText += `<span style="color: #FFD700; font-weight: bold;">${char}</span>`;
             } else {
-                // 아직 수집 안 한 알파벳 (회색)
-                displayText += `<span style="color: #888888;">${char}</span>`;
+                displayText += `<span style="color: #888888;">_</span>`;
             }
-        }
+        });
         collectedDisplay.innerHTML = '수집: ' + displayText;
     } else if (gameState.mode === GAME_MODE.QUIZ) {
         wordDisplay.textContent = currentStageData.word + '의 뜻은?';

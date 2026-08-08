@@ -616,6 +616,9 @@ class StoryScene {
             }
         });
 
+        // 이번 프레임의 대화 상자 영역 기록 (진행 버튼이 가리지 않도록)
+        this._dialogRect = { x: finalBoxX, y: boxY, w: boxWidth, h: boxHeight };
+
         // 컨텍스트 상태 복원
         this.ctx.restore();
     }
@@ -4789,6 +4792,7 @@ class StoryScene {
         // 대화창은 픽셀레이트 이후에 그리도록 지연시킨다 (텍스트 선명도 유지)
         this._dialogQueue = [];
         this._captionQueue = [];
+        this._dialogRect = null;
         this._deferDialogs = true;
         if (scene.update) {
             scene.update();
@@ -4850,8 +4854,19 @@ class StoryScene {
             const canvasHeight = this.canvas.height;
             const btnWidth = 100;  // 작게 축소
             const btnHeight = 40;  // 작게 축소
-            const btnX = canvasWidth - btnWidth - 30;
-            const btnY = canvasHeight - btnHeight - 30;
+            const btnX = canvasWidth - btnWidth - 20;
+            // 대화창이 있으면 그 위쪽에 배치해 텍스트를 가리지 않게 한다
+            const dr = this._dialogRect;
+            let btnY = canvasHeight - btnHeight - 30;
+            if (dr) {
+                const overlapsHorizontally = btnX < dr.x + dr.w && btnX + btnWidth > dr.x;
+                if (overlapsHorizontally) {
+                    btnY = dr.y - btnHeight - 8;   // 대화창 바로 위
+                } else {
+                    btnY = dr.y + dr.h - btnHeight; // 옆 공간이 있으면 대화창과 같은 높이
+                }
+                if (btnY < 10) btnY = 10;
+            }
 
             // 도트 버튼 (깜빡임)
             const px = 4;

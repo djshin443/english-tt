@@ -475,6 +475,29 @@
             });
         }
 
+        // ---- 순서 오류 패널티 경고 토스트 ----
+        if (typeof orderPenalty !== 'undefined' && orderPenalty.active) {
+            if (Date.now() > orderPenalty.until) {
+                orderPenalty.active = false;
+            } else {
+                const msg = orderPenalty.expected
+                    ? `순서가 틀렸어! 다음은 ${orderPenalty.expected}`
+                    : '순서가 틀렸어!';
+                const tOpts = { fontPx: 13, scale: 2, palette: 'fire' };
+                const tm = PixelText.measure(msg, tOpts);
+                const ts = Math.min(1.0, (canvas.width * 0.6) / tm.width);
+                const tw = tm.width * ts + 28, th = tm.height * ts + 18;
+                const tx = Math.round((canvas.width - tw) / 2), ty = Math.round(canvas.height * 0.2);
+                // 깜빡이는 경고 패널
+                if (Math.floor(Date.now() / 150) % 2 === 0) {
+                    drawPixelPanel(tx, ty, tw, th);
+                    PixelText.draw(ctx, msg, canvas.width / 2, ty + 9, {
+                        ...tOpts, drawScale: ts, shadowOffset: 2
+                    });
+                }
+            }
+        }
+
         // ---- 하단 중앙: 아케이드 크레딧 표시 (모든 모드 공통) ----
         // 좌우 하단은 조이스틱/액션 버튼이 차지하므로 중앙에 배치
         const credits = String(window.gameCredits || 0).padStart(2, '0');
@@ -499,10 +522,26 @@
             PixelText.draw(ctx, '목표 ' + currentStageData.word, wx + 12, wy + 34, {
                 fontPx: 13, scale: 2, palette: 'fire', drawScale: 0.75, align: 'left'
             });
-            const collected = (currentStageData.collectedLetters || []).join('');
-            PixelText.draw(ctx, '수집 ' + (collected || '-'), wx + 12, wy + 58, {
-                fontPx: 13, scale: 2, palette: 'white', drawScale: 0.75, align: 'left'
-            });
+            // 순서대로 수집: 모은 글자는 금색, 지금 필요한 글자는 깜빡이는 흰색,
+            // 아직 안 모은 글자는 회색 언더스코어로 표시
+            const word = currentStageData.word;
+            const done = (currentStageData.collectedLetters || []).length;
+            let lx = wx + 12;
+            const lOpts = { fontPx: 13, scale: 2, drawScale: 0.75, align: 'left' };
+            for (let i = 0; i < word.length; i++) {
+                const isNext = i === done;
+                const ch = i < done ? word[i] : (isNext ? word[i] : '_');
+                if (isNext && Math.floor(Date.now() / 300) % 2 === 0) {
+                    // 다음 차례 글자는 깜빡임 (밝게)
+                    lx += PixelText.draw(ctx, ch, lx, wy + 58, {
+                        ...lOpts, palette: 'white', shadowOffset: 2
+                    }).width + 4;
+                } else {
+                    lx += PixelText.draw(ctx, ch, lx, wy + 58, {
+                        ...lOpts, palette: i < done ? 'gold' : 'steel'
+                    }).width + 4;
+                }
+            }
         } else if (gameState.mode === GAME_MODE.BOSS) {
             PixelText.draw(ctx, '보스전!', wx + 12, wy + 40, {
                 fontPx: 14, scale: 2, palette: 'fire', drawScale: 0.9, align: 'left', shadowOffset: 2
