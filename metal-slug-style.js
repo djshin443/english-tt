@@ -213,20 +213,41 @@
         if (!hasPT) return;
         const collecting = gameState.mode === GAME_MODE.COLLECTING;
 
-        // ---- 좌측: HP 하트 + 이름 + 점수 (수집 모드) ----
+        // ---- 좌측: 캐릭터 초상 + HP 하트 + 이름 + 점수 (수집 모드) ----
         if (collecting) {
-            const pw = 236, ph = 86, pxl = 10, pyt = 10;
+            const pw = 300, ph = 86, pxl = 10, pyt = 10;
             drawPixelPanel(pxl, pyt, pw, ph);
+
+            // 캐릭터 초상 슬롯 (어두운 인셋 박스 + 현재 캐릭터 도트 스프라이트)
+            const slotX = pxl + 10, slotY = pyt + 10, slotW = 66, slotH = 66;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+            ctx.fillRect(slotX, slotY, slotW, slotH);
+            ctx.fillStyle = '#8A9A6A';
+            ctx.fillRect(slotX, slotY, slotW, 2);
+            ctx.fillRect(slotX, slotY + slotH - 2, slotW, 2);
+            ctx.fillRect(slotX, slotY, 2, slotH);
+            ctx.fillRect(slotX + slotW - 2, slotY, 2, slotH);
+            const portrait = (typeof pixelData !== 'undefined' && pixelData[player.sprite])
+                ? pixelData[player.sprite] : null;
+            if (portrait && portrait.idle) {
+                // 16x16 스프라이트를 슬롯 중앙에 (외곽선 포함 렌더링)
+                const ps = 3.5;
+                drawPixelSprite(portrait.idle, portrait.colorMap,
+                    slotX + (slotW - 16 * ps) / 2, slotY + (slotH - 16 * ps) / 2, ps);
+            }
+
+            // 초상 오른쪽에 하트/이름/점수
+            const infoX = slotX + slotW + 10;
             const hs = 3; // 하트 도트 크기
             for (let i = 0; i < gameState.maxEnergy; i++) {
-                drawPixelHeart(pxl + 12 + i * (7 * hs + 1), pyt + 12, hs, i < gameState.energy);
+                drawPixelHeart(infoX + i * (7 * hs + 1), pyt + 12, hs, i < gameState.energy);
             }
             const name = (typeof characterNames !== 'undefined' && typeof currentCharacter !== 'undefined')
                 ? characterNames[currentCharacter] : '지율';
-            PixelText.draw(ctx, name, pxl + 12, pyt + 36, {
+            PixelText.draw(ctx, name, infoX, pyt + 36, {
                 fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.8, align: 'left', shadowOffset: 2
             });
-            PixelText.draw(ctx, '점수 ' + (gameState.score || 0), pxl + 12, pyt + 60, {
+            PixelText.draw(ctx, '점수 ' + (gameState.score || 0), infoX, pyt + 60, {
                 fontPx: 13, scale: 2, palette: 'white', drawScale: 0.7, align: 'left'
             });
         }
