@@ -360,6 +360,36 @@ class StoryScene {
         // 지면 상단 어두운 경계선
         this.ctx.fillStyle = 'rgba(0,0,0,0.35)';
         this.ctx.fillRect(0, groundTop, canvasWidth, 3);
+
+        // 보도블럭 띠 (지면 상단, 도트 패턴)
+        for (let gx = 0; gx < canvasWidth; gx += gp * 2) {
+            this.ctx.fillStyle = ((gx / (gp * 2)) % 2 === 0) ? '#8A8A82' : '#6E6E68';
+            this.ctx.fillRect(gx, groundTop + 3, gp * 2 - 2, gp);
+        }
+    }
+
+    // 씬 배경 세트: 스카이라인 + 지면 + 거리 소품을 한 번에 그린다
+    drawStreetScene(scroll = 0, opts = {}) {
+        const w = this.canvas.width, h = this.canvas.height;
+        const groundTop = h - 100;
+        // 원경 도시 스카이라인
+        this.drawCityscape(scroll, groundTop);
+        // 지면 (drawGround를 직접 호출 — 재귀 방지)
+        this.drawGround();
+        // 거리 소품 (가로등 / 덤불) - 중경 패럴랙스
+        const scale = Math.max(3, Math.floor(h / 130));
+        const lampGap = 320;
+        const lampOff = (scroll * 0.6) % lampGap;
+        for (let x = -lampGap; x < w + lampGap; x += lampGap) {
+            this.drawStreetLamp(x - lampOff + 40, groundTop + 6, scale);
+        }
+        if (opts.bushes !== false) {
+            const bushGap = 180;
+            const bushOff = (scroll * 0.8) % bushGap;
+            for (let x = -bushGap; x < w + bushGap; x += bushGap) {
+                this.drawBush(x - bushOff + 120, groundTop + 14, scale);
+            }
+        }
     }
 
     // UFO 그리기 (픽셀 아트 스타일)
@@ -451,62 +481,225 @@ class StoryScene {
         this.ctx.restore();
     }
 
-    // 메탈슬러그풍 도트 건물 스프라이트 (컷씬용)
-    drawPixelBuilding(type, x, y, w, h) {
-        const BUILDINGS = {
-            // 영어학원: 벽돌 학교 건물
-            academy: {
-                sprite: [
-                    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
-                    [1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1],
-                    [0,2,2,3,2,2,2,3,2,2,2,3,2,2,2,0],
-                    [0,2,5,4,5,2,5,4,5,2,5,4,5,2,2,0],
-                    [0,2,5,4,5,2,5,4,5,2,5,4,5,2,2,0],
-                    [0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0],
-                    [0,2,3,2,2,3,2,2,2,3,2,2,3,2,2,0],
-                    [0,2,5,4,5,2,5,4,5,2,6,6,6,2,2,0],
-                    [0,2,5,4,5,2,5,4,5,2,6,7,6,2,2,0],
-                    [0,2,2,2,2,2,2,2,2,2,6,6,6,2,2,0],
-                    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8]
-                ],
-                colorMap: {
-                    0: null, 1: '#4A3828', 2: '#8B7355', 3: '#75604A',
-                    4: '#FFD966', 5: '#2E2620', 6: '#4A3018', 7: '#FFC22B', 8: '#3A2E22'
+    // ---- 도트 건물 스프라이트 생성기 ----
+    // 열/행/스타일을 받아 지붕·간판·창문 격자·출입문·옥상 설비까지 갖춘
+    // 건물 픽셀 그리드를 만들어낸다. 결과는 캐싱된다.
+    buildBuildingSprite(opts) {
+        const cols = opts.cols, rows = opts.rows;
+        const style = opts.style || 'academy';
+        const seed = opts.seed || 1;
+        const key = `${style}_${cols}x${rows}_${seed}`;
+        this._bldCache = this._bldCache || {};
+        if (this._bldCache[key]) return this._bldCache[key];
+
+        const rnd = (i, j) => (((i * 73856093) ^ (j * 19349663) ^ (seed * 83492791)) >>> 0) % 100;
+        const g = [];
+        for (let r = 0; r < rows; r++) g.push(new Array(cols).fill(0));
+
+        const isCity = style === 'city';
+        const roofH = isCity ? 2 : 3;
+        const hasSign = !isCity;
+        const eaveRow = roofH;
+        const signRow = hasSign ? roofH + 1 : -1;
+        const wallTop = hasSign ? signRow + 1 : eaveRow + 1;
+        const baseRow = rows - 1;
+        const wallBottom = baseRow - 1;
+
+        // 옥상 설비 (안테나 / 물탱크 / 굴뚝)
+        if (opts.antenna) {
+            const ax = Math.floor(cols * 0.22);
+            for (let r = 0; r < roofH; r++) g[r][ax] = 13;
+            if (rows > 4) { g[0][ax - 1] = 13; g[0][ax + 1] = 13; }
+        }
+        if (opts.tank) {
+            const tx = Math.floor(cols * 0.7);
+            for (let c = tx; c < Math.min(cols - 1, tx + 3); c++) {
+                g[0][c] = 1;
+                if (roofH > 1) g[1][c] = 13;
+            }
+        }
+
+        // 지붕 (사다리꼴) + 기와 하이라이트
+        for (let r = 0; r < roofH; r++) {
+            const inset = isCity ? 0 : (roofH - 1 - r);
+            for (let c = inset; c < cols - inset; c++) {
+                if (g[r][c] === 13) continue;
+                const edge = (c === inset || c === cols - 1 - inset || r === 0);
+                g[r][c] = edge ? 1 : 2;
+                if (!edge && c % 4 === (r % 2) * 2) g[r][c] = 3;
+            }
+        }
+        // 처마 라인
+        for (let c = 0; c < cols; c++) g[eaveRow][c] = 1;
+
+        // 간판 밴드
+        if (hasSign) {
+            for (let c = 0; c < cols; c++) {
+                g[signRow][c] = (c === 0 || c === cols - 1) ? 1 : 11;
+            }
+        }
+
+        // 벽면 채우기 (좌우 테두리 + 얼룩)
+        for (let r = wallTop; r <= wallBottom; r++) {
+            for (let c = 0; c < cols; c++) {
+                if (c === 0 || c === cols - 1) g[r][c] = 1;
+                else g[r][c] = (rnd(c, r) < 12) ? 5 : 4;
+            }
+        }
+
+        // 창문 격자 (4x4 창 + 2칸 간격 → 내부에 2x2 유리면 확보),
+        // 아래 두 층은 출입문 영역 확보
+        const winW = 4, winH = 4, gapX = 2, gapY = 2;
+        const usableW = cols - 4;
+        const perRow = Math.max(1, Math.floor((usableW + gapX) / (winW + gapX)));
+        const gridW = perRow * winW + (perRow - 1) * gapX;
+        const startX = Math.floor((cols - gridW) / 2);
+        const doorW = Math.min(4, Math.max(3, Math.floor(cols * 0.18)));
+        const doorX = Math.floor((cols - doorW) / 2);
+        const doorTop = wallBottom - 3;
+
+        for (let wy = wallTop + 1; wy + winH <= wallBottom; wy += winH + gapY) {
+            for (let i = 0; i < perRow; i++) {
+                const wx = startX + i * (winW + gapX);
+                // 출입문과 겹치는 창은 건너뜀
+                if (wy + winH > doorTop && wx + winW > doorX && wx < doorX + doorW) continue;
+                const lit = rnd(wx, wy) < 62;
+                for (let r = 0; r < winH; r++) {
+                    for (let c = 0; c < winW; c++) {
+                        const isFrame = (r === 0 || r === winH - 1 || c === 0 || c === winW - 1);
+                        g[wy + r][wx + c] = isFrame ? 6 : (lit ? 7 : 8);
+                    }
                 }
-            },
-            // 제니스 저항군 기지: 올리브 강판 요새 + 안테나 + 모래주머니
-            base: {
-                sprite: [
-                    [0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0],
-                    [0,0,0,9,0,1,1,1,1,1,1,1,1,0,0,0],
-                    [0,1,1,1,1,2,2,2,2,2,2,2,2,1,1,0],
-                    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
-                    [1,2,5,4,4,5,2,5,4,4,5,2,3,2,2,1],
-                    [1,2,5,4,4,5,2,5,4,4,5,2,2,3,2,1],
-                    [1,2,2,2,2,2,2,2,2,2,2,2,3,2,2,1],
-                    [1,2,5,4,4,5,2,6,6,6,2,2,2,2,2,1],
-                    [1,2,5,4,4,5,2,6,7,6,2,3,2,3,2,1],
-                    [1,2,2,2,2,2,2,6,6,6,2,2,2,2,2,1],
-                    [10,10,1,1,1,1,1,1,1,1,1,1,10,10,10,10],
-                    [10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10]
-                ],
-                colorMap: {
-                    0: null, 1: '#2A3A1E', 2: '#44582E', 3: '#5E7440',
-                    4: '#FFD966', 5: '#20281A', 6: '#4A3018', 7: '#FFC22B',
-                    9: '#8A9A6A', 10: '#7A6238'
+                // 창틀 십자 (유리면이 충분히 넓은 큰 창에만)
+                if (winW >= 6 && !isCity) {
+                    for (let r = 1; r < winH - 1; r++) g[wy + r][wx + Math.floor(winW / 2)] = 6;
                 }
             }
-        };
-        const b = BUILDINGS[type] || BUILDINGS.academy;
-        const rows = b.sprite.length;
-        const cols = b.sprite[0].length;
-        const scale = Math.max(2, Math.floor(Math.min(w / cols, h / rows)));
-        // 지정 박스 하단에 정렬 (지면에 붙도록)
-        const drawX = x + Math.floor((w - cols * scale) / 2);
-        const drawY = y + h - rows * scale;
-        this.drawPixelSprite(b.sprite, b.colorMap, drawX, drawY, scale, false);
+        }
+
+        // 출입문 + 손잡이
+        if (!isCity) {
+            for (let r = doorTop; r <= wallBottom; r++) {
+                for (let c = doorX; c < doorX + doorW; c++) {
+                    g[r][c] = 9;
+                }
+            }
+            const knobR = doorTop + Math.floor((wallBottom - doorTop) / 2);
+            g[knobR][doorX + doorW - 2] = 10;
+            // 문 위 차양
+            for (let c = doorX - 1; c <= doorX + doorW; c++) {
+                if (c > 0 && c < cols - 1) g[doorTop - 1][c] = 1;
+            }
+        }
+
+        // 바닥/계단
+        for (let c = 0; c < cols; c++) g[baseRow][c] = 12;
+
+        const result = { sprite: g, cols, rows };
+        this._bldCache[key] = result;
+        return result;
     }
 
+    // 스타일별 색상 팔레트
+    buildingPalette(style) {
+        const P = {
+            academy: {
+                0: null, 1: '#2E1F10', 2: '#A8442E', 3: '#C85A3A', 4: '#B89868',
+                5: '#98784A', 6: '#241A0E', 7: '#FFE9A0', 8: '#3E5C78', 9: '#5A3A1E',
+                10: '#FFC22B', 11: '#1A140A', 12: '#8A8A82', 13: '#8A9A6A'
+            },
+            base: {
+                0: null, 1: '#16200E', 2: '#3A4A26', 3: '#4E6234', 4: '#3E5228',
+                5: '#324420', 6: '#12180C', 7: '#FFE9A0', 8: '#2E4A44', 9: '#4A3018',
+                10: '#FFC22B', 11: '#0E140A', 12: '#7A6238', 13: '#8A9A6A'
+            },
+            city: {
+                0: null, 1: '#20242E', 2: '#2A303C', 3: '#38404E', 4: '#333A48',
+                5: '#2A303C', 6: '#1A1E26', 7: '#FFD966', 8: '#4A5464', 9: '#1A1E26',
+                10: '#FFC22B', 11: '#161A20', 12: '#242832', 13: '#4A5464'
+            }
+        };
+        const pal = P[style] || P.academy;
+        // 잘못된 값 방지
+        if (pal[5] && pal[5].length > 7) pal[5] = '#364824';
+        return pal;
+    }
+
+    // 건물 그리기 (지정 박스 하단에 정렬)
+    drawPixelBuilding(type, x, y, w, h) {
+        const presets = {
+            academy: { cols: 26, rows: 20, style: 'academy', seed: 3, tank: true },
+            base:    { cols: 28, rows: 22, style: 'base',    seed: 7, antenna: true, tank: true }
+        };
+        const opt = presets[type] || presets.academy;
+        const built = this.buildBuildingSprite(opt);
+        const pal = this.buildingPalette(opt.style);
+        const scale = Math.max(2, Math.floor(Math.min(w / built.cols, h / built.rows)));
+        const drawX = Math.round(x + (w - built.cols * scale) / 2);
+        const drawY = Math.round(y + h - built.rows * scale);
+        this.drawPixelSprite(built.sprite, pal, drawX, drawY, scale, false);
+    }
+
+    // 도시 스카이라인 (원경 패럴랙스) - 오프닝 배경을 풍성하게
+    drawCityscape(scrollX = 0, baseY = null) {
+        const h = this.canvas.height;
+        const w = this.canvas.width;
+        const groundY = baseY === null ? h - 100 : baseY;
+        const specs = [
+            { cols: 14, rows: 22, seed: 11 },
+            { cols: 12, rows: 16, seed: 23 },
+            { cols: 16, rows: 26, seed: 37 },
+            { cols: 11, rows: 19, seed: 51 },
+            { cols: 15, rows: 14, seed: 67 },
+            { cols: 13, rows: 24, seed: 83 }
+        ];
+        const scale = Math.max(4, Math.floor(h / 62));
+        const pal = this.buildingPalette('city');
+        let cursor = -(scrollX * 0.25) % (w * 1.6);
+        for (let repeat = 0; repeat < 3; repeat++) {
+            let px = cursor + repeat * w * 1.6;
+            specs.forEach((s, i) => {
+                const built = this.buildBuildingSprite({ ...s, style: 'city' });
+                const bw = built.cols * scale;
+                const bh = built.rows * scale;
+                if (px > -bw && px < w + bw) {
+                    this.drawPixelSprite(built.sprite, pal, Math.round(px), Math.round(groundY - bh + scale), scale, false);
+                }
+                px += bw + (i % 2 === 0 ? scale * 3 : scale * 6);
+            });
+        }
+    }
+
+    // 가로등 (거리 소품)
+    drawStreetLamp(x, baseY, scale = 4) {
+        const LAMP = [
+            [0,1,1,1,0],
+            [1,2,2,2,1],
+            [1,2,2,2,1],
+            [0,1,3,1,0],
+            [0,0,3,0,0],
+            [0,0,3,0,0],
+            [0,0,3,0,0],
+            [0,0,3,0,0],
+            [0,0,3,0,0],
+            [0,3,3,3,0]
+        ];
+        const COLORS = { 0: null, 1: '#5A4A1E', 2: '#FFDD66', 3: '#33383F' };
+        this.drawPixelSprite(LAMP, COLORS, Math.round(x), Math.round(baseY - LAMP.length * scale), scale, false);
+    }
+
+    // 덤불/화단 (거리 소품)
+    drawBush(x, baseY, scale = 4) {
+        const BUSH = [
+            [0,0,1,1,1,0,0],
+            [0,1,2,2,2,1,0],
+            [1,2,3,2,2,2,1],
+            [1,2,2,2,3,2,1],
+            [1,1,1,1,1,1,1]
+        ];
+        const COLORS = { 0: null, 1: '#1E3D1A', 2: '#2E5C24', 3: '#4A8236' };
+        this.drawPixelSprite(BUSH, COLORS, Math.round(x), Math.round(baseY - BUSH.length * scale), scale, false);
+    }
     // 간판/캡션 스프라이트 텍스트 (픽셀레이트 이후에 선명하게 그림)
     drawCaption(text, x, y, opts) {
         if (this._deferDialogs) {
@@ -717,7 +910,7 @@ class StoryScene {
                     this.drawCloud(500 - this.bgScroll * 0.5, 40, 1.0);
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 건물 (학원)
                     this.ctx.fillStyle = '#8B7355';
@@ -754,7 +947,7 @@ class StoryScene {
                     this.drawCloud(500, 40, 1.0);
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 건물 (학원)
                     this.ctx.fillStyle = '#8B7355';
@@ -803,7 +996,7 @@ class StoryScene {
                     }
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 건물들 (스크롤)
                     for (let i = 0; i < 5; i++) {
@@ -863,7 +1056,7 @@ class StoryScene {
                     }
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 지율이
                     this.drawJiyul(
@@ -903,7 +1096,7 @@ class StoryScene {
                     this.drawSkyBackground('#FF6B6B', '#FFB6C1');
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 지율이 (놀란 표정)
                     this.drawJiyul(
@@ -955,7 +1148,7 @@ class StoryScene {
                     this.drawSkyBackground('#FF6B6B', '#FFB6C1');
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 지율이
                     this.drawJiyul(
@@ -1009,7 +1202,7 @@ class StoryScene {
                     }
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // ABC 대마왕 (크게! - 지율이를 바라보도록 좌우 반전)
                     const bossScale = 6 + Math.sin(this.animationFrame * 0.05) * 0.5;
@@ -1108,7 +1301,7 @@ class StoryScene {
                     }
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // ABC 대마왕
                     const bossScale = 6 + Math.sin(this.animationFrame * 0.05) * 0.5;
@@ -1207,7 +1400,7 @@ class StoryScene {
                     }
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // ABC 대마왕
                     const bossScale = 6 + Math.sin(this.animationFrame * 0.05) * 0.5;
@@ -1302,7 +1495,7 @@ class StoryScene {
                     }
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 제니스 영어학원 건물 (빛나는)
                     const buildingGlow = Math.sin(this.animationFrame * 0.1) * 0.3 + 0.7;
@@ -1513,7 +1706,7 @@ class StoryScene {
                     }
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 제니스 영어학원 건물
                     const buildingGlow = Math.sin(this.animationFrame * 0.1) * 0.3 + 0.7;
@@ -1593,7 +1786,7 @@ class StoryScene {
                     }
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 제니스 영어학원 건물
                     const buildingGlow = Math.sin(this.animationFrame * 0.1) * 0.3 + 0.7;
@@ -1730,7 +1923,7 @@ class StoryScene {
                     }
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 제니스 영어학원 건물
                     const buildingGlow = Math.sin(this.animationFrame * 0.1) * 0.3 + 0.7;
@@ -1801,7 +1994,7 @@ class StoryScene {
                     this.drawSkyBackground('#9370DB', '#DDA0DD');
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 제니스 영어학원 건물
                     this.ctx.fillStyle = '#8B7355';
@@ -1860,7 +2053,7 @@ class StoryScene {
                     this.drawSkyBackground('#9370DB', '#DDA0DD');
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 제니스 영어학원 건물
                     this.ctx.fillStyle = '#8B7355';
@@ -1897,7 +2090,7 @@ class StoryScene {
                     this.drawSkyBackground('#90EE90', '#98FB98');
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 지율이와 하린이 (배경, 작게)
                     this.drawJiyul(this.canvas.width / 4 - 50, this.canvas.height - 150, 'idle', 0, 3);
@@ -2070,7 +2263,7 @@ class StoryScene {
                     this.drawSkyBackground('#9370DB', '#BA55D3');
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 지율이와 세은이 (배경, 작게)
                     this.drawJiyul(this.canvas.width / 4 - 50, this.canvas.height - 150, 'idle', 0, 3);
@@ -2302,7 +2495,7 @@ class StoryScene {
                     }
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 지율이 (파워업!)
                     const jiyulScale = 5 + Math.sin(this.animationFrame * 0.1) * 0.5;
@@ -3513,7 +3706,7 @@ class StoryScene {
                     this.drawSkyBackground('#87CEEB', '#E0F6FF');
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 탁구장 건물
                     this.ctx.fillStyle = '#8B7355';
@@ -3568,7 +3761,7 @@ class StoryScene {
                     this.drawSkyBackground('#87CEEB', '#E0F6FF');
 
                     // 땅
-                    this.drawGround();
+                    this.drawStreetScene(this.bgScroll || 0);
 
                     // 탁구장 건물
                     this.ctx.fillStyle = '#8B7355';
