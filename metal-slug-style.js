@@ -151,10 +151,117 @@
         };
     }
 
+    // ---- HTML 상태바를 캔버스 도트 HUD로 교체 ----
+    // 기존 DOM 박스(#ui, #wordProgress)를 숨기고 매 프레임 캔버스에
+    // 강판 패널 + 픽셀 하트 + 스프라이트 텍스트로 그린다
+    const hudStyle = document.createElement('style');
+    hudStyle.textContent = '#ui, #wordProgress { display: none !important; }';
+    document.head.appendChild(hudStyle);
+
+    // 강판 패널 (어두운 올리브 + 금색 도트 테두리 + 리벳)
+    function drawPixelPanel(x, y, w, h) {
+        const px = 3;
+        ctx.fillStyle = 'rgba(18, 22, 14, 0.88)';
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = '#FFC22B';
+        for (let bx = 0; bx < w; bx += px * 2) {
+            ctx.fillRect(x + bx, y, px, px);
+            ctx.fillRect(x + bx, y + h - px, px, px);
+        }
+        for (let by = 0; by < h; by += px * 2) {
+            ctx.fillRect(x, y + by, px, px);
+            ctx.fillRect(x + w - px, y + by, px, px);
+        }
+        ctx.fillStyle = '#8A9A6A';
+        [[x + px, y + px], [x + w - px * 2, y + px],
+         [x + px, y + h - px * 2], [x + w - px * 2, y + h - px * 2]].forEach(([rx, ry]) => {
+            ctx.fillRect(rx, ry, px, px);
+        });
+    }
+
+    // 픽셀 하트 (체력 표시)
+    const HEART = [
+        [0,1,1,0,1,1,0],
+        [1,2,2,1,2,2,1],
+        [1,2,2,2,2,2,1],
+        [0,1,2,2,2,1,0],
+        [0,0,1,2,1,0,0]
+    ];
+    function drawPixelHeart(x, y, s, filled) {
+        const colors = filled
+            ? { 1: '#3A0A10', 2: '#E83848' }
+            : { 1: '#22242C', 2: '#3A3E4A' };
+        for (let r = 0; r < HEART.length; r++) {
+            for (let c = 0; c < HEART[r].length; c++) {
+                const v = HEART[r][c];
+                if (!v) continue;
+                ctx.fillStyle = colors[v];
+                ctx.fillRect(x + c * s, y + r * s, s, s);
+            }
+        }
+        // 상단 하이라이트
+        if (filled) {
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillRect(x + s, y + s, s, s);
+        }
+    }
+
+    // 도트 HUD 그리기 (매 프레임, 스케일 밖 화면 좌표)
+    function drawHUD() {
+        if (typeof gameState === 'undefined' || !gameState.isRunning) return;
+        const hasPT = typeof PixelText !== 'undefined';
+        if (!hasPT) return;
+        const collecting = gameState.mode === GAME_MODE.COLLECTING;
+
+        // ---- 좌측: HP 하트 + 이름 + 점수 (수집 모드) ----
+        if (collecting) {
+            const pw = 236, ph = 86, pxl = 10, pyt = 10;
+            drawPixelPanel(pxl, pyt, pw, ph);
+            const hs = 3; // 하트 도트 크기
+            for (let i = 0; i < gameState.maxEnergy; i++) {
+                drawPixelHeart(pxl + 12 + i * (7 * hs + 1), pyt + 12, hs, i < gameState.energy);
+            }
+            const name = (typeof characterNames !== 'undefined' && typeof currentCharacter !== 'undefined')
+                ? characterNames[currentCharacter] : '지율';
+            PixelText.draw(ctx, name, pxl + 12, pyt + 36, {
+                fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.8, align: 'left', shadowOffset: 2
+            });
+            PixelText.draw(ctx, '점수 ' + (gameState.score || 0), pxl + 12, pyt + 60, {
+                fontPx: 13, scale: 2, palette: 'white', drawScale: 0.7, align: 'left'
+            });
+        }
+
+        // ---- 스테이지 / 단어 패널 ----
+        // 수집 모드: 우측 상단, 퀴즈/보스 모드: 좌측 상단 (선택지와 겹침 방지)
+        const wp = 240, hp2 = 86;
+        const wx = collecting ? canvas.width - wp - 10 : 10;
+        const wy = 10;
+        drawPixelPanel(wx, wy, wp, hp2);
+        PixelText.draw(ctx, 'STAGE ' + gameState.currentStage + '/20', wx + 12, wy + 10, {
+            fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.8, align: 'left', shadowOffset: 2
+        });
+        if (typeof currentStageData !== 'undefined' && currentStageData && currentStageData.word) {
+            PixelText.draw(ctx, '목표 ' + currentStageData.word, wx + 12, wy + 34, {
+                fontPx: 13, scale: 2, palette: 'fire', drawScale: 0.75, align: 'left'
+            });
+            const collected = (currentStageData.collectedLetters || []).join('');
+            PixelText.draw(ctx, '수집 ' + (collected || '-'), wx + 12, wy + 58, {
+                fontPx: 13, scale: 2, palette: 'white', drawScale: 0.75, align: 'left'
+            });
+        } else if (gameState.mode === GAME_MODE.BOSS) {
+            PixelText.draw(ctx, '보스전!', wx + 12, wy + 40, {
+                fontPx: 14, scale: 2, palette: 'fire', drawScale: 0.9, align: 'left', shadowOffset: 2
+            });
+        }
+    }
+
     // ---- 인게임 대화창을 메탈슬러그풍 픽셀 패널로 교체 ----
     // (어두운 강판 배경 + 금색 도트 테두리 + 리벳 + 스프라이트 텍스트)
     if (typeof drawDialogue === 'function' && typeof dialogueState !== 'undefined') {
         drawDialogue = function () {
+            // 도트 HUD는 대화 여부와 관계없이 매 프레임 그린다 (gameLoop 마지막 호출 지점)
+            drawHUD();
+
             if (!dialogueState.active) return;
 
             const dialogue = dialogueState.dialogues[dialogueState.currentIndex];
