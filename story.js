@@ -396,6 +396,62 @@ class StoryScene {
         this.ctx.restore();
     }
 
+    // 메탈슬러그풍 도트 건물 스프라이트 (컷씬용)
+    drawPixelBuilding(type, x, y, w, h) {
+        const BUILDINGS = {
+            // 영어학원: 벽돌 학교 건물
+            academy: {
+                sprite: [
+                    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+                    [1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1],
+                    [0,2,2,3,2,2,2,3,2,2,2,3,2,2,2,0],
+                    [0,2,5,4,5,2,5,4,5,2,5,4,5,2,2,0],
+                    [0,2,5,4,5,2,5,4,5,2,5,4,5,2,2,0],
+                    [0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0],
+                    [0,2,3,2,2,3,2,2,2,3,2,2,3,2,2,0],
+                    [0,2,5,4,5,2,5,4,5,2,6,6,6,2,2,0],
+                    [0,2,5,4,5,2,5,4,5,2,6,7,6,2,2,0],
+                    [0,2,2,2,2,2,2,2,2,2,6,6,6,2,2,0],
+                    [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8]
+                ],
+                colorMap: {
+                    0: null, 1: '#4A3828', 2: '#8B7355', 3: '#75604A',
+                    4: '#FFD966', 5: '#2E2620', 6: '#4A3018', 7: '#FFC22B', 8: '#3A2E22'
+                }
+            },
+            // 제니스 저항군 기지: 올리브 강판 요새 + 안테나 + 모래주머니
+            base: {
+                sprite: [
+                    [0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,9,0,1,1,1,1,1,1,1,1,0,0,0],
+                    [0,1,1,1,1,2,2,2,2,2,2,2,2,1,1,0],
+                    [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+                    [1,2,5,4,4,5,2,5,4,4,5,2,3,2,2,1],
+                    [1,2,5,4,4,5,2,5,4,4,5,2,2,3,2,1],
+                    [1,2,2,2,2,2,2,2,2,2,2,2,3,2,2,1],
+                    [1,2,5,4,4,5,2,6,6,6,2,2,2,2,2,1],
+                    [1,2,5,4,4,5,2,6,7,6,2,3,2,3,2,1],
+                    [1,2,2,2,2,2,2,6,6,6,2,2,2,2,2,1],
+                    [10,10,1,1,1,1,1,1,1,1,1,1,10,10,10,10],
+                    [10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10]
+                ],
+                colorMap: {
+                    0: null, 1: '#2A3A1E', 2: '#44582E', 3: '#5E7440',
+                    4: '#FFD966', 5: '#20281A', 6: '#4A3018', 7: '#FFC22B',
+                    9: '#8A9A6A', 10: '#7A6238'
+                }
+            }
+        };
+        const b = BUILDINGS[type] || BUILDINGS.academy;
+        const rows = b.sprite.length;
+        const cols = b.sprite[0].length;
+        const scale = Math.max(2, Math.floor(Math.min(w / cols, h / rows)));
+        // 지정 박스 하단에 정렬 (지면에 붙도록)
+        const drawX = x + Math.floor((w - cols * scale) / 2);
+        const drawY = y + h - rows * scale;
+        this.drawPixelSprite(b.sprite, b.colorMap, drawX, drawY, scale, false);
+    }
+
     // 대화 상자 그리기 (픽셀 스타일)
     drawDialogBox(text, x, y, speaker = '') {
         // 픽셀레이트 패스 이후에 선명하게 그리도록 지연 큐에 적재
@@ -582,7 +638,7 @@ class StoryScene {
 
                     // 건물 (학원)
                     this.ctx.fillStyle = '#8B7355';
-                    this.ctx.fillRect(50, this.canvas.height - 250, 200, 150);
+                    this.drawPixelBuilding('academy', 50, this.canvas.height - 250, 200, 150);
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
@@ -619,7 +675,7 @@ class StoryScene {
 
                     // 건물 (학원)
                     this.ctx.fillStyle = '#8B7355';
-                    this.ctx.fillRect(50, this.canvas.height - 250, 200, 150);
+                    this.drawPixelBuilding('academy', 50, this.canvas.height - 250, 200, 150);
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
@@ -1168,13 +1224,13 @@ class StoryScene {
                     // 제니스 영어학원 건물 (빛나는)
                     const buildingGlow = Math.sin(this.animationFrame * 0.1) * 0.3 + 0.7;
                     this.ctx.fillStyle = `rgba(139, 115, 85, ${buildingGlow})`;
-                    this.ctx.fillRect(50, this.canvas.height - 280, 250, 180);
+                    this.drawPixelBuilding('base', 50, this.canvas.height - 280, 250, 180);
 
                     // 건물 창문
                     this.ctx.fillStyle = '#FFD700';
                     for (let i = 0; i < 2; i++) {
                         for (let j = 0; j < 3; j++) {
-                            this.ctx.fillRect(80 + j * 60, this.canvas.height - 250 + i * 60, 40, 50);
+                            // 창문은 도트 건물 스프라이트에 포함됨
                         }
                     }
 
@@ -1379,13 +1435,13 @@ class StoryScene {
                     // 제니스 영어학원 건물
                     const buildingGlow = Math.sin(this.animationFrame * 0.1) * 0.3 + 0.7;
                     this.ctx.fillStyle = `rgba(139, 115, 85, ${buildingGlow})`;
-                    this.ctx.fillRect(50, this.canvas.height - 280, 250, 180);
+                    this.drawPixelBuilding('base', 50, this.canvas.height - 280, 250, 180);
 
                     // 건물 창문
                     this.ctx.fillStyle = '#FFD700';
                     for (let i = 0; i < 2; i++) {
                         for (let j = 0; j < 3; j++) {
-                            this.ctx.fillRect(80 + j * 60, this.canvas.height - 250 + i * 60, 40, 50);
+                            // 창문은 도트 건물 스프라이트에 포함됨
                         }
                     }
 
@@ -1459,13 +1515,13 @@ class StoryScene {
                     // 제니스 영어학원 건물
                     const buildingGlow = Math.sin(this.animationFrame * 0.1) * 0.3 + 0.7;
                     this.ctx.fillStyle = `rgba(139, 115, 85, ${buildingGlow})`;
-                    this.ctx.fillRect(50, this.canvas.height - 280, 250, 180);
+                    this.drawPixelBuilding('base', 50, this.canvas.height - 280, 250, 180);
 
                     // 건물 창문
                     this.ctx.fillStyle = '#FFD700';
                     for (let i = 0; i < 2; i++) {
                         for (let j = 0; j < 3; j++) {
-                            this.ctx.fillRect(80 + j * 60, this.canvas.height - 250 + i * 60, 40, 50);
+                            // 창문은 도트 건물 스프라이트에 포함됨
                         }
                     }
 
@@ -1596,13 +1652,13 @@ class StoryScene {
                     // 제니스 영어학원 건물
                     const buildingGlow = Math.sin(this.animationFrame * 0.1) * 0.3 + 0.7;
                     this.ctx.fillStyle = `rgba(139, 115, 85, ${buildingGlow})`;
-                    this.ctx.fillRect(50, this.canvas.height - 280, 250, 180);
+                    this.drawPixelBuilding('base', 50, this.canvas.height - 280, 250, 180);
 
                     // 건물 창문
                     this.ctx.fillStyle = '#FFD700';
                     for (let i = 0; i < 2; i++) {
                         for (let j = 0; j < 3; j++) {
-                            this.ctx.fillRect(80 + j * 60, this.canvas.height - 250 + i * 60, 40, 50);
+                            // 창문은 도트 건물 스프라이트에 포함됨
                         }
                     }
 
@@ -1666,7 +1722,7 @@ class StoryScene {
 
                     // 제니스 영어학원 건물
                     this.ctx.fillStyle = '#8B7355';
-                    this.ctx.fillRect(50, this.canvas.height - 280, 250, 180);
+                    this.drawPixelBuilding('base', 50, this.canvas.height - 280, 250, 180);
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
@@ -1725,7 +1781,7 @@ class StoryScene {
 
                     // 제니스 영어학원 건물
                     this.ctx.fillStyle = '#8B7355';
-                    this.ctx.fillRect(50, this.canvas.height - 280, 250, 180);
+                    this.drawPixelBuilding('base', 50, this.canvas.height - 280, 250, 180);
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
