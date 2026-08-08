@@ -225,33 +225,201 @@
         }
     }
 
-    // ---- 아케이드 크레딧 시스템 ----
-    // 게임 오버마다 1씩 차감되며, 0이 되면 게임 종료(재시작 시 초기화)
+    // ---- 아케이드 크레딧 + CONTINUE 카운트다운 시스템 ----
+    // 게임 오버 시 9초 카운트다운 화면을 띄우고, 입력하면 크레딧 1을 소모해
+    // 현재 스테이지부터 재개한다. 카운트다운이 끝나거나 크레딧이 없으면 종료.
     const CREDIT_START = 8;
     if (typeof window.gameCredits !== 'number') {
         window.gameCredits = CREDIT_START;
     }
+
+    let continueActive = false;
+    let continueCount = 9;
+    let continueDeadline = 0;
+    let continueRaf = null;
+
+    // 카운트다운 화면 렌더링 (도트 스타일)
+    function drawContinueScreen() {
+        const w = canvas.width, h = canvas.height;
+        const hasPT = typeof PixelText !== 'undefined';
+
+        // 어두운 오버레이 + 주사선 (아케이드 CRT 느낌)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.82)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+        for (let sy = 0; sy < h; sy += 4) {
+            ctx.fillRect(0, sy, w, 2);
+        }
+        if (!hasPT) return;
+
+        const base = Math.max(0.8, Math.min(w / 480, h / 320));
+
+        // GAME OVER (금색 로고)
+        const goOpts = { fontPx: 18, scale: 2, palette: 'gold' };
+        const gm = PixelText.measure('GAME OVER', goOpts);
+        const gs = Math.min(2.4 * base, (w * 0.72) / gm.width);
+        PixelText.draw(ctx, 'GAME OVER', w / 2, h * 0.14, {
+            ...goOpts, drawScale: gs, shadowOffset: 4 * base
+        });
+
+        // CONTINUE? (크레딧 있을 때만)
+        if (window.gameCredits > 0) {
+            const cOpts = { fontPx: 14, scale: 2, palette: 'fire' };
+            const cm = PixelText.measure('CONTINUE?', cOpts);
+            const cs = Math.min(1.7 * base, (w * 0.5) / cm.width);
+            PixelText.draw(ctx, 'CONTINUE?', w / 2, h * 0.34, {
+                ...cOpts, drawScale: cs, shadowOffset: 3 * base
+            });
+
+            // 대형 카운트다운 숫자 (1초마다 펄스, 3 이하 빨강)
+            // 숫자 높이가 안내 문구를 침범하지 않도록 가용 높이 안에 맞춘다
+            const remainMs = Math.max(0, continueDeadline - Date.now());
+            const frac = (remainMs % 1000) / 1000;
+            const pulse = 1 + frac * 0.3;           // 초가 바뀔 때 크게 → 작아짐
+            const numOpts = {
+                fontPx: 20, scale: 2,
+                palette: continueCount <= 3 ? 'fire' : 'white'
+            };
+            const nm = PixelText.measure(String(continueCount), numOpts);
+            const numTop = h * 0.45;
+            const numMaxH = h * 0.26;               // 안내 문구 위까지만 사용
+            const nsBase = Math.min((w * 0.16) / nm.width, numMaxH / nm.height);
+            const ns = nsBase * pulse;
+            // 펄스로 커져도 중앙 기준을 유지하도록 위치 보정
+            PixelText.draw(ctx, String(continueCount), w / 2,
+                numTop - (nm.height * (ns - nsBase)) / 2, {
+                ...numOpts, drawScale: ns, shadowOffset: 4 * base
+            });
+
+            // 안내 문구 (깜빡임)
+            if (Math.floor(Date.now() / 400) % 2 === 0) {
+                const pOpts = { fontPx: 12, scale: 2, palette: 'gold' };
+                const pm = PixelText.measure('터치 / SPACE 로 계속하기', pOpts);
+                const ps = Math.min(1.2 * base, (w * 0.6) / pm.width);
+                PixelText.draw(ctx, '터치 / SPACE 로 계속하기', w / 2, h * 0.78, {
+                    ...pOpts, drawScale: ps, shadowOffset: 2 * base
+                });
+            }
+        } else {
+            const nOpts = { fontPx: 13, scale: 2, palette: 'fire' };
+            const nm2 = PixelText.measure('CREDIT 소진!', nOpts);
+            const ns2 = Math.min(1.6 * base, (w * 0.5) / nm2.width);
+            PixelText.draw(ctx, 'CREDIT 소진!', w / 2, h * 0.42, {
+                ...nOpts, drawScale: ns2, shadowOffset: 3 * base
+            });
+        }
+
+        // 하단 크레딧 패널
+        const credits = String(window.gameCredits || 0).padStart(2, '0');
+        const cw = 156, ch = 30;
+        const cx = Math.round((w - cw) / 2), cy = h - ch - 8;
+        drawPixelPanel(cx, cy, cw, ch);
+        PixelText.draw(ctx, 'CREDIT ' + credits, cx + cw / 2, cy + 8, {
+            fontPx: 12, scale: 2, palette: window.gameCredits > 2 ? 'gold' : 'fire',
+            drawScale: 0.7, shadowOffset: 2
+        });
+    }
+
+    function continueLoop() {
+        if (!continueActive) return;
+        // 남은 시간으로 카운트 갱신
+        const remainMs = Math.max(0, continueDeadline - Date.now());
+        continueCount = Math.ceil(remainMs / 1000);
+        drawContinueScreen();
+        if (remainMs <= 0) {
+            endContinue(false);
+            return;
+        }
+        continueRaf = requestAnimationFrame(continueLoop);
+    }
+
+    // 카운트다운 종료: accepted=true면 크레딧 소모 후 현재 스테이지 재개
+    function endContinue(accepted) {
+        if (!continueActive) return;
+        continueActive = false;
+        if (continueRaf) cancelAnimationFrame(continueRaf);
+        continueRaf = null;
+        window.removeEventListener('keydown', onContinueKey);
+        canvas.removeEventListener('click', onContinueClick);
+        canvas.removeEventListener('touchstart', onContinueTouch);
+
+        if (accepted && window.gameCredits > 0) {
+            window.gameCredits -= 1;
+            // 체력 회복 + 현재 스테이지 재개
+            gameState.energy = gameState.maxEnergy;
+            if (typeof characterEnergies !== 'undefined' && typeof currentCharacter !== 'undefined') {
+                characterEnergies[currentCharacter] = gameState.maxEnergy;
+            }
+            gameState.isRunning = true;
+            if (typeof showMobileControls === 'function') showMobileControls();
+            if (typeof updateEnergyDisplay === 'function') updateEnergyDisplay();
+            if (typeof startStage === 'function') startStage(gameState.currentStage);
+            if (!gameState.gameLoopRunning) {
+                gameState.gameLoopRunning = true;
+                gameLoop();
+            }
+        } else {
+            // 최종 게임 오버 화면 (기존 HTML 패널)
+            const gameOverDiv = document.getElementById('gameOver');
+            if (gameOverDiv) {
+                gameOverDiv.classList.remove('success');
+                const h2 = gameOverDiv.querySelector('h2');
+                if (h2) h2.textContent = '게임 오버!';
+                const msg = document.getElementById('gameOverMessage');
+                if (msg) {
+                    msg.textContent = `스테이지 ${gameState.currentStage}까지 클리어! / CREDIT ${String(window.gameCredits).padStart(2, '0')}`;
+                }
+                gameOverDiv.style.display = 'block';
+            }
+        }
+    }
+
+    function onContinueKey(e) {
+        if (e.code === 'Space' || e.code === 'Enter') {
+            e.preventDefault();
+            endContinue(true);
+        }
+    }
+    function onContinueClick() { endContinue(true); }
+    function onContinueTouch(e) { e.preventDefault(); endContinue(true); }
+
     if (typeof gameOver === 'function') {
-        const originalGameOver = gameOver;
         gameOver = function () {
-            window.gameCredits = Math.max(0, window.gameCredits - 1);
-            originalGameOver();
-            // 게임 오버 패널에 남은 크레딧 안내 추가
-            const msg = document.getElementById('gameOverMessage');
-            if (msg) {
-                msg.textContent += window.gameCredits > 0
-                    ? ` / CREDIT ${String(window.gameCredits).padStart(2, '0')} 남음`
-                    : ' / CREDIT 소진!';
+            gameState.isRunning = false;
+            if (typeof hideMobileControls === 'function') hideMobileControls();
+
+            if (window.gameCredits > 0) {
+                // CONTINUE 카운트다운 시작 (9초)
+                continueActive = true;
+                continueCount = 9;
+                continueDeadline = Date.now() + 9000;
+                window.addEventListener('keydown', onContinueKey);
+                canvas.addEventListener('click', onContinueClick);
+                canvas.addEventListener('touchstart', onContinueTouch);
+                continueLoop();
+            } else {
+                endContinueFallback();
             }
         };
     }
+
+    // 크레딧이 없을 때 바로 최종 게임 오버 표시
+    function endContinueFallback() {
+        const gameOverDiv = document.getElementById('gameOver');
+        if (!gameOverDiv) return;
+        gameOverDiv.classList.remove('success');
+        const h2 = gameOverDiv.querySelector('h2');
+        if (h2) h2.textContent = '게임 오버!';
+        const msg = document.getElementById('gameOverMessage');
+        if (msg) msg.textContent = `스테이지 ${gameState.currentStage}까지 클리어! / CREDIT 소진!`;
+        gameOverDiv.style.display = 'block';
+    }
+
     if (typeof restartGame === 'function') {
         const originalRestart = restartGame;
         restartGame = function () {
-            // 크레딧이 모두 소진되면 새 판으로 크레딧 보충
-            if (window.gameCredits <= 0) {
-                window.gameCredits = CREDIT_START;
-            }
+            // 새 판 시작 시 크레딧 보충
+            window.gameCredits = CREDIT_START;
             originalRestart();
         };
     }
