@@ -193,7 +193,7 @@
             const hasPT = typeof PixelText !== 'undefined';
             if (hasPT) {
                 PixelText.draw(ctx, dialogue.speaker, padding * 2, top + padding * 2, {
-                    fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.85,
+                    fontPx: 13, scale: 2, palette: 'gold', drawScale: 1.0,
                     align: 'left', shadowOffset: 2
                 });
             } else {
@@ -204,22 +204,23 @@
                 ctx.fillText(dialogue.speaker, padding * 2, top + padding * 2);
             }
 
-            // 본문 줄바꿈 (측정은 캔버스 폰트 기준)
-            ctx.font = `${fontSize}px Arial`;
+            // 본문 줄바꿈 (측정은 온스크린 스프라이트 크기에 맞춘 폰트 기준)
+            ctx.font = '20px Arial';
             ctx.textAlign = 'left';
             ctx.textBaseline = 'top';
             const maxWidth = canvas.width - padding * 4;
             const btnHeight = 40;
             const maxY = canvas.height - btnHeight - padding;
-            const lineHeight = fontSize + 8;
+            const lineHeight = 28;
             let line = '';
-            let y = top + padding * 2 + fontSize + 16;
+            let y = top + padding * 2 + fontSize + 18;
             const flush = (text, yy) => {
                 if (!text.length || yy >= maxY) return;
                 if (hasPT) {
-                    PixelText.draw(ctx, text, padding * 2, yy, {
-                        fontPx: 12, scale: 2, palette: 'white', drawScale: 0.62, align: 'left'
-                    });
+                    const bodyOpts = { fontPx: 13, scale: 2, palette: 'white', align: 'left' };
+                    const bm = PixelText.measure(text, bodyOpts);
+                    const ds = Math.min(0.85, maxWidth / bm.width);
+                    PixelText.draw(ctx, text, padding * 2, yy, { ...bodyOpts, drawScale: ds });
                 } else {
                     ctx.fillStyle = '#FFFFFF';
                     ctx.fillText(text, padding * 2, yy);

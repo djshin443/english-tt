@@ -452,6 +452,29 @@ class StoryScene {
         this.drawPixelSprite(b.sprite, b.colorMap, drawX, drawY, scale, false);
     }
 
+    // 간판/캡션 스프라이트 텍스트 (픽셀레이트 이후에 선명하게 그림)
+    drawCaption(text, x, y, opts) {
+        if (this._deferDialogs) {
+            this._captionQueue.push([text, x, y, opts]);
+            return;
+        }
+        if (!window.PixelText) return;
+        const m = PixelText.measure(text, opts);
+        // 가독성용 어두운 배경판 + 금색 라인
+        const w = m.width + 28;
+        const h = m.height + 14;
+        const bx = x - w / 2;
+        const by = y - 7;
+        this.ctx.fillStyle = 'rgba(10, 12, 8, 0.88)';
+        this.ctx.fillRect(bx, by, w, h);
+        this.ctx.fillStyle = '#FFC22B';
+        for (let gx = 0; gx < w; gx += 8) {
+            this.ctx.fillRect(bx + gx, by, 4, 3);
+            this.ctx.fillRect(bx + gx, by + h - 3, 4, 3);
+        }
+        PixelText.draw(this.ctx, text, x, y, opts);
+    }
+
     // 대화 상자 그리기 (픽셀 스타일)
     drawDialogBox(text, x, y, speaker = '') {
         // 픽셀레이트 패스 이후에 선명하게 그리도록 지연 큐에 적재
@@ -468,9 +491,9 @@ class StoryScene {
         this.ctx.textBaseline = 'alphabetic';  // 기본 베이스라인
 
         // 박스 크기 설정
-        const boxWidth = 400;  // 고정 너비
+        const boxWidth = 480;  // 고정 너비 (가독성 확대)
         const padding = 15;
-        const lineHeight = 20;
+        const lineHeight = 27;
 
         // 텍스트 줄바꿈
         const lines = this.wrapTextKorean(text, boxWidth - padding * 2);
@@ -511,7 +534,7 @@ class StoryScene {
         if (speaker) {
             if (window.PixelText) {
                 PixelText.draw(this.ctx, speaker, finalBoxX + padding, textY, {
-                    fontPx: 12, scale: 2, palette: 'gold', drawScale: 0.8,
+                    fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.95,
                     align: 'left', shadowOffset: 2
                 });
             } else {
@@ -525,9 +548,11 @@ class StoryScene {
         // 대화 내용 (스프라이트 텍스트 - 줄 단위 캐싱)
         lines.forEach((line, index) => {
             if (window.PixelText && line.trim()) {
+                const bodyOpts = { fontPx: 13, scale: 2, palette: 'white', align: 'left' };
+                const bm = PixelText.measure(line, bodyOpts);
+                const ds = Math.min(0.85, (boxWidth - padding * 2) / bm.width);
                 PixelText.draw(this.ctx, line, finalBoxX + padding, textY + 4 + index * lineHeight, {
-                    fontPx: 12, scale: 2, palette: 'white', drawScale: 0.65,
-                    align: 'left'
+                    ...bodyOpts, drawScale: ds
                 });
             } else if (line.trim()) {
                 this.ctx.fillStyle = '#FFFFFF';
@@ -542,7 +567,7 @@ class StoryScene {
 
     // 한글 텍스트 줄바꿈 (개선된 버전)
     wrapTextKorean(text, maxWidth) {
-        this.ctx.font = '14px Arial';
+        this.ctx.font = '20px Arial';
         const lines = [];
 
         // 먼저 \n으로 강제 줄바꿈 처리
@@ -642,7 +667,7 @@ class StoryScene {
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
-                    if (window.PixelText) { PixelText.draw(this.ctx, '영어학원', 150, this.canvas.height - 212, { fontPx: 12, scale: 2, palette: 'steel', drawScale: 0.9, shadowOffset: 2 }); } else { this.ctx.fillText('영어학원', 150, this.canvas.height - 200); }
+                    this.drawCaption('영어학원', 150, this.canvas.height - 220, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.05, shadowOffset: 2 });
                     this.ctx.textAlign = 'left';
 
                     // 지율이 (걸어나오는 애니메이션)
@@ -679,7 +704,7 @@ class StoryScene {
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
-                    if (window.PixelText) { PixelText.draw(this.ctx, '영어학원', 150, this.canvas.height - 212, { fontPx: 12, scale: 2, palette: 'steel', drawScale: 0.9, shadowOffset: 2 }); } else { this.ctx.fillText('영어학원', 150, this.canvas.height - 200); }
+                    this.drawCaption('영어학원', 150, this.canvas.height - 220, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.05, shadowOffset: 2 });
                     this.ctx.textAlign = 'left';
 
                     // 지율이
@@ -1240,7 +1265,7 @@ class StoryScene {
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
                     this.ctx.textAlign = 'center';
-                    if (window.PixelText) { PixelText.draw(this.ctx, '제니스 저항군 기지', 175, this.canvas.height - 288, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 }); } else { this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275); }
+                    this.drawCaption('제니스 저항군 기지', 175, this.canvas.height - 296, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.1, shadowOffset: 2 });
                     this.ctx.textAlign = 'left';
 
                     // 지율이 (놀란 모습)
@@ -1451,7 +1476,7 @@ class StoryScene {
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
                     this.ctx.textAlign = 'center';
-                    if (window.PixelText) { PixelText.draw(this.ctx, '제니스 저항군 기지', 175, this.canvas.height - 288, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 }); } else { this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275); }
+                    this.drawCaption('제니스 저항군 기지', 175, this.canvas.height - 296, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.1, shadowOffset: 2 });
                     this.ctx.textAlign = 'left';
 
                     // 지율이
@@ -1531,7 +1556,7 @@ class StoryScene {
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
                     this.ctx.textAlign = 'center';
-                    if (window.PixelText) { PixelText.draw(this.ctx, '제니스 저항군 기지', 175, this.canvas.height - 288, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 }); } else { this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275); }
+                    this.drawCaption('제니스 저항군 기지', 175, this.canvas.height - 296, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.1, shadowOffset: 2 });
                     this.ctx.textAlign = 'left';
 
                     // 지율이
@@ -1668,7 +1693,7 @@ class StoryScene {
                     this.ctx.fillStyle = `hsl(${this.animationFrame * 2 % 360}, 80%, 60%)`;
                     this.ctx.font = 'bold 22px Arial';
                     this.ctx.textAlign = 'center';
-                    if (window.PixelText) { PixelText.draw(this.ctx, '제니스 저항군 기지', 175, this.canvas.height - 288, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 }); } else { this.ctx.fillText('✨ 제니스 영어학원 ✨', 175, this.canvas.height - 275); }
+                    this.drawCaption('제니스 저항군 기지', 175, this.canvas.height - 296, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.1, shadowOffset: 2 });
                     this.ctx.textAlign = 'left';
 
                     // 지율이
@@ -4708,6 +4733,7 @@ class StoryScene {
         // 씬 업데이트 함수 호출 (스케일 없이 전체 화면 사용)
         // 대화창은 픽셀레이트 이후에 그리도록 지연시킨다 (텍스트 선명도 유지)
         this._dialogQueue = [];
+        this._captionQueue = [];
         this._deferDialogs = true;
         if (scene.update) {
             scene.update();
@@ -4717,7 +4743,9 @@ class StoryScene {
         // 컷씬 도트화: 장면 전체를 저해상도로 재샘플링해 픽셀 아트화
         this.pixelatePass();
 
-        // 지연된 대화창을 선명하게 그리기
+        // 지연된 간판/캡션과 대화창을 선명하게 그리기
+        this._captionQueue.forEach(args => this.drawCaption(args[0], args[1], args[2], args[3]));
+        this._captionQueue = [];
         this._dialogQueue.forEach(args => this.drawDialogBox(args[0], args[1], args[2], args[3]));
         this._dialogQueue = [];
 
