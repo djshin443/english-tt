@@ -90,23 +90,39 @@ function showTitleScreen() {
     const NOTE_COLORS_A = { 0: null, 1: '#FFFFFF' };
     const NOTE_COLORS_B = { 0: null, 1: '#FFE55A' };
 
-    // 탁구 라켓 (크림이 스윙용) - 들어올린 포즈 / 휘두른 포즈
+    // 셰이크핸드 탁구 라켓 (크림이 스윙용)
+    // 둥근 블레이드 + 곧은 나무 손잡이, 앞면 보라 러버 / 뒷면 핑크 러버
     const PADDLE_UP = [
-        [0,0,1,1,0],
-        [0,1,2,2,1],
-        [1,2,2,2,1],
-        [1,2,2,1,0],
-        [0,1,1,0,0],
-        [0,0,3,0,0],
-        [0,0,3,0,0]
+        [0,0,1,1,1,1,1,0,0],
+        [0,1,2,2,2,2,2,1,0],
+        [1,2,3,3,2,2,2,2,1],
+        [1,2,3,2,2,2,2,2,1],
+        [1,2,2,2,2,2,2,2,1],
+        [0,1,2,2,2,2,2,1,0],
+        [0,0,1,2,2,2,1,0,0],
+        [0,0,0,1,1,1,0,0,0],
+        [0,0,0,4,5,4,0,0,0],
+        [0,0,0,4,5,4,0,0,0],
+        [0,0,0,4,4,4,0,0,0]
     ];
+    // 앞면: 보라색 러버
+    const PADDLE_COLORS_UP = {
+        0: null, 1: '#3A1A4A', 2: '#9B59D0', 3: '#C79AE8',
+        4: '#D9A05B', 5: '#B67F3E'
+    };
     const PADDLE_SWING = [
-        [0,0,0,1,1,1,0],
-        [3,3,1,2,2,2,1],
-        [0,0,1,2,2,1,0],
-        [0,0,0,1,1,0,0]
+        [0,0,0,0,1,1,1,1,1,0,0],
+        [0,0,1,1,2,2,2,2,2,1,0],
+        [4,4,5,1,2,3,3,2,2,2,1],
+        [4,4,5,1,2,3,2,2,2,2,1],
+        [0,0,1,1,2,2,2,2,2,1,0],
+        [0,0,0,0,1,1,1,1,1,0,0]
     ];
-    const PADDLE_COLORS = { 0: null, 1: '#5A1420', 2: '#E85060', 3: '#FFC22B' };
+    // 뒷면: 핑크색 러버 (휘두를 때 반대면이 보임)
+    const PADDLE_COLORS_SWING = {
+        0: null, 1: '#7A2A4A', 2: '#FF7FB0', 3: '#FFC2DC',
+        4: '#D9A05B', 5: '#B67F3E'
+    };
 
     // 갈색 곰돌이 인형 (하린용)
     const BEAR_SPRITE = [
@@ -272,12 +288,12 @@ function showTitleScreen() {
                     if (!swinging) {
                         // 라켓 들어올린 포즈 (살짝 흔들림)
                         const bob = Math.round(Math.sin(frame * 0.25) * ps);
-                        drawSpriteMS(PADDLE_UP, PADDLE_COLORS,
-                            mx + spriteW - ps * 2, baseY + mScale * 2 + bob, ps, false);
+                        drawSpriteMS(PADDLE_UP, PADDLE_COLORS_UP,
+                            mx + spriteW - ps * 3, baseY + mScale + bob, ps, false);
                     } else {
                         // 휘두른 포즈 + 스윙 궤적 (흰 잔상 도트)
-                        drawSpriteMS(PADDLE_SWING, PADDLE_COLORS,
-                            mx + spriteW - ps, baseY + mScale * 6, ps, false);
+                        drawSpriteMS(PADDLE_SWING, PADDLE_COLORS_SWING,
+                            mx + spriteW - ps * 2, baseY + mScale * 6, ps, false);
                         tctx.fillStyle = 'rgba(255,255,255,0.7)';
                         for (let k = 0; k < 4; k++) {
                             const arcA = -0.9 + k * 0.45;
