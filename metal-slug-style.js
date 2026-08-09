@@ -141,7 +141,7 @@
                     player.weaponAngle
                 );
             }
-            // 크림(0)이 사인검(번개검) 사용
+            // 크림이(0)이 사인검(번개검) 사용
             if (currentCharacter === 0 && player.showWeapon) {
                 drawLightningSword(
                     player.x + player.width + 20,

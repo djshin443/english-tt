@@ -1161,7 +1161,7 @@ class StoryScene {
                         '오늘의 영어 훈련 임무 완료!\n다음 작전은 탁구 특훈이다, 출발!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
-                        '크림'
+                        '크림이'
                     );
                 }
             },
@@ -1283,7 +1283,7 @@ class StoryScene {
                         '오늘은 필살 스매싱 훈련의 날!\n작전 개시다. 가자!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
-                        '크림'
+                        '크림이'
                     );
                 }
             },
@@ -1335,7 +1335,7 @@ class StoryScene {
                         '비상!! 상공에 미확인 비행물체!\n...UFO다! 적기 출현!!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
-                        '크림'
+                        '크림이'
                     );
                 }
             },
@@ -1673,7 +1673,7 @@ class StoryScene {
                         '뭐라고?! 탁구는 내 심장이다!\n침략자들, 절대 용서 못 해!',
                         this.canvas.width / 4,
                         this.canvas.height - 300,
-                        '크림'
+                        '크림이'
                     );
                 }
             },
@@ -1884,7 +1884,7 @@ class StoryScene {
                         '누, 누구냐! 정체를 밝혀라!',
                         this.canvas.width / 4,
                         this.canvas.height - 120,
-                        '크림'
+                        '크림이'
                     );
                 }
             },
@@ -1961,7 +1961,7 @@ class StoryScene {
 
                     // 선생님 대사
                     this.drawDialogBox(
-                        '나는 제니스 저항군 사령관 sunzero다!\n크림 대원, 너를 특공대로 스카우트하러 왔다!',
+                        '나는 제니스 저항군 사령관 sunzero다!\n크림이 대원, 너를 특공대로 스카우트하러 왔다!',
                         this.canvas.width * 3 / 4,
                         this.canvas.height - 150,
                         'sunzero 선생님'
@@ -2181,7 +2181,7 @@ class StoryScene {
                         '임무 접수 완료!\nABC 대마왕을 격파하고 탁구를 되찾겠습니다!',
                         this.canvas.width / 4,
                         this.canvas.height - 140,
-                        '크림'
+                        '크림이'
                     );
                 }
             },
@@ -2236,7 +2236,7 @@ class StoryScene {
                     // 세은이 대사
                     if (this.animationFrame > 60) {
                         this.drawDialogBox(
-                            '크림 대원! 2번 대원 세은, 작전에 합류한다!',
+                            '크림이 대원! 2번 대원 세은, 작전에 합류한다!',
                             this.canvas.width / 2 - 30,
                             this.canvas.height - 300,
                             '세은'
@@ -2527,7 +2527,7 @@ class StoryScene {
                     this.ctx.shadowBlur = 0;
                     this.ctx.strokeRect(-30, -4, 30, 8);
 
-                    // 검날 본체 (더 크고 날카로운 크림 신검 스타일 + 케데헌 루미 보라색)
+                    // 검날 본체 (더 크고 날카로운 크림이 신검 스타일 + 케데헌 루미 보라색)
                     const spearGradient = this.ctx.createLinearGradient(0, -10, 60, 10);
                     spearGradient.addColorStop(0, '#FFD700');                  // 금색
                     spearGradient.addColorStop(0.15, '#DA70D6');               // 오키드
@@ -2875,7 +2875,7 @@ class StoryScene {
                         '탁구 특공대, 출격!!\nABC 대마왕을 무찌르고 탁구를 되찾는다! GO GO GO!',
                         this.canvas.width / 2,
                         this.canvas.height - 200,
-                        '크림'
+                        '크림이'
                     );
 
                     // READY 텍스트
@@ -3965,7 +3965,7 @@ class StoryScene {
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
-                    this.drawCaption('크림 탁구&잉글리시 클럽', 175, this.canvas.height - 262, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 });
+                    this.drawCaption('크림이 탁구&잉글리시 클럽', 175, this.canvas.height - 262, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 });
 
                     // ABC 대마왕 (코치 복장)
                     this.drawBossSprite(
@@ -3993,7 +3993,7 @@ class StoryScene {
                         '사령관님! 작전 대성공!\n금메달 획득 완료했습니다!',
                         this.canvas.width / 2 - 100,
                         this.canvas.height - 250,
-                        '크림'
+                        '크림이'
                     );
 
                     // 하트 효과
@@ -4019,7 +4019,7 @@ class StoryScene {
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
-                    this.drawCaption('크림 탁구&잉글리시 클럽', 175, this.canvas.height - 262, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 });
+                    this.drawCaption('크림이 탁구&잉글리시 클럽', 175, this.canvas.height - 262, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 });
 
                     // ABC 대마왕 (코치 복장)
                     this.drawBossSprite(
@@ -4330,7 +4330,7 @@ class StoryScene {
                             '작전 종료! 캠프파이어 점화!\n오늘 작전 진짜 최고였어. 금메달도 땄고!',
                             this.canvas.width / 2 - 150,
                             this.canvas.height - 370,
-                            '크림'
+                            '크림이'
                         );
                     }
                 }
@@ -4855,7 +4855,7 @@ class StoryScene {
                         '탁구도, 영어도, 그리고 노래까지!\n우리는 세계 최고 아이돌, 핑퐁스타즈!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
-                        '크림'
+                        '크림이'
                     );
                 }
             },

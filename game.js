@@ -104,9 +104,9 @@ let ball = null;
 let divineSwords = [];
 let tornados = [];
 let lightningChains = [];
-let currentCharacter = 0;  // 0: 크림, 1: 세은, 2: 하린
+let currentCharacter = 0;  // 0: 크림이, 1: 세은, 2: 하린
 const characters = ['jiyul', 'seeun', 'harin'];
-const characterNames = ['크림', '세은', '하린'];
+const characterNames = ['크림이', '세은', '하린'];
 const characterEnergies = [10, 10, 10];  // 각 캐릭터의 체력 저장
 
 // 크림이 스매싱 상태
@@ -3456,7 +3456,7 @@ function switchCharacter() {
 // 무기 발사 함수
 function fireWeapon() {
     if (currentCharacter === 0) {
-        // 크림 - 사인검 (번개체인) 발사
+        // 크림이 - 사인검 (번개체인) 발사
         fireLightningChain();
     } else if (currentCharacter === 1) {
         // 세은 - 토네이도 발사
@@ -3582,7 +3582,7 @@ function fireLightningChain() {
     }
 }
 
-// 청룡언월도 그리기 함수 (크림 신검 스타일 + 케데헌 미라 날)
+// 청룡언월도 그리기 함수 (크림이 신검 스타일 + 케데헌 미라 날)
 function drawGreenDragonBlade(x, y, angle) {
     ctx.save();
     ctx.translate(x, y);
@@ -3633,7 +3633,7 @@ function drawGreenDragonBlade(x, y, angle) {
     ctx.shadowBlur = 0;
     ctx.strokeRect(-90, -4, 90, 8);
 
-    // 창날 본체 (더 크고 날카로운 크림 신검 스타일 + 케데헌 미라 컬러)
+    // 창날 본체 (더 크고 날카로운 크림이 신검 스타일 + 케데헌 미라 컬러)
     const spearGradient = ctx.createLinearGradient(0, -10, 60, 10);
     spearGradient.addColorStop(0, '#FFD700');                  // 금색
     spearGradient.addColorStop(0.15, '#DA70D6');               // 오키드
@@ -3846,7 +3846,7 @@ function drawGreenDragonBlade(x, y, angle) {
     ctx.restore();
 }
 
-// 케데헌 루미 보라색 사인검 그리기 함수 (크림/세은 검 스타일 + 보라색 테마)
+// 케데헌 루미 보라색 사인검 그리기 함수 (크림이/세은 검 스타일 + 보라색 테마)
 function drawLightningSword(x, y, angle) {
     ctx.save();
     ctx.translate(x, y);
@@ -3898,7 +3898,7 @@ function drawLightningSword(x, y, angle) {
     ctx.shadowBlur = 0;
     ctx.strokeRect(-30, -4, 30, 8);
 
-    // 검날 본체 (더 크고 날카로운 크림 신검 스타일 + 케데헌 루미 보라색)
+    // 검날 본체 (더 크고 날카로운 크림이 신검 스타일 + 케데헌 루미 보라색)
     const spearGradient = ctx.createLinearGradient(0, -10, 60, 10);
     spearGradient.addColorStop(0, '#FFD700');                  // 금색
     spearGradient.addColorStop(0.15, '#DA70D6');               // 오키드
