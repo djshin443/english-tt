@@ -236,6 +236,147 @@ class StoryScene {
         this.drawPixelSprite(sprite, spriteData.colorMap, x, y, scale, flipH);
     }
 
+    // 초이 캐릭터 그리기
+    drawChoi(x, y, animation = 'idle', frame = 0, scale = 4, flipH = false) {
+        const spriteData = pixelData.choi;
+        if (!spriteData) return;
+        let sprite;
+        switch (animation) {
+            case 'walk':
+                sprite = frame % 2 === 0 ? spriteData.walking1 : spriteData.walking2;
+                break;
+            case 'jump':
+                sprite = spriteData.jump;
+                break;
+            case 'casting':
+                sprite = spriteData.casting;
+                break;
+            default:
+                sprite = spriteData.idle;
+        }
+        this.drawPixelSprite(sprite, spriteData.colorMap, x, y, scale, flipH);
+    }
+
+    // 도트 버블 링 (초이 물총 연출용)
+    drawStoryBubble(cx, cy, r, alpha = 1) {
+        const s = Math.max(2, Math.round(r / 4));
+        this.ctx.globalAlpha = alpha;
+        const steps = Math.max(8, Math.round(r * 1.2));
+        for (let i = 0; i < steps; i++) {
+            const a = (i / steps) * Math.PI * 2;
+            this.ctx.fillStyle = (i % 3 === 0) ? '#B8ECFF' : '#2E9CD8';
+            this.ctx.fillRect(Math.round(cx + Math.cos(a) * r) - s / 2, Math.round(cy + Math.sin(a) * r) - s / 2, s, s);
+        }
+        this.ctx.fillStyle = 'rgba(122, 220, 255, 0.2)';
+        this.ctx.fillRect(cx - r + s, cy - r + s, (r - s) * 2, (r - s) * 2);
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(Math.round(cx - r * 0.45), Math.round(cy - r * 0.5), s, s);
+        this.ctx.globalAlpha = 1;
+    }
+
+    // 초이의 방 (밤) - 벽/바닥/창문/침대를 도트로
+    drawChoiRoom() {
+        const w = this.canvas.width, h = this.canvas.height;
+        // 벽 (따뜻한 밴드 2색)
+        this.ctx.fillStyle = '#5C4A3C';
+        this.ctx.fillRect(0, 0, w, h * 0.66);
+        this.ctx.fillStyle = '#544234';
+        for (let x = 0; x < w; x += 48) this.ctx.fillRect(x, 0, 24, h * 0.66);
+        // 바닥 (마루 도트) - 밑색을 먼저 깔아 틈새로 이전 프레임이 비치지 않게
+        const gp = 10;
+        const floorTop = Math.floor(h * 0.66);
+        this.ctx.fillStyle = '#5A4630';
+        this.ctx.fillRect(0, floorTop, w, h - floorTop);
+        for (let gy = floorTop; gy < h; gy += gp) {
+            for (let gx = 0; gx < w; gx += gp * 3) {
+                const iy = Math.floor(gy / gp);
+                this.ctx.fillStyle = (Math.floor(gx / (gp * 3)) + iy) % 2 ? '#8A6A46' : '#7A5C3C';
+                this.ctx.fillRect(gx, gy, gp * 3 - 2, gp - 1);
+            }
+        }
+        // 창문 (밤하늘 + 별 + UFO)
+        const wx = w * 0.12, wy = h * 0.12, ww = 190, wh = 150;
+        this.ctx.fillStyle = '#2E2418';
+        this.ctx.fillRect(wx - 8, wy - 8, ww + 16, wh + 16);
+        this.ctx.fillStyle = '#12183A';
+        this.ctx.fillRect(wx, wy, ww, wh);
+        this.ctx.fillStyle = '#FFFFFF';
+        for (let i = 0; i < 8; i++) {
+            this.ctx.fillRect(wx + ((i * 53) % (ww - 8)) + 4, wy + ((i * 37) % (wh - 8)) + 4, 3, 3);
+        }
+        this.drawPixelUFO(wx + ww - 70, wy + 22, 2);
+        this.ctx.fillStyle = '#2E2418';
+        this.ctx.fillRect(wx + ww / 2 - 4, wy, 8, wh);
+        this.ctx.fillRect(wx, wy + wh / 2 - 4, ww, 8);
+        // 침대 (오른쪽)
+        const bx = w * 0.68, by = h * 0.66 - 70;
+        this.ctx.fillStyle = '#4A3018';
+        this.ctx.fillRect(bx, by, 220, 70);
+        this.ctx.fillStyle = '#E85060';
+        this.ctx.fillRect(bx + 8, by - 14, 204, 34);
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(bx + 14, by - 26, 56, 24);
+    }
+
+    // 아이돌 무대 - 스포트라이트/무대/관중/네 멤버 댄스
+    drawIdolStage() {
+        const w = this.canvas.width, h = this.canvas.height;
+        // 어두운 공연장 배경 밴드
+        ['#100A24', '#1A1238', '#28184E', '#38206A'].forEach((c, i) => {
+            this.ctx.fillStyle = c;
+            this.ctx.fillRect(0, i * h * 0.17, w, h * 0.17 + 1);
+        });
+        // 스포트라이트 3줄기
+        const beams = [0.25, 0.5, 0.75];
+        beams.forEach((bx, i) => {
+            const sway = Math.sin(this.animationFrame * 0.04 + i * 2) * 60;
+            this.ctx.fillStyle = ['rgba(255,229,90,0.16)', 'rgba(122,220,255,0.16)', 'rgba(255,105,180,0.16)'][i];
+            this.ctx.beginPath();
+            this.ctx.moveTo(w * bx - 14, 0);
+            this.ctx.lineTo(w * bx + 14, 0);
+            this.ctx.lineTo(w * bx + 120 + sway, h * 0.72);
+            this.ctx.lineTo(w * bx - 120 + sway, h * 0.72);
+            this.ctx.closePath();
+            this.ctx.fill();
+        });
+        // 무대 바닥
+        const stageY = Math.floor(h * 0.62);
+        this.ctx.fillStyle = '#3A2A5C';
+        this.ctx.fillRect(0, stageY, w, h * 0.16);
+        this.ctx.fillStyle = '#FFC22B';
+        for (let x = 0; x < w; x += 16) this.ctx.fillRect(x, stageY, 8, 4);
+        // 멤버 4명 (박자에 맞춰 번갈아 점프 댄스)
+        const beat = Math.floor(this.animationFrame / 18);
+        const members = [
+            (x, y, a) => this.drawJiyul(x, y, a, 0, 4),
+            (x, y, a) => this.drawSeeun(x, y, a, 0, 4),
+            (x, y, a) => this.drawHarin(x, y, a, 0, 4),
+            (x, y, a) => this.drawChoi(x, y, a, 0, 4)
+        ];
+        members.forEach((draw, i) => {
+            const dance = (beat + i) % 2 === 0;
+            const mx = w * 0.5 + (i - 1.5) * 110 - 32;
+            const my = stageY - 64 * 1.55 - (dance ? 14 : 0);
+            draw(mx, my, dance ? 'jump' : 'idle');
+        });
+        // 관중 실루엣 (하단, 팔 흔들기)
+        const crowdY = Math.floor(h * 0.8);
+        for (let x = 0; x < w; x += 34) {
+            const wave = Math.sin(this.animationFrame * 0.15 + x) > 0;
+            this.ctx.fillStyle = '#0C081A';
+            this.ctx.fillRect(x + 4, crowdY + 10, 26, h - crowdY);
+            this.ctx.fillRect(x + (wave ? 0 : 24), crowdY + (wave ? -6 : 2), 6, 16);
+            this.ctx.fillRect(x + (wave ? 24 : 0), crowdY + (wave ? 2 : -6), 6, 16);
+        }
+        // 반짝임 + 도트 하트
+        for (let i = 0; i < 5; i++) {
+            const sx = ((i * 191 + this.animationFrame * 2) % w);
+            const sy = 40 + ((i * 97) % Math.floor(h * 0.4));
+            if ((i + Math.floor(this.animationFrame / 20)) % 2 === 0) this.drawPixelStar(sx, sy, 16);
+            else this.drawPixelHeartIcon(sx, sy, 14, '#FF69B4');
+        }
+    }
+
     // 보스 캐릭터 그리기
     drawBossSprite(bossType, x, y, scale = 4, flipH = false) {
         if (typeof bossSprites !== 'undefined' && bossSprites[bossType]) {
@@ -2536,6 +2677,55 @@ class StoryScene {
                 }
             },
 
+            // 씬 5-9: 초이의 방 - 뉴스를 본 초이
+            {
+                update: () => {
+                    this.drawChoiRoom();
+
+                    // 초이 (중앙, 놀란 모습)
+                    this.drawChoi(this.canvas.width / 2 - 40, this.canvas.height - 190, 'idle', 0, 4);
+
+                    // 머리 위 느낌표
+                    if (Math.floor(this.animationFrame / 20) % 2 === 0) {
+                        this.ctx.fillStyle = '#FFE55A';
+                        this.ctx.fillRect(this.canvas.width / 2 - 6, this.canvas.height - 235, 10, 24);
+                        this.ctx.fillRect(this.canvas.width / 2 - 6, this.canvas.height - 204, 10, 10);
+                    }
+
+                    this.drawDialogBox(
+                        '큰일이야! 크림이가 영어 제국 침략자들과\n싸우고 있다고?! 나도 도와주러 가야지!',
+                        this.canvas.width / 2,
+                        this.canvas.height - 300,
+                        '초이'
+                    );
+                }
+            },
+
+            // 씬 5-10: 초이, 장난감 물총을 챙기다
+            {
+                update: () => {
+                    this.drawChoiRoom();
+
+                    // 초이 (물총 든 포즈)
+                    this.drawChoi(this.canvas.width / 2 - 40, this.canvas.height - 190, 'casting', 0, 4);
+
+                    // 버블이 보글보글 떠오르는 연출
+                    for (let i = 0; i < 6; i++) {
+                        const bx = this.canvas.width / 2 + 60 + ((i * 47) % 120);
+                        const by = this.canvas.height - 200 - ((this.animationFrame * 1.2 + i * 55) % 220);
+                        const br = 7 + (i % 3) * 4;
+                        this.drawStoryBubble(bx, by, br, 0.85);
+                    }
+
+                    this.drawDialogBox(
+                        '내 비장의 무기, 반짝반짝 버블 물총!\n기다려 크림아, 4번 대원 초이가 간다!',
+                        this.canvas.width / 2,
+                        this.canvas.height - 300,
+                        '초이'
+                    );
+                }
+            },
+
             // 씬 6: 신검 파워업 & 결전 준비!
             {
                 duration: 200,
@@ -4640,6 +4830,47 @@ class StoryScene {
                         this.canvas.width / 2 + 90,
                         this.canvas.height - 370,
                         '하린'
+                    );
+                }
+            },
+
+            // 씬 4-4: 그리고 얼마 후... (자막)
+            {
+                duration: 120,
+                update: () => {
+                    this.ctx.fillStyle = '#000000';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.drawCaption('그리고 얼마 후...', this.canvas.width / 2, this.canvas.height / 2 - 20,
+                        { fontPx: 16, scale: 2, palette: 'white', drawScale: 1.3, shadowOffset: 3 });
+                }
+            },
+
+            // 씬 4-5: 세계 최고 아이돌 그룹 데뷔!
+            {
+                update: () => {
+                    this.drawIdolStage();
+                    this.drawCaption('세계 최고 아이돌 그룹, 핑퐁스타즈 데뷔!', this.canvas.width / 2, 36,
+                        { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.0, shadowOffset: 2 });
+                    this.drawDialogBox(
+                        '탁구도, 영어도, 그리고 노래까지!\n우리는 세계 최고 아이돌, 핑퐁스타즈!',
+                        this.canvas.width / 2,
+                        this.canvas.height - 300,
+                        '크림'
+                    );
+                }
+            },
+
+            // 씬 4-6: 초이의 무대 인사
+            {
+                update: () => {
+                    this.drawIdolStage();
+                    this.drawCaption('세계 최고 아이돌 그룹, 핑퐁스타즈 데뷔!', this.canvas.width / 2, 36,
+                        { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.0, shadowOffset: 2 });
+                    this.drawDialogBox(
+                        '버블처럼 반짝반짝 빛나는 우리 넷!\n전 세계 여러분, 사랑해요~!',
+                        this.canvas.width / 2,
+                        this.canvas.height - 300,
+                        '초이'
                     );
                 }
             },
