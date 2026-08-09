@@ -274,30 +274,43 @@ class StoryScene {
         this.ctx.globalAlpha = 1;
     }
 
-    // 초이의 방 (밤) - 벽/바닥/창문/침대를 도트로
+    // 초이의 방 (밤) - 핑크핑크한 분위기 (하얀 벽지 + 핑크 소품)
     drawChoiRoom() {
         const w = this.canvas.width, h = this.canvas.height;
-        // 벽 (따뜻한 밴드 2색)
-        this.ctx.fillStyle = '#5C4A3C';
+        // 하얀 벽지 + 연핑크 세로 스트라이프
+        this.ctx.fillStyle = '#FDF7F8';
         this.ctx.fillRect(0, 0, w, h * 0.66);
-        this.ctx.fillStyle = '#544234';
+        this.ctx.fillStyle = '#FFE4EE';
         for (let x = 0; x < w; x += 48) this.ctx.fillRect(x, 0, 24, h * 0.66);
-        // 바닥 (마루 도트) - 밑색을 먼저 깔아 틈새로 이전 프레임이 비치지 않게
+        // 벽 상단 핑크 하트 몰딩
+        for (let x = 20; x < w; x += 90) {
+            this.drawPixelHeartIcon(x, 26, 14, '#FF8FB8');
+        }
+        // 바닥 (연핑크 마루 도트) - 밑색을 먼저 깔아 틈새로 이전 프레임이 비치지 않게
         const gp = 10;
         const floorTop = Math.floor(h * 0.66);
-        this.ctx.fillStyle = '#5A4630';
+        this.ctx.fillStyle = '#D8A8B8';
         this.ctx.fillRect(0, floorTop, w, h - floorTop);
         for (let gy = floorTop; gy < h; gy += gp) {
             for (let gx = 0; gx < w; gx += gp * 3) {
                 const iy = Math.floor(gy / gp);
-                this.ctx.fillStyle = (Math.floor(gx / (gp * 3)) + iy) % 2 ? '#8A6A46' : '#7A5C3C';
+                this.ctx.fillStyle = (Math.floor(gx / (gp * 3)) + iy) % 2 ? '#F0CCD8' : '#E4BCCA';
                 this.ctx.fillRect(gx, gy, gp * 3 - 2, gp - 1);
             }
         }
-        // 창문 (밤하늘 + 별 + UFO)
+        // 하트 러그 (바닥 중앙)
+        this.ctx.fillStyle = '#FFB6D9';
+        this.ctx.fillRect(w / 2 - 90, floorTop + 24, 180, 46);
+        this.ctx.fillStyle = '#FF8FB8';
+        this.ctx.fillRect(w / 2 - 90, floorTop + 24, 180, 4);
+        this.ctx.fillRect(w / 2 - 90, floorTop + 66, 180, 4);
+        this.drawPixelHeartIcon(w / 2, floorTop + 46, 18, '#FF5C9E');
+        // 창문 (밤하늘 + 별 + UFO) - 흰 창틀 + 핑크 커튼
         const wx = w * 0.12, wy = h * 0.12, ww = 190, wh = 150;
-        this.ctx.fillStyle = '#2E2418';
+        this.ctx.fillStyle = '#FFFFFF';
         this.ctx.fillRect(wx - 8, wy - 8, ww + 16, wh + 16);
+        this.ctx.fillStyle = '#E8B8C8';
+        this.ctx.fillRect(wx - 8, wy - 8, ww + 16, 4);
         this.ctx.fillStyle = '#12183A';
         this.ctx.fillRect(wx, wy, ww, wh);
         this.ctx.fillStyle = '#FFFFFF';
@@ -305,17 +318,35 @@ class StoryScene {
             this.ctx.fillRect(wx + ((i * 53) % (ww - 8)) + 4, wy + ((i * 37) % (wh - 8)) + 4, 3, 3);
         }
         this.drawPixelUFO(wx + ww - 70, wy + 22, 2);
-        this.ctx.fillStyle = '#2E2418';
+        this.ctx.fillStyle = '#FFFFFF';
         this.ctx.fillRect(wx + ww / 2 - 4, wy, 8, wh);
         this.ctx.fillRect(wx, wy + wh / 2 - 4, ww, 8);
-        // 침대 (오른쪽)
-        const bx = w * 0.68, by = h * 0.66 - 70;
-        this.ctx.fillStyle = '#4A3018';
+        // 핑크 커튼 (양옆, 주름 도트)
+        [-1, 1].forEach(side => {
+            const cx = side === -1 ? wx - 34 : wx + ww + 6;
+            this.ctx.fillStyle = '#FF9EC4';
+            this.ctx.fillRect(cx, wy - 14, 28, wh + 28);
+            this.ctx.fillStyle = '#FF7FB0';
+            for (let cyy = wy - 14; cyy < wy + wh + 14; cyy += 12) {
+                this.ctx.fillRect(cx + 6, cyy, 4, 8);
+                this.ctx.fillRect(cx + 18, cyy + 6, 4, 8);
+            }
+        });
+        // 핑크 침대 (오른쪽): 프레임/이불/베개/하트 장식
+        const bx = w * 0.68, by = floorTop - 70;
+        this.ctx.fillStyle = '#E87FA8';           // 침대 프레임 (진핑크)
         this.ctx.fillRect(bx, by, 220, 70);
-        this.ctx.fillStyle = '#E85060';
+        this.ctx.fillStyle = '#C85E88';           // 프레임 하단 셰이드
+        this.ctx.fillRect(bx, by + 58, 220, 12);
+        this.ctx.fillStyle = '#FFB6D9';           // 핑크 이불
         this.ctx.fillRect(bx + 8, by - 14, 204, 34);
-        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillStyle = '#FF9EC4';           // 이불 줄무늬
+        for (let sx = bx + 16; sx < bx + 204; sx += 28) {
+            this.ctx.fillRect(sx, by - 14, 10, 34);
+        }
+        this.ctx.fillStyle = '#FFFFFF';           // 베개
         this.ctx.fillRect(bx + 14, by - 26, 56, 24);
+        this.drawPixelHeartIcon(bx + 170, by - 2, 14, '#FF5C9E');  // 이불 위 하트
     }
 
     // 아이돌 무대 - 스포트라이트/무대/관중/네 멤버 댄스
