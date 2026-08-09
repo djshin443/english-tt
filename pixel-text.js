@@ -32,6 +32,33 @@ const PixelText = (function () {
         }
     };
 
+    // 렌더링 계획 수립.
+    // 기존에는 스프라이트를 소수 배율로 축소해서 그렸는데, 최근접 샘플링이
+    // 행/열을 통째로 버리는 바람에 '은'의 가는 가로획이 사라져 '온'처럼 보였다.
+    // 아래 두 가지로 나눠 항상 격자 한 칸이 정수 픽셀에 대응하게 만든다.
+    //  - 도트가 2px 이상인 큰 글자(타이틀 로고 등): 칸 크기를 정수로 반올림해
+    //    기존의 굵직한 도트 느낌을 유지
+    //  - 도트가 2px 미만인 작은 글자(대사/HUD): 격자를 그만큼 촘촘하게 만들고
+    //    1px 칸으로 그려 화면 크기는 그대로 두면서 획을 모두 살림
+    function planFor(opts) {
+        const scale = Math.max(1, Math.round(opts.scale || 3));
+        const dot = scale * (opts.drawScale || 1);   // 원래 의도한 화면상 도트 크기
+        if (dot >= 2) {
+            return { fontMul: 1, cell: Math.round(dot) };
+        }
+        return { fontMul: Math.max(1, dot), cell: 1 };
+    }
+
+    // 계획대로 그렸을 때의 화면 크기 (draw/measure가 동일하게 사용)
+    function plannedSize(sprite, opts) {
+        const scale = Math.max(1, Math.round(opts.scale || 3));
+        const { cell } = planFor(opts);
+        return {
+            width: (sprite.width / scale) * cell,
+            height: (sprite.height / scale) * cell
+        };
+    }
+
     // 텍스트 → 0/1 픽셀 그리드 (상하좌우 여백 트리밍 포함)
     function textToGrid(text, fontPx, fontFamily, weight) {
         const off = document.createElement('canvas');
@@ -53,7 +80,8 @@ const PixelText = (function () {
         for (let y = 0; y < height; y++) {
             const row = new Array(width);
             for (let x = 0; x < width; x++) {
-                row[x] = data[(y * width + x) * 4 + 3] > 120 ? 1 : 0;
+                // 임계값을 낮춰 한글의 가는 가로획(은/온 구분)이 살아남도록 함
+                row[x] = data[(y * width + x) * 4 + 3] > 96 ? 1 : 0;
             }
             grid.push(row);
         }
@@ -83,11 +111,14 @@ const PixelText = (function () {
         const weight = opts.weight || 'bold';
         const scale = Math.max(1, Math.round(opts.scale || 3));
         const paletteName = opts.palette || 'gold';
-        const key = [text, fontPx, fontFamily, weight, scale, paletteName].join('|');
+        // 작은 글자는 격자를 촘촘하게 만들어 획 손실을 막는다
+        const fontMul = planFor(opts).fontMul;
+        const gridFontPx = Math.max(6, Math.round(fontPx * fontMul));
+        const key = [text, gridFontPx, fontFamily, weight, scale, paletteName].join('|');
         if (spriteCache.has(key)) return spriteCache.get(key);
 
         const pal = PALETTES[paletteName] || PALETTES.gold;
-        const grid = textToGrid(text, fontPx, fontFamily, weight);
+        const grid = textToGrid(text, gridFontPx, fontFamily, weight);
         const rows = grid.length;
         const cols = rows ? grid[0].length : 0;
 
@@ -146,9 +177,8 @@ const PixelText = (function () {
     // opts: x기준 align('center'|'left'), drawScale, alpha, shadowOffset + makeSprite 옵션
     function draw(ctx, text, x, y, opts = {}) {
         const sprite = makeSprite(text, opts);
-        const dScale = opts.drawScale || 1;
-        const w = sprite.width * dScale;
-        const h = sprite.height * dScale;
+        // 격자 칸을 정수 픽셀에 맞춰 그린다 (획 손실 없이 또렷하게)
+        const { width: w, height: h } = plannedSize(sprite, opts);
         const drawX = opts.align === 'left' ? x : x - w / 2;
         const alpha = opts.alpha === undefined ? 1 : opts.alpha;
 
@@ -167,8 +197,7 @@ const PixelText = (function () {
     // 레이아웃 계산용 크기 측정
     function measure(text, opts = {}) {
         const sprite = makeSprite(text, opts);
-        const dScale = opts.drawScale || 1;
-        return { width: sprite.width * dScale, height: sprite.height * dScale };
+        return plannedSize(sprite, opts);
     }
 
     return { makeSprite, draw, measure, PALETTES };
