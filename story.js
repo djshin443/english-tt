@@ -1736,8 +1736,8 @@ class StoryScene {
             // 씬 5-1: 제니스 영어학원 sunzero 선생님 등장! (크림이 놀람)
             {
                 update: () => {
-                    // 신비로운 보라색 하늘
-                    this.drawSkyBackground('#9370DB', '#DDA0DD');
+                    // 번개빛 금색 하늘 (사인검 테마)
+                    this.drawSkyBackground('#F0B429', '#FFE9A0');
 
                     // 반짝이는 별들
                     for (let i = 0; i < 20; i++) {
@@ -2024,11 +2024,11 @@ class StoryScene {
                 }
             },
 
-            // 씬 5-3: 신검 설명
+            // 씬 5-3: 사인검 설명
             {
                 update: () => {
-                    // 신비로운 보라색 하늘
-                    this.drawSkyBackground('#9370DB', '#DDA0DD');
+                    // 번개빛 금색 하늘 (사인검 테마)
+                    this.drawSkyBackground('#E8A020', '#FFE9A0');
 
                     // 반짝이는 별들
                     for (let i = 0; i < 20; i++) {
@@ -2094,60 +2094,43 @@ class StoryScene {
                     this.drawPixelSprite(sunzeroSprite, sunzeroColorMap,
                         this.canvas.width / 2 + 70, this.canvas.height - 200, 4);
 
-                    // 신검 (떠있는 상태)
+                    // 사인검 (번개검) - 게임 내 무기와 동일한 그래픽 사용
                     const swordY = this.canvas.height / 2 + Math.sin(this.animationFrame * 0.1) * 10;
                     const swordRotation = this.animationFrame * 0.05;
 
-                    this.ctx.save();
-                    this.ctx.translate(this.canvas.width / 2, swordY);
-                    this.ctx.rotate(swordRotation);
-
-                    // 신검 글로우
-                    const swordGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 60);
-                    swordGradient.addColorStop(0, 'rgba(255, 229, 90, 0.85)');
-                    swordGradient.addColorStop(0.5, 'rgba(255, 194, 43, 0.5)');
-                    swordGradient.addColorStop(1, 'rgba(255, 229, 90, 0)');
-                    this.ctx.fillStyle = swordGradient;
+                    // 번개 오라 (금빛 펄스)
+                    const auraR = 70 + Math.sin(this.animationFrame * 0.12) * 10;
+                    const aura = this.ctx.createRadialGradient(
+                        this.canvas.width / 2, swordY, 0, this.canvas.width / 2, swordY, auraR);
+                    aura.addColorStop(0, 'rgba(255, 229, 90, 0.55)');
+                    aura.addColorStop(0.6, 'rgba(122, 220, 255, 0.25)');
+                    aura.addColorStop(1, 'rgba(255, 229, 90, 0)');
+                    this.ctx.fillStyle = aura;
                     this.ctx.beginPath();
-                    this.ctx.arc(0, 0, 60, 0, Math.PI * 2);
+                    this.ctx.arc(this.canvas.width / 2, swordY, auraR, 0, Math.PI * 2);
                     this.ctx.fill();
 
-                    // 신검 본체
-                    const gradient = this.ctx.createLinearGradient(-30, 0, 30, 0);
-                    gradient.addColorStop(0, '#B8860B');
-                    gradient.addColorStop(0.2, '#FFC22B');
-                    gradient.addColorStop(0.4, '#FFFFFF');
-                    gradient.addColorStop(0.6, '#FFE55A');
-                    gradient.addColorStop(0.8, '#E8ECF4');
-                    gradient.addColorStop(1, '#C8D4E0');
-                    this.ctx.fillStyle = gradient;
-                    this.ctx.fillRect(-30, -4, 60, 8);
+                    // 번개검 본체 (game.js의 drawLightningSword — 같은 캔버스 컨텍스트)
+                    if (typeof drawLightningSword === 'function') {
+                        drawLightningSword(this.canvas.width / 2, swordY, swordRotation);
+                    }
 
-                    // 검 끝
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(30, -4);
-                    this.ctx.lineTo(35, 0);
-                    this.ctx.lineTo(30, 4);
-                    this.ctx.closePath();
-                    this.ctx.fill();
+                    // 번개 스파크 (지그재그 도트)
+                    for (let i = 0; i < 4; i++) {
+                        const a = this.animationFrame * 0.08 + i * Math.PI / 2;
+                        const bx = this.canvas.width / 2 + Math.cos(a) * 55;
+                        const by = swordY + Math.sin(a) * 55;
+                        this.ctx.fillStyle = i % 2 ? '#FFFFFF' : '#FFE55A';
+                        for (let k = 0; k < 3; k++) {
+                            this.ctx.fillRect(bx + (k % 2 ? 5 : 0), by + k * 6, 4, 6);
+                        }
+                    }
 
-                    // 흰 번개 중심선
-                    this.ctx.strokeStyle = '#FFFFFF';
-                    this.ctx.lineWidth = 2;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(-25, 0);
-                    this.ctx.lineTo(30, 0);
-                    this.ctx.stroke();
-
-                    this.ctx.restore();
-
-                    // 신검 주위 반짝임
+                    // 사인검 주위 반짝임
                     for (let i = 0; i < 8; i++) {
                         const angle = (this.animationFrame * 0.05 + i * Math.PI / 4);
                         const sparkX = this.canvas.width / 2 + Math.cos(angle) * 70;
                         const sparkY = swordY + Math.sin(angle) * 70;
-                        this.ctx.fillStyle = ['#FFD700', '#FF69B4', '#BA55D3'][i % 3];
-                        this.ctx.font = '20px Arial';
                         this.drawPixelStar(sparkX, sparkY, 20);
                     }
 
@@ -2510,11 +2493,11 @@ class StoryScene {
                 }
             },
 
-            // 씬 5-8: 선제로가 하린에게 사인검 라켓 수여
+            // 씬 5-8: 선제로가 하린에게 신검 라켓 수여
             {
                 update: () => {
-                    // 보라빛 하늘 (사인검 테마)
-                    this.drawSkyBackground('#9370DB', '#BA55D3');
+                    // 보라빛 하늘 (신검 테마)
+                    this.drawSkyBackground('#9370DB', '#DDA0DD');
 
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
@@ -2526,197 +2509,69 @@ class StoryScene {
                     // 하린이 (중앙에 크게)
                     this.drawHarin(this.canvas.width / 2 - 32, this.canvas.height - 200, 'jump', 0, 4);
 
-                    // 사인검 (보라색 검 - 왼쪽에서 등장)
+                    // 신검 3자루 (왼쪽에서 부채꼴로 등장) - 신성한 보라/금빛 검
                     const weaponStartX = -200;
                     const weaponTargetX = this.canvas.width / 2 + 80;
                     const weaponX = Math.min(weaponTargetX, weaponStartX + this.animationFrame * 5);
                     const weaponY = this.canvas.height - 200;
 
-                    this.ctx.save();
-                    this.ctx.translate(weaponX, weaponY);
-                    this.ctx.rotate(-Math.PI / 4 + Math.sin(this.animationFrame * 0.1) * 0.3);
-
-                    // 강력한 보라색 글로우 효과 (펄스 애니메이션)
-                    const glowPhase = this.animationFrame * 0.1;
-                    const dynamicGlowSize = 45 + Math.sin(glowPhase) * 8;
-                    const outerGlowSize = 60 + Math.sin(glowPhase * 1.3) * 10;
-
-                    // 외부 글로우 (케데헌 루미 오라)
-                    const outerGlow = this.ctx.createRadialGradient(20, 0, 0, 20, 0, outerGlowSize);
-                    outerGlow.addColorStop(0, 'rgba(138, 43, 226, 0.4)');     // 블루바이올렛
-                    outerGlow.addColorStop(0.3, 'rgba(148, 0, 211, 0.3)');    // 다크바이올렛
-                    outerGlow.addColorStop(0.6, 'rgba(128, 0, 128, 0.2)');    // 퍼플
-                    outerGlow.addColorStop(1, 'rgba(75, 0, 130, 0)');         // 투명
-                    this.ctx.fillStyle = outerGlow;
+                    // 신성한 오라 (보라 → 금빛 펄스)
+                    const holyR = 70 + Math.sin(this.animationFrame * 0.12) * 10;
+                    const holyAura = this.ctx.createRadialGradient(weaponX, weaponY, 0, weaponX, weaponY, holyR);
+                    holyAura.addColorStop(0, 'rgba(255, 215, 0, 0.5)');
+                    holyAura.addColorStop(0.55, 'rgba(186, 85, 211, 0.3)');
+                    holyAura.addColorStop(1, 'rgba(186, 85, 211, 0)');
+                    this.ctx.fillStyle = holyAura;
                     this.ctx.beginPath();
-                    this.ctx.arc(20, 0, outerGlowSize, 0, Math.PI * 2);
+                    this.ctx.arc(weaponX, weaponY, holyR, 0, Math.PI * 2);
                     this.ctx.fill();
 
-                    // 내부 글로우 (강렬한 빛)
-                    const innerGlow = this.ctx.createRadialGradient(20, 0, 0, 20, 0, dynamicGlowSize);
-                    innerGlow.addColorStop(0, 'rgba(255, 255, 255, 0.8)');    // 백색
-                    innerGlow.addColorStop(0.2, 'rgba(218, 112, 214, 0.7)');  // 오키드
-                    innerGlow.addColorStop(0.5, 'rgba(186, 85, 211, 0.5)');   // 미디엄오키드
-                    innerGlow.addColorStop(1, 'rgba(148, 0, 211, 0)');        // 투명
-                    this.ctx.fillStyle = innerGlow;
-                    this.ctx.beginPath();
-                    this.ctx.arc(20, 0, dynamicGlowSize, 0, Math.PI * 2);
-                    this.ctx.fill();
+                    // 검 3자루를 부채꼴(-30° / 0° / +30°)로 배치 — 인게임 신검 발사와 동일
+                    [-Math.PI / 6, 0, Math.PI / 6].forEach((tilt, si) => {
+                        this.ctx.save();
+                        this.ctx.translate(weaponX, weaponY);
+                        this.ctx.rotate(tilt + Math.sin(this.animationFrame * 0.08) * 0.08);
 
-                    // 검 손잡이 (짧고 화려한 금색)
-                    const handleGradient = this.ctx.createLinearGradient(-30, 0, 0, 0);
-                    handleGradient.addColorStop(0, '#B8860B');      // 다크골드
-                    handleGradient.addColorStop(0.2, '#FFD700');    // 골드
-                    handleGradient.addColorStop(0.4, '#FFA500');    // 오렌지골드
-                    handleGradient.addColorStop(0.6, '#FFD700');    // 골드
-                    handleGradient.addColorStop(0.8, '#FFA500');    // 오렌지골드
-                    handleGradient.addColorStop(1, '#FFD700');      // 골드
-                    this.ctx.fillStyle = handleGradient;
-                    this.ctx.shadowColor = '#FFD700';
-                    this.ctx.shadowBlur = 15;
-                    this.ctx.fillRect(-30, -4, 30, 8);
+                        // 칼날 (보라 → 금 그라데이션)
+                        const bladeGrad = this.ctx.createLinearGradient(-28, 0, 34, 0);
+                        bladeGrad.addColorStop(0, '#B8860B');   // 손잡이 끝
+                        bladeGrad.addColorStop(0.22, '#FFC22B'); // 금색 가드
+                        bladeGrad.addColorStop(0.45, '#DDA0DD'); // 연보라
+                        bladeGrad.addColorStop(0.75, '#BA55D3'); // 보라
+                        bladeGrad.addColorStop(1, '#8B008B');    // 진보라 검끝
+                        this.ctx.fillStyle = bladeGrad;
+                        this.ctx.fillRect(-28, -4, 62, 8);
 
-                    // 손잡이 테두리
-                    this.ctx.strokeStyle = '#8B4513';
-                    this.ctx.lineWidth = 1;
-                    this.ctx.shadowBlur = 0;
-                    this.ctx.strokeRect(-30, -4, 30, 8);
+                        // 검끝 (뾰족)
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(34, -4);
+                        this.ctx.lineTo(42, 0);
+                        this.ctx.lineTo(34, 4);
+                        this.ctx.closePath();
+                        this.ctx.fill();
 
-                    // 검날 본체 (더 크고 날카로운 크림이 신검 스타일 + 케데헌 루미 보라색)
-                    const spearGradient = this.ctx.createLinearGradient(0, -10, 60, 10);
-                    spearGradient.addColorStop(0, '#FFD700');                  // 금색
-                    spearGradient.addColorStop(0.15, '#DA70D6');               // 오키드
-                    spearGradient.addColorStop(0.3, '#FFFFFF');                // 백색 (빛나는)
-                    spearGradient.addColorStop(0.5, '#EE82EE');                // 바이올렛
-                    spearGradient.addColorStop(0.7, '#BA55D3');                // 미디엄오키드
-                    spearGradient.addColorStop(0.85, '#9932CC');               // 다크오키드
-                    spearGradient.addColorStop(1, 'rgba(138, 43, 226, 0.3)');  // 반투명
+                        // 금색 가드 (십자)
+                        this.ctx.fillStyle = '#FFC22B';
+                        this.ctx.fillRect(-16, -10, 5, 20);
 
-                    this.ctx.fillStyle = spearGradient;
-                    this.ctx.shadowColor = '#BA55D3';
-                    this.ctx.shadowBlur = 25;
+                        // 흰 중심선 (신성한 빛)
+                        this.ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(-10, 0);
+                        this.ctx.lineTo(34, 0);
+                        this.ctx.stroke();
 
-                    // 검날 본체 그리기 (더 길고 날카롭게)
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(0, -10);  // 손잡이 끝 (더 굵게)
-                    this.ctx.lineTo(45, -6);  // 위쪽 날
-                    this.ctx.lineTo(60, 0);   // 뾰족한 끝 (더 길게)
-                    this.ctx.lineTo(45, 6);   // 아래쪽 날
-                    this.ctx.lineTo(0, 10);   // 손잡이 끝
-                    this.ctx.closePath();
-                    this.ctx.fill();
+                        this.ctx.restore();
+                    });
 
-                    // 검날 이중 테두리 (빛나는 효과)
-                    this.ctx.strokeStyle = '#BA55D3';
-                    this.ctx.lineWidth = 2;
-                    this.ctx.shadowColor = '#BA55D3';
-                    this.ctx.shadowBlur = 15;
-                    this.ctx.stroke();
-
-                    // 내부 빛나는 선
-                    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-                    this.ctx.lineWidth = 1;
-                    this.ctx.shadowBlur = 10;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(5, -7);
-                    this.ctx.lineTo(43, -4);
-                    this.ctx.lineTo(73, 0);
-                    this.ctx.lineTo(43, 4);
-                    this.ctx.lineTo(5, 7);
-                    this.ctx.stroke();
-
-                    // 케데헌 루미 스타일 사인검 날 (뾰족하고 날카롭게)
-                    const bladeGradient = this.ctx.createRadialGradient(50, 0, 5, 50, 0, 25);
-                    bladeGradient.addColorStop(0, '#FFFFFF');                  // 백색 중심
-                    bladeGradient.addColorStop(0.3, '#DA70D6');                // 오키드
-                    bladeGradient.addColorStop(0.6, '#BA55D3');                // 미디엄오키드
-                    bladeGradient.addColorStop(0.8, '#9932CC');                // 다크오키드
-                    bladeGradient.addColorStop(1, 'rgba(138, 43, 226, 0.6)');  // 반투명
-
-                    this.ctx.fillStyle = bladeGradient;
-                    this.ctx.shadowColor = '#BA55D3';
-                    this.ctx.shadowBlur = 20;
-
-                    // 위쪽 사인검 날 (뾰족하고 날카롭게)
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(45, -5);
-                    this.ctx.quadraticCurveTo(58, -14, 73, -6);
-                    this.ctx.lineTo(76, 0);
-                    this.ctx.lineTo(60, 0);
-                    this.ctx.lineTo(45, -5);
-                    this.ctx.closePath();
-                    this.ctx.fill();
-
-                    // 아래쪽 사인검 날 (대칭)
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(45, 5);
-                    this.ctx.quadraticCurveTo(58, 14, 73, 6);
-                    this.ctx.lineTo(76, 0);
-                    this.ctx.lineTo(60, 0);
-                    this.ctx.lineTo(45, 5);
-                    this.ctx.closePath();
-                    this.ctx.fill();
-
-                    // 사인검 날 이중 테두리
-                    this.ctx.strokeStyle = '#FFFFFF';
-                    this.ctx.lineWidth = 1.5;
-                    this.ctx.shadowColor = '#FFFFFF';
-                    this.ctx.shadowBlur = 12;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(45, -5);
-                    this.ctx.quadraticCurveTo(58, -14, 73, -6);
-                    this.ctx.lineTo(76, 0);
-                    this.ctx.stroke();
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(45, 5);
-                    this.ctx.quadraticCurveTo(58, 14, 73, 6);
-                    this.ctx.lineTo(76, 0);
-                    this.ctx.stroke();
-
-                    // 외부 보라색 테두리
-                    this.ctx.strokeStyle = '#BA55D3';
-                    this.ctx.lineWidth = 0.8;
-                    this.ctx.shadowBlur = 8;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(45, -5);
-                    this.ctx.quadraticCurveTo(58, -14, 73, -6);
-                    this.ctx.lineTo(76, 0);
-                    this.ctx.stroke();
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(45, 5);
-                    this.ctx.quadraticCurveTo(58, 14, 73, 6);
-                    this.ctx.lineTo(76, 0);
-                    this.ctx.stroke();
-
-                    // 중앙선 (강렬한 빛의 선)
-                    this.ctx.strokeStyle = '#FFFFFF';
-                    this.ctx.lineWidth = 3;
-                    this.ctx.shadowColor = '#FFFFFF';
-                    this.ctx.shadowBlur = 20;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(5, 0);
-                    this.ctx.lineTo(73, 0);
-                    this.ctx.stroke();
-
-                    // 중앙선 보라색 오라
-                    this.ctx.strokeStyle = '#BA55D3';
-                    this.ctx.lineWidth = 5;
-                    this.ctx.globalAlpha = 0.3;
-                    this.ctx.shadowBlur = 25;
-                    this.ctx.stroke();
-                    this.ctx.globalAlpha = 1.0;
-
-                    this.ctx.restore();
-
-                    // 반짝임
+                    // 반짝임 (신검 도착 후)
                     if (weaponX >= weaponTargetX - 10) {
                         for (let i = 0; i < 6; i++) {
                             const angle = this.animationFrame * 0.07 + i * Math.PI / 3;
-                            const sparkX = weaponX + Math.cos(angle) * 60;
-                            const sparkY = weaponY + Math.sin(angle) * 60;
-                            this.ctx.fillStyle = '#FF00FF';
-                            this.ctx.font = '20px Arial';
-                            this.ctx.fillText('⚡', sparkX, sparkY);
+                            const sparkX = weaponX + Math.cos(angle) * 70;
+                            const sparkY = weaponY + Math.sin(angle) * 70;
+                            this.drawPixelStar(sparkX, sparkY, 20);
                         }
                     }
 
