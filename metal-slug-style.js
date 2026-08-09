@@ -696,16 +696,19 @@
             }
         }
 
-        // ---- 하단 중앙: 아케이드 크레딧 표시 (모든 모드 공통) ----
-        // 좌우 하단은 조이스틱/액션 버튼이 차지하므로 중앙에 배치
-        const credits = String(window.gameCredits || 0).padStart(2, '0');
-        const cw = 156, ch = 30;
-        const cx = Math.round((canvas.width - cw) / 2), cy = canvas.height - ch - 8;
-        drawPixelPanel(cx, cy, cw, ch);
-        PixelText.draw(ctx, 'CREDIT ' + credits, cx + cw / 2, cy + 8, {
-            fontPx: 12, scale: 2, palette: window.gameCredits > 2 ? 'gold' : 'fire',
-            drawScale: 0.7, shadowOffset: 2
-        });
+        // ---- 하단 중앙: 아케이드 크레딧 표시 (수집 모드에서만) ----
+        // 퀴즈/보스 모드에서는 선택지·전투 영역을 가리므로 숨긴다
+        // (CONTINUE 화면에는 자체 크레딧 표시가 있음)
+        if (collecting) {
+            const credits = String(window.gameCredits || 0).padStart(2, '0');
+            const cw = 156, ch = 30;
+            const cx = Math.round((canvas.width - cw) / 2), cy = canvas.height - ch - 8;
+            drawPixelPanel(cx, cy, cw, ch);
+            PixelText.draw(ctx, 'CREDIT ' + credits, cx + cw / 2, cy + 8, {
+                fontPx: 12, scale: 2, palette: window.gameCredits > 2 ? 'gold' : 'fire',
+                drawScale: 0.7, shadowOffset: 2
+            });
+        }
 
         // ---- 스테이지 / 단어 패널 ----
         // 수집 모드: 우측 상단, 퀴즈/보스 모드: 좌측 상단 (선택지와 겹침 방지)
