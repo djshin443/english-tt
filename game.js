@@ -1296,11 +1296,11 @@ class QuizChoice {
 
         // 가로 모드 모바일: 더 작은 크기로 4개 박스가 모두 보이도록
         if (isMobile && isLandscape) {
-            this.width = 160;
-            this.height = Math.min(60, (canvas.height - 80) / 5);  // 화면 높이에 맞게
+            this.width = 200;
+            this.height = Math.min(64, (canvas.height - 80) / 5);  // 화면 높이에 맞게
         } else {
-            this.width = isMobile ? 160 : 220;
-            this.height = isMobile ? 65 : 90;
+            this.width = isMobile ? 200 : 280;
+            this.height = isMobile ? 70 : 96;
         }
 
         this.text = text;
@@ -1354,19 +1354,25 @@ class QuizChoice {
         const isMobile = window.innerWidth <= 800;
         const isLandscape = window.innerWidth > window.innerHeight;
 
-        // 가로 모드 모바일: 박스 크기에 맞게 폰트 크기 조정
+        // 가로 모드 모바일: 박스 크기에 맞게 폰트 크기 조정 (가독성 확대)
         let fontSize;
         if (isMobile && isLandscape) {
-            fontSize = Math.min(12, this.height * 0.25);  // 박스 높이의 25%
+            fontSize = Math.min(18, this.height * 0.36);
         } else {
-            fontSize = isMobile ? 14 : 20;
+            fontSize = isMobile ? 19 : 26;
         }
         ctx.font = `bold ${fontSize}px Arial`;
+
+        // 텍스트가 박스보다 넓으면 맞을 때까지 폰트 축소 (최소 12px)
+        while (fontSize > 12 && ctx.measureText(this.text).width > this.width - 16) {
+            fontSize -= 1;
+            ctx.font = `bold ${fontSize}px Arial`;
+        }
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.shadowColor = '#000000';
-        ctx.shadowBlur = 3;
+        ctx.shadowBlur = 4;
         ctx.fillText(this.text, 0, 0);
 
         ctx.restore();
@@ -2059,11 +2065,11 @@ function createQuizChoices() {
     // 박스 크기 결정 (QuizChoice 생성자와 동일한 로직)
     let boxWidth, boxHeight;
     if (isMobile && isLandscape) {
-        boxWidth = 160;
-        boxHeight = Math.min(60, (canvas.height * 2 - 80) / 5);
+        boxWidth = 200;
+        boxHeight = Math.min(64, (canvas.height * 2 - 80) / 5);
     } else {
-        boxWidth = isMobile ? 160 : 220;
-        boxHeight = isMobile ? 65 : 90;
+        boxWidth = isMobile ? 200 : 280;
+        boxHeight = isMobile ? 70 : 96;
     }
 
     // 박스 간격
@@ -2332,10 +2338,20 @@ function spawnNextLetter() {
         if (!usedLetters.includes(letter)) {
             usedLetters.push(letter);  // 사용한 알파벳 추가
 
-            // 화면 오른쪽 밖에서 생성 (실제 캔버스 크기 기준)
-            const x = canvas.width + 200 + i * 500;  // 간격을 500px으로 매우 넓게 설정
-            // 상단 UI와 겹치지 않도록 y 최소값을 150으로 조정
-            const y = 150 + Math.random() * (canvas.height - 300);
+            // 화면 오른쪽 밖에서 생성하되, 기존 카드들과 절대 겹치지 않게
+            // 가장 오른쪽 카드 뒤에서 시작
+            let baseX = canvas.width + 200;
+            letters.forEach(l => { baseX = Math.max(baseX, l.x + 400); });
+            const x = baseX + i * 500;
+
+            // y도 기존 카드들과 세로 간격을 확보 (가로로 가까운 카드 기준)
+            let y, yTries = 0;
+            do {
+                y = 150 + Math.random() * (canvas.height - 300);
+                yTries++;
+            } while (yTries < 15 && letters.some(l =>
+                Math.abs(l.x - x) < 380 && Math.abs(l.y - y) < 110));
+
             letters.push(new LetterCard(x, y, letter));
         }
     }
@@ -2574,14 +2590,16 @@ function updatePlayer() {
     const offsetX = (canvas.width * (1 - GAME_SCALE)) / 2;
     const offsetY = (canvas.height * (1 - GAME_SCALE)) / 2;
 
-    // X 경계
-    if (player.x < 0) player.x = 0;
+    // X 경계: 렌더링 오프셋을 역산해 화면 왼쪽 끝~오른쪽 끝까지 이동 가능
+    const minX = -offsetX / GAME_SCALE;
+    if (player.x < minX) player.x = minX;
     if (player.x > (canvas.width - offsetX) / GAME_SCALE - player.width) {
         player.x = (canvas.width - offsetX) / GAME_SCALE - player.width;
     }
 
-    // Y 경계 (위쪽 50px 여백, 아래쪽 끝까지)
-    if (player.y < 50) player.y = 50;
+    // Y 경계: 상단 HUD 패널 바로 아래(화면 105px)부터 화면 아래 끝까지
+    const minY = (105 - offsetY) / GAME_SCALE;
+    if (player.y < minY) player.y = minY;
     if (player.y > (canvas.height - offsetY) / GAME_SCALE - player.height) {
         player.y = (canvas.height - offsetY) / GAME_SCALE - player.height;
     }
