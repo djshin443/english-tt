@@ -90,39 +90,32 @@ function showTitleScreen() {
     const NOTE_COLORS_A = { 0: null, 1: '#FFFFFF' };
     const NOTE_COLORS_B = { 0: null, 1: '#FFE55A' };
 
-    // 셰이크핸드 탁구 라켓 (크림이 스윙용)
-    // 둥근 블레이드 + 곧은 나무 손잡이, 앞면 보라 러버 / 뒷면 핑크 러버
-    const PADDLE_UP = [
-        [0,0,1,1,1,1,1,0,0],
-        [0,1,2,2,2,2,2,1,0],
-        [1,2,3,3,2,2,2,2,1],
-        [1,2,3,2,2,2,2,2,1],
-        [1,2,2,2,2,2,2,2,1],
-        [0,1,2,2,2,2,2,1,0],
-        [0,0,1,2,2,2,1,0,0],
-        [0,0,0,1,1,1,0,0,0],
-        [0,0,0,4,5,4,0,0,0],
-        [0,0,0,4,5,4,0,0,0],
-        [0,0,0,4,4,4,0,0,0]
+    // 셰이크핸드 탁구 라켓 (크림이 공 튀기기용, 수평으로 든 형태)
+    // 납작한 블레이드 + 왼쪽 나무 손잡이, 튀길 때마다 보라면/핑크면 교대
+    const PADDLE_FLAT = [
+        [0,0,0,0,1,1,1,1,1,0,0],
+        [4,4,5,1,2,2,3,2,2,1,0],
+        [4,4,5,1,2,2,2,2,2,2,1],
+        [0,0,0,0,1,1,1,1,1,0,0]
     ];
-    // 앞면: 보라색 러버
-    const PADDLE_COLORS_UP = {
+    // 보라색 러버 면
+    const PADDLE_COLORS_PURPLE = {
         0: null, 1: '#3A1A4A', 2: '#9B59D0', 3: '#C79AE8',
         4: '#D9A05B', 5: '#B67F3E'
     };
-    const PADDLE_SWING = [
-        [0,0,0,0,1,1,1,1,1,0,0],
-        [0,0,1,1,2,2,2,2,2,1,0],
-        [4,4,5,1,2,3,3,2,2,2,1],
-        [4,4,5,1,2,3,2,2,2,2,1],
-        [0,0,1,1,2,2,2,2,2,1,0],
-        [0,0,0,0,1,1,1,1,1,0,0]
-    ];
-    // 뒷면: 핑크색 러버 (휘두를 때 반대면이 보임)
-    const PADDLE_COLORS_SWING = {
+    // 핑크색 러버 면
+    const PADDLE_COLORS_PINK = {
         0: null, 1: '#7A2A4A', 2: '#FF7FB0', 3: '#FFC2DC',
         4: '#D9A05B', 5: '#B67F3E'
     };
+    // 탁구공 (흰 공 + 옅은 셰이드)
+    const BALL_SPRITE = [
+        [0,1,1,0],
+        [1,1,1,2],
+        [1,1,2,2],
+        [0,2,2,0]
+    ];
+    const BALL_COLORS = { 0: null, 1: '#FFFFFF', 2: '#D8D8DC' };
 
     // 갈색 곰돌이 인형 (하린용)
     const BEAR_SPRITE = [
@@ -279,29 +272,35 @@ function showTitleScreen() {
                 const walkSprite = walkFrame === 0 ? (data.walking1 || data.idle) : (data.walking2 || data.idle);
 
                 if (m.sig === 'paddle') {
-                    // ---- 크림이: 탁구 라켓을 휘두르며 행진 ----
-                    // 28프레임 주기: 들어올렸다가 → 쌩! 휘두르기
-                    const swingT = frame % 28;
-                    const swinging = swingT >= 18;
+                    // ---- 크림이: 탁구공을 라켓으로 통통 튀기며 행진 ----
+                    // 32프레임에 한 번 공이 튀고, 튀길 때마다 보라면/핑크면 교대
                     drawSpriteMS(walkSprite, data.colorMap, mx, baseY, mScale, false);
                     const ps = Math.max(1, Math.round(mScale * 0.8));
-                    if (!swinging) {
-                        // 라켓 들어올린 포즈 (살짝 흔들림)
-                        const bob = Math.round(Math.sin(frame * 0.25) * ps);
-                        drawSpriteMS(PADDLE_UP, PADDLE_COLORS_UP,
-                            mx + spriteW - ps * 3, baseY + mScale + bob, ps, false);
-                    } else {
-                        // 휘두른 포즈 + 스윙 궤적 (흰 잔상 도트)
-                        drawSpriteMS(PADDLE_SWING, PADDLE_COLORS_SWING,
-                            mx + spriteW - ps * 2, baseY + mScale * 6, ps, false);
-                        tctx.fillStyle = 'rgba(255,255,255,0.7)';
-                        for (let k = 0; k < 4; k++) {
-                            const arcA = -0.9 + k * 0.45;
-                            tctx.fillRect(
-                                Math.round(mx + spriteW + Math.cos(arcA) * mScale * 5),
-                                Math.round(baseY + mScale * 6 + Math.sin(arcA) * mScale * 4),
-                                ps, ps);
-                        }
+                    const T = 32;
+                    const bt = frame % T;
+                    const p = bt / T;
+                    const bounceIdx = Math.floor(frame / T);
+                    const faceColors = bounceIdx % 2 === 0 ? PADDLE_COLORS_PURPLE : PADDLE_COLORS_PINK;
+
+                    // 라켓: 공을 받아칠 때 살짝 위로 톡
+                    const paddleX = mx + spriteW - ps * 3;
+                    const paddleBaseY = baseY + mScale * 8;
+                    const hitLift = bt < 5 ? Math.round((1 - bt / 5) * ps * 2) : 0;
+                    drawSpriteMS(PADDLE_FLAT, faceColors, paddleX, paddleBaseY - hitLift, ps, false);
+
+                    // 탁구공: 라켓 위에서 포물선으로 통통 (공중에서 살짝 흔들림)
+                    const arc = Math.sin(p * Math.PI);                       // 0→1→0
+                    const ballX = paddleX + ps * 7 + Math.round(Math.sin(frame * 0.3) * ps * 0.5);
+                    const ballY = paddleBaseY - ps * 4 - Math.round(arc * mScale * 7);
+                    drawSpriteMS(BALL_SPRITE, BALL_COLORS, ballX, ballY, Math.max(1, Math.round(ps * 0.8)), false);
+
+                    // 팅! 하는 순간 임팩트 반짝 (라켓에 닿을 때, 러버색과 같은 빛)
+                    if (bt < 4) {
+                        tctx.fillStyle = bounceIdx % 2 === 0 ? '#C79AE8' : '#FFC2DC';
+                        const ix = paddleX + ps * 7, iy = paddleBaseY - hitLift;
+                        tctx.fillRect(ix - ps * 3, iy, ps, ps);
+                        tctx.fillRect(ix + ps * 4, iy, ps, ps);
+                        tctx.fillRect(ix, iy - ps * 2, ps, ps);
                     }
                 } else if (m.sig === 'study') {
                     // ---- 세은: 귀에 연필 꽂고 영어 단어를 외우며 행진 ----
