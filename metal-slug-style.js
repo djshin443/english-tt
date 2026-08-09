@@ -160,43 +160,83 @@
         characterEnergies.push(10);
     }
 
-    // 물방울 탄환: DivineSword와 같은 인터페이스로 divineSwords 배열에 편승
-    // (update에서 몬스터 충돌 처리, filter가 active로 수명 관리)
+    // 버블 탄환: DivineSword와 같은 인터페이스로 divineSwords 배열에 편승
+    // (update에서 몬스터 충돌 처리, 분열 버블 배열 반환, filter가 active로 수명 관리)
+    // 큰 버블이 날아가다 팡! 하고 작은 버블 여러 개로 분열하며 화면을 뒤덮는다
     class WaterShot {
-        constructor(x, y, angle) {
+        constructor(x, y, angle, depth = 0) {
             this.x = x;
             this.y = y;
             this.angle = angle;
-            this.speed = 9;
+            this.depth = depth;                     // 0: 큰 버블, 1: 중간, 2: 작은
+            this.speed = 8 - depth * 1.5;
             this.vx = Math.cos(angle) * this.speed;
             this.vy = Math.sin(angle) * this.speed;
             this.active = true;
-            this.width = 34;   // 충돌 반경 계산에 사용
-            this.height = 34;
-            this.lifetime = 70;
-            this.phase = angle * 5;     // 물결 위상 (탄마다 다르게)
-            this.trail = [];
+            this.radius = [16, 11, 7][depth];       // 버블 크기 (depth별)
+            this.width = this.radius * 2 + 8;       // 충돌 반경 계산에 사용
+            this.height = this.width;
+            this.lifetime = 80 - depth * 15;
+            this.phase = angle * 5 + depth * 2;     // 둥실거림 위상
+            this.framesSinceLaunch = 0;
+            this.hasSplit = false;
+            this.miniBubbles = [];                  // 뒤로 흘리는 꼬마 방울들
+        }
+
+        // 버블 터짐: 꼬마 방울 파티클
+        pop() {
+            this.active = false;
+            const n = 8 - this.depth * 2;
+            for (let i = 0; i < n; i++) {
+                addParticle(this.x, this.y,
+                    ['#4AC8F0', '#B8ECFF', '#FFFFFF', '#7ADCFF'][i % 4], 'star');
+            }
         }
 
         update() {
             if (!this.active) return [];
+            this.framesSinceLaunch++;
             this.lifetime--;
             if (this.lifetime <= 0) {
-                this.active = false;
-                for (let i = 0; i < 5; i++) {
-                    addParticle(this.x, this.y, i % 2 ? '#4AC8F0' : '#B8ECFF', 'star');
-                }
+                this.pop();
                 return [];
             }
 
-            // 파도처럼 출렁이며 전진
-            this.phase += 0.35;
+            // 둥실둥실 떠가는 버블 움직임
+            this.phase += 0.25;
             this.x += this.vx;
-            this.y += this.vy + Math.sin(this.phase) * 1.8;
+            this.y += this.vy + Math.sin(this.phase) * 1.4;
 
-            // 파도 잔상 기록
-            this.trail.push({ x: this.x, y: this.y });
-            if (this.trail.length > 7) this.trail.shift();
+            // 꼬마 방울 흘리기 (6프레임마다)
+            if (this.framesSinceLaunch % 6 === 0) {
+                this.miniBubbles.push({
+                    x: this.x - this.vx * 2, y: this.y,
+                    r: 2 + Math.random() * 3, life: 24
+                });
+            }
+            this.miniBubbles = this.miniBubbles.filter(b => {
+                b.y -= 0.8;             // 위로 보글보글 떠오름
+                b.x += Math.sin(b.life * 0.4) * 0.6;
+                b.life--;
+                return b.life > 0;
+            });
+
+            // ---- 버블 분열: 날아가던 버블에서 새 버블들이 팡팡 발사 ----
+            const splitAt = [22, 20][this.depth];
+            if (!this.hasSplit && this.depth < 2 && this.framesSinceLaunch >= splitAt) {
+                this.hasSplit = true;
+                const children = [];
+                const count = this.depth === 0 ? 3 : 2;
+                for (let i = 0; i < count; i++) {
+                    const spread = (i - (count - 1) / 2) * 0.55;
+                    children.push(new WaterShot(this.x, this.y, this.angle + spread, this.depth + 1));
+                }
+                // 분열 순간 반짝 파티클
+                for (let i = 0; i < 6; i++) {
+                    addParticle(this.x, this.y, i % 2 ? '#B8ECFF' : '#FFFFFF', 'star');
+                }
+                return children;
+            }
 
             if (this.x < -300 || this.x > canvas.width + 300 ||
                 this.y < -300 || this.y > canvas.height + 300) {
@@ -204,51 +244,59 @@
                 return [];
             }
 
-            // 몬스터와 충돌 체크 (물총알은 관통하지 않고 터짐)
+            // 몬스터와 충돌 체크 (버블은 명중하면 팡 터짐)
             for (let i = monsters.length - 1; i >= 0; i--) {
                 const m = monsters[i];
                 const dx = this.x - (m.x + m.width / 2);
                 const dy = this.y - (m.y + m.height / 2);
-                if (Math.sqrt(dx * dx + dy * dy) < (this.width / 2 + m.width / 2)) {
+                if (Math.sqrt(dx * dx + dy * dy) < (this.radius + m.width / 2)) {
                     monsters.splice(i, 1);
                     addScore(10);
-                    // 물보라 파티클
                     for (let p = 0; p < 12; p++) {
                         addParticle(m.x + m.width / 2, m.y + m.height / 2,
                             ['#4AC8F0', '#B8ECFF', '#FFFFFF', '#1E88C8'][p % 4], 'star');
                     }
-                    this.active = false;
+                    this.pop();
                     return [];
                 }
             }
             return [];
         }
 
+        // 도트 버블 링 그리기 (외곽 진한 링 + 밝은 유리막 + 흰 하이라이트)
+        drawBubbleAt(cx, cy, r, alpha) {
+            const s = Math.max(2, Math.round(r / 4)); // 도트 크기
+            ctx.globalAlpha = alpha;
+            // 외곽 링 (8방향 도트 원)
+            const steps = Math.max(8, Math.round(r * 1.2));
+            for (let i = 0; i < steps; i++) {
+                const a = (i / steps) * Math.PI * 2;
+                const px = Math.round(cx + Math.cos(a) * r);
+                const py = Math.round(cy + Math.sin(a) * r);
+                ctx.fillStyle = (i % 3 === 0) ? '#B8ECFF' : '#2E9CD8';
+                ctx.fillRect(px - s / 2, py - s / 2, s, s);
+            }
+            // 유리막 (안쪽 옅은 채움)
+            ctx.fillStyle = 'rgba(122, 220, 255, 0.22)';
+            ctx.fillRect(cx - r + s, cy - r + s, (r - s) * 2, (r - s) * 2);
+            // 흰 하이라이트 (좌상단 반짝)
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(Math.round(cx - r * 0.45), Math.round(cy - r * 0.5), s, s);
+            ctx.fillRect(Math.round(cx - r * 0.6), Math.round(cy - r * 0.28), Math.ceil(s / 2), Math.ceil(s / 2));
+            ctx.globalAlpha = 1;
+        }
+
         draw() {
             if (!this.active) return;
-            const s = 5; // 도트 크기
 
-            // 파도 잔상 (뒤로 갈수록 흐려지는 물결 곡선)
-            this.trail.forEach((t, i) => {
-                const a = (i + 1) / this.trail.length * 0.5;
-                ctx.globalAlpha = a;
-                ctx.fillStyle = i % 2 ? '#7ADCFF' : '#B8ECFF';
-                const waveY = Math.sin(this.phase - (this.trail.length - i) * 0.5) * 4;
-                ctx.fillRect(Math.round(t.x - s / 2), Math.round(t.y + waveY - s / 2), s, s);
+            // 꼬마 방울들 (뒤에서 보글보글)
+            this.miniBubbles.forEach(b => {
+                this.drawBubbleAt(Math.round(b.x), Math.round(b.y), b.r, b.life / 24 * 0.7);
             });
-            ctx.globalAlpha = 1;
 
-            // 물방울 본체 (도트)
-            const dropX = Math.round(this.x), dropY = Math.round(this.y);
-            ctx.fillStyle = '#1E88C8';
-            ctx.fillRect(dropX - s, dropY - s * 2, s * 2, s);       // 위 테두리
-            ctx.fillRect(dropX - s * 2, dropY - s, s, s * 2);       // 좌 테두리
-            ctx.fillRect(dropX + s, dropY - s, s, s * 2);           // 우 테두리
-            ctx.fillRect(dropX - s, dropY + s, s * 2, s);           // 아래 테두리
-            ctx.fillStyle = '#4AC8F0';
-            ctx.fillRect(dropX - s, dropY - s, s * 2, s * 2);       // 몸체
-            ctx.fillStyle = '#B8ECFF';
-            ctx.fillRect(dropX - s, dropY - s, s, s);               // 하이라이트
+            // 본체 버블 (숨쉬듯 크기가 살짝 출렁임)
+            const wobble = 1 + Math.sin(this.phase * 1.6) * 0.08;
+            this.drawBubbleAt(Math.round(this.x), Math.round(this.y), this.radius * wobble, 1);
         }
     }
 
@@ -260,9 +308,11 @@
 
         const originX = player.x + player.width + 4;
         const originY = player.y + player.height / 2;
-        for (let i = 0; i < 5; i++) {
-            const angle = -0.45 + i * 0.225;   // -26° ~ +26° 부채꼴
-            divineSwords.push(new WaterShot(originX, originY, angle));
+        // 큰 버블 3발 부채꼴 발사 → 날아가며 3개씩, 다시 2개씩 분열
+        // (최대 3 + 9 + 18 = 30버블이 화면을 뒤덮는다)
+        for (let i = 0; i < 3; i++) {
+            const angle = -0.35 + i * 0.35;   // -20° ~ +20° 부채꼴
+            divineSwords.push(new WaterShot(originX, originY, angle, 0));
         }
 
         player.animation = 'casting';
