@@ -69,11 +69,25 @@ function showTitleScreen() {
     const SKY_BANDS = ['#0E1230', '#232B5C', '#4A3B7C', '#8C4A6E', '#C56A50', '#E8925A'];
 
     // 행진하는 캐릭터들 (characters-player.js의 도트 스프라이트 사용)
+    // 초이는 맨 뒤에서 음표와 함께 춤추며 등장
     const marchers = [
         { name: 'jiyul', offset: 0 },
         { name: 'seeun', offset: 90 },
-        { name: 'harin', offset: 180 }
+        { name: 'harin', offset: 180 },
+        { name: 'choi', offset: 285, dance: true }
     ];
+
+    // 도트 음표 (초이 댄스용)
+    const NOTE_SPRITE = [
+        [0,0,0,1,1,1],
+        [0,0,0,1,0,1],
+        [0,0,0,1,0,0],
+        [0,0,0,1,0,0],
+        [0,1,1,1,0,0],
+        [1,1,1,1,0,0]
+    ];
+    const NOTE_COLORS_A = { 0: null, 1: '#FFFFFF' };
+    const NOTE_COLORS_B = { 0: null, 1: '#FFE55A' };
 
     // 메탈슬러그풍 로컬 스프라이트 렌더러 (검은 외곽선 + 상단 하이라이트/하단 셰이드)
     // 셀 경계를 정수 픽셀에 스냅해서 소수 스케일에서도 이음새(안티앨리어싱 줄무늬)가 생기지 않게 한다
@@ -193,19 +207,70 @@ function showTitleScreen() {
             }
         }
 
-        // ---- 행진하는 캐릭터 (걷기 사이클) ----
+        // ---- 행진하는 캐릭터 (걷기 사이클) + 초이 아이돌 댄스 ----
         if (typeof pixelData !== 'undefined') {
             const mScale = Math.max(2, Math.floor(base * 2.6));
             const walkFrame = Math.floor(frame / 8) % 2;
             marchers.forEach(m => {
                 const data = pixelData[m.name];
                 if (!data) return;
-                const sprite = walkFrame === 0 ? (data.walking1 || data.idle) : (data.walking2 || data.idle);
                 const spriteW = 16 * mScale;
                 const travel = w + spriteW + 240;
                 const mx = ((frame * 1.6 + m.offset * base) % travel) - spriteW - 20;
-                const my = groundTop - 16 * mScale + Math.floor(mScale / 2);
-                drawSpriteMS(sprite, data.colorMap, mx, my, mScale, false);
+                const baseY = groundTop - 16 * mScale + Math.floor(mScale / 2);
+
+                if (m.dance) {
+                    // ---- 초이 아이돌 댄스: 4박자 안무 루틴 ----
+                    // 박자 0: 대기(리듬 타기) → 1: 점프! → 2: 왼쪽 스텝 → 3: 포인트 포즈(물총 팔 뻗기)
+                    const beat = Math.floor(frame / 16) % 4;
+                    const beatProgress = (frame % 16) / 16;
+                    let sprite = data.idle;
+                    let danceY = baseY;
+                    let danceX = mx;
+                    let flip = false;
+
+                    if (beat === 0) {
+                        // 리듬 타기: 무릎 굽혔다 펴기 (살짝 위아래)
+                        sprite = data.idle;
+                        danceY += Math.round(Math.sin(beatProgress * Math.PI * 2) * mScale);
+                    } else if (beat === 1) {
+                        // 점프! (포물선)
+                        sprite = data.jump || data.idle;
+                        danceY -= Math.round(Math.sin(beatProgress * Math.PI) * mScale * 5);
+                    } else if (beat === 2) {
+                        // 사이드 스텝 (좌우로 미끄러지며 몸 반전)
+                        sprite = walkFrame === 0 ? (data.walking1 || data.idle) : (data.walking2 || data.idle);
+                        danceX += Math.round(Math.sin(beatProgress * Math.PI * 2) * mScale * 2.5);
+                        flip = beatProgress > 0.5;
+                    } else {
+                        // 포인트 포즈: 물총 든 팔을 쭉! (casting 프레임)
+                        sprite = data.casting || data.idle;
+                        danceY += beatProgress < 0.3 ? -Math.round(mScale) : 0;
+                    }
+                    drawSpriteMS(sprite, data.colorMap, danceX, danceY, mScale, flip);
+
+                    // 음표들: 초이 머리 위에서 좌우로 번갈아 둥실둥실
+                    const noteScale = Math.max(1, Math.round(mScale / 2));
+                    for (let n = 0; n < 3; n++) {
+                        const notePhase = frame * 0.09 + n * 2.1;
+                        const nx = danceX + spriteW / 2 + Math.round(Math.cos(notePhase) * mScale * 6) - 3 * noteScale;
+                        const ny = danceY - mScale * (4 + n * 2) + Math.round(Math.sin(notePhase * 1.7) * mScale * 1.5);
+                        // 위로 갈수록 옅어지는 음표 (흰색/금색 번갈아)
+                        drawSpriteMS(NOTE_SPRITE, n % 2 ? NOTE_COLORS_B : NOTE_COLORS_A, nx, ny, noteScale, n % 2 === 1);
+                    }
+                    // 박자 강조 반짝이 (점프/포인트 순간)
+                    if ((beat === 1 || beat === 3) && frame % 4 < 2) {
+                        tctx.fillStyle = '#FFB6D9';
+                        const sparkX = danceX + spriteW / 2;
+                        const sparkY = danceY - mScale * 2;
+                        tctx.fillRect(sparkX - noteScale, sparkY - noteScale * 3, noteScale * 2, noteScale * 2);
+                        tctx.fillRect(sparkX - noteScale * 4, sparkY, noteScale * 2, noteScale * 2);
+                        tctx.fillRect(sparkX + noteScale * 2, sparkY, noteScale * 2, noteScale * 2);
+                    }
+                } else {
+                    const sprite = walkFrame === 0 ? (data.walking1 || data.idle) : (data.walking2 || data.idle);
+                    drawSpriteMS(sprite, data.colorMap, mx, baseY, mScale, false);
+                }
             });
         }
 
