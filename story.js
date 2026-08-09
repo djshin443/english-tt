@@ -305,18 +305,42 @@ class StoryScene {
         this.ctx.fillRect(w / 2 - 90, floorTop + 24, 180, 4);
         this.ctx.fillRect(w / 2 - 90, floorTop + 66, 180, 4);
         this.drawPixelHeartIcon(w / 2, floorTop + 46, 18, '#FF5C9E');
-        // 창문 (밤하늘 + 별 + UFO) - 흰 창틀 + 핑크 커튼
+        // 창문 (아침 하늘 + 구름 + UFO) - 흰 창틀 + 핑크 커튼
+        // 바깥 거리 씬과 같은 낮 시간대로 맞춤
         const wx = w * 0.12, wy = h * 0.12, ww = 190, wh = 150;
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.fillRect(wx - 8, wy - 8, ww + 16, wh + 16);
         this.ctx.fillStyle = '#E8B8C8';
         this.ctx.fillRect(wx - 8, wy - 8, ww + 16, 4);
-        this.ctx.fillStyle = '#12183A';
-        this.ctx.fillRect(wx, wy, ww, wh);
-        this.ctx.fillStyle = '#FFFFFF';
-        for (let i = 0; i < 8; i++) {
-            this.ctx.fillRect(wx + ((i * 53) % (ww - 8)) + 4, wy + ((i * 37) % (wh - 8)) + 4, 3, 3);
-        }
+        // 아침 하늘: 위에서 아래로 옅어지는 픽셀 밴드
+        const skyBands = ['#7EC8F0', '#98D6F5', '#B4E2F8', '#D6EFFA'];
+        const sbH = Math.ceil(wh / skyBands.length);
+        skyBands.forEach((color, i) => {
+            this.ctx.fillStyle = color;
+            this.ctx.fillRect(wx, wy + i * sbH, ww, Math.min(sbH, wh - i * sbH));
+        });
+        // 아침 해 (도트 원 + 빛무리)
+        const sunX = wx + 42, sunY = wy + 40, sunR = 5, sp = 4;
+        [['#FFF3B8', sunR + 2], ['#FFD966', sunR]].forEach(([color, rad]) => {
+            this.ctx.fillStyle = color;
+            for (let ry = -rad; ry <= rad; ry++) {
+                for (let rx = -rad; rx <= rad; rx++) {
+                    if (rx * rx + ry * ry <= rad * rad) {
+                        this.ctx.fillRect(sunX + rx * sp, sunY + ry * sp, sp, sp);
+                    }
+                }
+            }
+        });
+        // 흰 도트 구름 2개
+        [[wx + 108, wy + 34], [wx + 60, wy + 100]].forEach(([cx2, cy2], i) => {
+            this.ctx.fillStyle = '#FFFFFF';
+            const cs = i === 0 ? 5 : 4;
+            this.ctx.fillRect(cx2, cy2, cs * 6, cs * 2);
+            this.ctx.fillRect(cx2 + cs, cy2 - cs, cs * 4, cs);
+            this.ctx.fillStyle = '#DCEEF8';
+            this.ctx.fillRect(cx2, cy2 + cs, cs * 6, cs);
+        });
+        // 침공 중인 UFO (아침 하늘에 실루엣으로)
         this.drawPixelUFO(wx + ww - 70, wy + 22, 2);
         this.ctx.fillStyle = '#FFFFFF';
         this.ctx.fillRect(wx + ww / 2 - 4, wy, 8, wh);
