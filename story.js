@@ -1046,16 +1046,26 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 건물들 (스크롤)
+                    // 건물들 (스크롤) - 도트 건물 생성기 사용 (창문/지붕/문 포함)
+                    const streetSpecs = [
+                        { cols: 13, rows: 15, seed: 101, style: 'academy' },
+                        { cols: 12, rows: 18, seed: 113, style: 'city' },
+                        { cols: 14, rows: 13, seed: 127, style: 'academy', tank: true },
+                        { cols: 12, rows: 16, seed: 139, style: 'city', antenna: true },
+                        { cols: 13, rows: 14, seed: 151, style: 'academy' }
+                    ];
                     for (let i = 0; i < 5; i++) {
                         const buildingX = (i * 300 - this.bgScroll) % (this.canvas.width + 300);
                         if (buildingX > -300) {
-                            this.ctx.fillStyle = ['#8B7355', '#708090', '#CD853F'][i % 3];
-                            this.ctx.fillRect(
-                                buildingX,
-                                this.canvas.height - 280,
-                                150,
-                                180
+                            const spec = streetSpecs[i];
+                            const built = this.buildBuildingSprite(spec);
+                            const pal = this.buildingPalette(spec.style);
+                            const scale = Math.max(2, Math.floor(180 / built.rows));
+                            this.drawPixelSprite(
+                                built.sprite, pal,
+                                Math.round(buildingX),
+                                this.canvas.height - 100 - built.rows * scale + scale,
+                                scale, false
                             );
                         }
                     }
