@@ -152,6 +152,113 @@
         };
     }
 
+    // ---- "화면을 돌려주세요" 회전 안내를 도트 스프라이트 화면으로 교체 ----
+    (function pixelRotatePrompt() {
+        const prompt = document.getElementById('rotatePrompt');
+        if (!prompt) return;
+        prompt.innerHTML = '';
+        prompt.style.background = '#0E1230';
+        prompt.style.padding = '0';
+        const rc = document.createElement('canvas');
+        rc.style.cssText = 'width:100%;height:100%;display:block;image-rendering:pixelated;';
+        prompt.appendChild(rc);
+        const g = rc.getContext('2d');
+
+        // 도트 휴대폰 (세로)
+        const PHONE_P = [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,3,3,3,3,1,1,1],
+            [1,2,2,2,2,2,2,2,2,1],
+            [1,2,2,2,2,2,2,2,2,1],
+            [1,2,2,4,2,2,2,2,2,1],
+            [1,2,2,4,4,2,2,2,2,1],
+            [1,2,2,4,4,4,2,2,2,1],
+            [1,2,2,4,4,2,2,2,2,1],
+            [1,2,2,4,2,2,2,2,2,1],
+            [1,2,2,2,2,2,2,2,2,1],
+            [1,2,2,2,2,2,2,2,2,1],
+            [1,2,2,2,2,2,2,2,2,1],
+            [1,2,2,2,2,2,2,2,2,1],
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,1,1,1,3,3,1,1,1,1],
+            [1,1,1,1,1,1,1,1,1,1]
+        ];
+        // 도트 휴대폰 (가로) = 세로를 눕힌 형태
+        const PHONE_L = PHONE_P[0].map((_, c) =>
+            PHONE_P.map(row => row[c]).reverse()
+        );
+        const PHONE_COLORS = { 0: null, 1: '#C8D4E0', 2: '#1E3A5C', 3: '#5A6478', 4: '#FFC22B' };
+
+        let frame = 0;
+        function draw() {
+            frame++;
+            const visible = getComputedStyle(prompt).display !== 'none';
+            if (visible) {
+                if (rc.width !== prompt.clientWidth || rc.height !== prompt.clientHeight) {
+                    rc.width = prompt.clientWidth;
+                    rc.height = prompt.clientHeight;
+                }
+                const w = rc.width, h = rc.height;
+                const base = Math.max(0.7, Math.min(w / 360, h / 640));
+
+                // 어두운 밤하늘 밴드 + 별
+                const bands = ['#0A0E24', '#0E1230', '#161C40', '#1E2650'];
+                const bandH = Math.ceil(h / bands.length);
+                bands.forEach((color, i) => {
+                    g.fillStyle = color;
+                    g.fillRect(0, i * bandH, w, bandH + 1);
+                });
+                g.fillStyle = 'rgba(255,255,255,0.6)';
+                for (let i = 0; i < 20; i++) {
+                    const sx = ((i * 73856093) >>> 0) % w;
+                    const sy = ((i * 19349663) >>> 0) % h;
+                    if (i % 3 === 0) g.fillRect(sx, sy, 3, 3);
+                }
+
+                // 휴대폰: 세로 ↔ 가로 번갈아 표시 (60프레임 주기)
+                const showLandscape = Math.floor(frame / 60) % 2 === 1;
+                const sprite = showLandscape ? PHONE_L : PHONE_P;
+                const ps = Math.max(4, Math.floor(base * 9));
+                const pw = sprite[0].length * ps, ph = sprite.length * ps;
+                const px0 = Math.round((w - pw) / 2), py0 = Math.round(h * 0.32 - ph / 2);
+                if (typeof renderSpriteMS === 'function') {
+                    renderSpriteMS(g, sprite, PHONE_COLORS, px0, py0, ps, false);
+                }
+
+                // 회전 화살표 (도트 곡선 + 화살촉)
+                g.fillStyle = '#FFE55A';
+                const cx = w / 2, cy = h * 0.32;
+                const rad = Math.max(pw, ph) * 0.75;
+                for (let a = 0; a < 7; a++) {
+                    const ang = -Math.PI * 0.25 + a * 0.16;
+                    g.fillRect(cx + Math.cos(ang) * rad - 3, cy + Math.sin(ang) * rad - 3, 6, 6);
+                }
+                const tipAng = -Math.PI * 0.25 + 7 * 0.16;
+                const tx = cx + Math.cos(tipAng) * rad, ty = cy + Math.sin(tipAng) * rad;
+                g.fillRect(tx - 5, ty - 9, 10, 6);
+                g.fillRect(tx - 5, ty - 3, 6, 6);
+
+                // 안내 문구 (스프라이트 텍스트, 깜빡임)
+                if (typeof PixelText !== 'undefined') {
+                    PixelText.draw(g, '화면을 돌려주세요!', w / 2, h * 0.58, {
+                        fontPx: 14, scale: 2, palette: 'gold',
+                        drawScale: Math.min(1.4 * base, (w * 0.85) / PixelText.measure('화면을 돌려주세요!', { fontPx: 14, scale: 2 }).width),
+                        shadowOffset: 3
+                    });
+                    if (Math.floor(frame / 40) % 2 === 0) {
+                        PixelText.draw(g, '가로 모드에서 플레이할 수 있어요', w / 2, h * 0.68, {
+                            fontPx: 12, scale: 2, palette: 'white',
+                            drawScale: Math.min(0.9 * base, (w * 0.85) / PixelText.measure('가로 모드에서 플레이할 수 있어요', { fontPx: 12, scale: 2 }).width),
+                            shadowOffset: 2
+                        });
+                    }
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+        draw();
+    })();
+
     // ---- 모바일 액션 버튼 도트 스타일 ----
     // 이모지 아이콘을 픽셀 아이콘 캔버스로 교체하고 강판 패널 스타일 적용
     (function stylePixelButtons() {
