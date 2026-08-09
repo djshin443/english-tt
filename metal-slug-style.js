@@ -673,7 +673,7 @@
             });
         }
 
-        // ---- 순서 오류 패널티 경고 토스트 ----
+        // ---- 순서 오류 패널티 경고 토스트 (화면 중앙, 항상 표시) ----
         if (typeof orderPenalty !== 'undefined' && orderPenalty.active) {
             if (Date.now() > orderPenalty.until) {
                 orderPenalty.active = false;
@@ -681,18 +681,36 @@
                 const msg = orderPenalty.expected
                     ? `순서가 틀렸어! 다음은 ${orderPenalty.expected}`
                     : '순서가 틀렸어!';
-                const tOpts = { fontPx: 13, scale: 2, palette: 'fire' };
+                // 복잡한 한글 자형(틀 등)이 뭉개지지 않도록 고해상도 + 보통 굵기로 래스터 후 축소
+                const tOpts = { fontPx: 28, scale: 2, palette: 'fire', weight: '500' };
                 const tm = PixelText.measure(msg, tOpts);
-                const ts = Math.min(1.0, (canvas.width * 0.6) / tm.width);
-                const tw = tm.width * ts + 28, th = tm.height * ts + 18;
-                const tx = Math.round((canvas.width - tw) / 2), ty = Math.round(canvas.height * 0.2);
-                // 깜빡이는 경고 패널
-                if (Math.floor(Date.now() / 150) % 2 === 0) {
-                    drawPixelPanel(tx, ty, tw, th);
-                    PixelText.draw(ctx, msg, canvas.width / 2, ty + 9, {
-                        ...tOpts, drawScale: ts, shadowOffset: 2
-                    });
+                // 등장 시 살짝 커지는 팝 효과 (처음 150ms)
+                const elapsed = 1600 - (orderPenalty.until - Date.now());
+                const pop = elapsed < 150 ? 1 + (1 - elapsed / 150) * 0.25 : 1;
+                const ts = Math.min(0.95, (canvas.width * 0.75) / tm.width) * pop;
+                const tw = tm.width * ts + 36, th = tm.height * ts + 22;
+                const tx = Math.round((canvas.width - tw) / 2);
+                const ty = Math.round(canvas.height * 0.33 - th / 2);
+                // 배경을 살짝 어둡게 눌러 메시지가 묻히지 않게
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+                ctx.fillRect(tx - 8, ty - 8, tw + 16, th + 16);
+                drawPixelPanel(tx, ty, tw, th);
+                // 테두리만 빨강/금색으로 깜빡여 시선 유도 (메시지는 항상 표시)
+                if (Math.floor(Date.now() / 160) % 2 === 0) {
+                    ctx.fillStyle = '#FF4040';
+                    const px3 = 3;
+                    for (let bx = 0; bx < tw; bx += px3 * 2) {
+                        ctx.fillRect(tx + bx, ty, px3, px3);
+                        ctx.fillRect(tx + bx, ty + th - px3, px3, px3);
+                    }
+                    for (let by = 0; by < th; by += px3 * 2) {
+                        ctx.fillRect(tx, ty + by, px3, px3);
+                        ctx.fillRect(tx + tw - px3, ty + by, px3, px3);
+                    }
                 }
+                PixelText.draw(ctx, msg, canvas.width / 2, ty + 11, {
+                    ...tOpts, drawScale: ts, shadowOffset: 2
+                });
             }
         }
 

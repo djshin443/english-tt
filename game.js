@@ -2908,7 +2908,7 @@ let orderPenalty = { active: false, until: 0, expected: '', got: '' };
 function showOrderPenalty(letter, expected) {
     orderPenalty = {
         active: true,
-        until: Date.now() + 1300,
+        until: Date.now() + 1600,
         expected: expected || '',
         got: letter ? letter.letter : ''
     };
