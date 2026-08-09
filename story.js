@@ -303,6 +303,54 @@ class StoryScene {
         this.ctx.fillRect(x + s * 2, y - s / 2, s, s);
     }
 
+    // 도트 하트 (이모지 💖 대체)
+    drawPixelHeartIcon(x, y, size = 20, color = '#E83848') {
+        const H = [
+            [0,1,1,0,1,1,0],
+            [1,2,2,1,2,2,1],
+            [1,2,2,2,2,2,1],
+            [0,1,2,2,2,1,0],
+            [0,0,1,2,1,0,0]
+        ];
+        const s = Math.max(2, Math.round(size / 6));
+        const colors = { 1: '#3A0A10', 2: color };
+        for (let r = 0; r < H.length; r++) {
+            for (let c = 0; c < H[r].length; c++) {
+                if (!H[r][c]) continue;
+                this.ctx.fillStyle = colors[H[r][c]];
+                this.ctx.fillRect(x + (c - 3) * s, y + (r - 2) * s, s, s);
+            }
+        }
+        this.ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        this.ctx.fillRect(x - 2 * s, y - s, s, s);
+    }
+
+    // 도트 트로피 (이모지 🏆 대체)
+    drawPixelTrophy(x, y, size = 24) {
+        const T = [
+            [1,1,1,1,1,1,1],
+            [1,2,2,2,2,2,1],
+            [3,1,2,2,2,1,3],
+            [3,1,2,2,2,1,3],
+            [0,1,2,2,2,1,0],
+            [0,0,1,2,1,0,0],
+            [0,0,0,2,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,1,1,1,1,1,0]
+        ];
+        const s = Math.max(2, Math.round(size / 8));
+        const colors = { 1: '#B8860B', 2: '#FFD966', 3: '#B8860B' };
+        for (let r = 0; r < T.length; r++) {
+            for (let c = 0; c < T[r].length; c++) {
+                if (!T[r][c]) continue;
+                this.ctx.fillStyle = colors[T[r][c]];
+                this.ctx.fillRect(x + (c - 3) * s, y + (r - 4) * s, s, s);
+            }
+        }
+        this.ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        this.ctx.fillRect(x - s, y - 3 * s, s, s);
+    }
+
     // 도트 음표 (이모지 ♪ 대체)
     drawPixelNote(x, y, size = 20) {
         const s = Math.max(2, Math.round(size / 7));
@@ -2661,7 +2709,7 @@ class StoryScene {
                     this.ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
                     this.ctx.font = 'bold 60px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('1년 후...', this.canvas.width / 2, this.canvas.height / 2);
+                    this.drawCaption('1년 후...', this.canvas.width / 2, this.canvas.height / 2 - 20, { fontPx: 16, scale: 2, palette: 'white', drawScale: 1.3, shadowOffset: 3 });
 
                     // 반짝이는 별
                     for (let i = 0; i < 10; i++) {
@@ -2724,7 +2772,7 @@ class StoryScene {
                         const starY = 105 + (i % 5) * 35;
                         this.ctx.fillStyle = i % 2 === 0 ? '#FFD700' : '#FFFFFF';
                         this.ctx.font = '12px Arial';
-                        this.ctx.fillText('⭐', starX, starY);
+                        this.drawPixelStar(starX, starY, 20);
                     }
 
                     // 테두리
@@ -3080,15 +3128,15 @@ class StoryScene {
                     // 그림자 효과
                     this.ctx.shadowColor = '#FFFFFF';
                     this.ctx.shadowBlur = 10;
-                    this.ctx.fillText('11 : 9', this.canvas.width / 2, scoreboardY + 40);
+                    this.drawCaption('11 : 9', this.canvas.width / 2, scoreboardY + 22, { fontPx: 15, scale: 2, palette: 'white', drawScale: 1.1, shadowOffset: 2 });
                     // 그림자 완전히 초기화
                     this.ctx.shadowBlur = 0;
                     this.ctx.shadowColor = 'transparent';
 
                     // 하트 장식
                     this.ctx.font = '25px Arial';
-                    this.ctx.fillText('💖', scoreboardX + 30, scoreboardY + 65);
-                    this.ctx.fillText('💖', scoreboardX + 210, scoreboardY + 65);
+                    this.drawPixelHeartIcon(scoreboardX + 30, scoreboardY + 65, 20);
+                    this.drawPixelHeartIcon(scoreboardX + 210, scoreboardY + 65, 20);
 
                     // 현수막 배경
                     const bannerY = 270;
@@ -3112,7 +3160,9 @@ class StoryScene {
                     this.ctx.font = 'bold 28px Arial';
                     this.ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
                     this.ctx.shadowBlur = 4;
-                    this.ctx.fillText('🏆 세기의 탁구 대회 결승전 🏆', this.canvas.width / 2, bannerY - 10);
+                    this.drawPixelTrophy(this.canvas.width / 2 - 190, bannerY - 16, 22);
+                    this.drawPixelTrophy(this.canvas.width / 2 + 190, bannerY - 16, 22);
+                    this.drawCaption('세기의 탁구 대회 결승전', this.canvas.width / 2, bannerY - 26, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 0.95, shadowOffset: 2 });
                     // 그림자 완전히 초기화
                     this.ctx.shadowBlur = 0;
                     this.ctx.shadowColor = 'transparent';
@@ -3120,7 +3170,7 @@ class StoryScene {
                     // 특별한 설명
                     this.ctx.fillStyle = '#4169E1';
                     this.ctx.font = 'bold 18px Arial';
-                    this.ctx.fillText('제니스 대표 지율이 vs 동네 탁구장 대표 아빠', this.canvas.width / 2, bannerY + 15);
+                    this.drawCaption('제니스 대표 지율이 vs 동네 탁구장 대표 아빠', this.canvas.width / 2, bannerY + 8, { fontPx: 12, scale: 2, palette: 'white', drawScale: 0.8, shadowOffset: 2 });
 
                     // ⭐⭐⭐ 중계 멘트 (화려하게!) ⭐⭐⭐
                     const commentaryY = 350;
@@ -3204,7 +3254,7 @@ class StoryScene {
                             this.ctx.fillStyle = '#FFFF00';
                             this.ctx.font = '16px Arial';
                             this.ctx.textAlign = 'center';
-                            this.ctx.fillText('⭐', 0, 0);
+                            this.drawPixelStar(0, 0, 20);
                             this.ctx.restore();
                         }
                     }
@@ -3288,11 +3338,11 @@ class StoryScene {
                         if (i % 3 === 0) {
                             this.ctx.fillStyle = '#FF69B4';
                             this.ctx.font = '14px Arial';
-                            this.ctx.fillText('💖', decorX, decorY);
+                            this.drawPixelHeartIcon(decorX, decorY, 20);
                         } else {
                             this.ctx.fillStyle = i % 2 === 0 ? '#FFD700' : '#FFFFFF';
                             this.ctx.font = '12px Arial';
-                            this.ctx.fillText('⭐', decorX, decorY);
+                            this.drawPixelStar(decorX, decorY, 20);
                         }
                     }
 
@@ -3387,7 +3437,7 @@ class StoryScene {
                             // 박수 이모지 (애니메이션)
                             if ((seed + this.animationFrame) % 20 < 10) {
                                 this.ctx.font = '15px Arial';
-                                this.ctx.fillText('👏', x + 5, y - 5);
+                                this.drawPixelStar(x + 5, y - 5, 16);
                             }
                         }
                     }
@@ -3641,10 +3691,10 @@ class StoryScene {
                     this.ctx.fillStyle = '#000000';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('지율이', this.canvas.width / 2, this.canvas.height - 70);
+                    this.drawCaption('지율이 · 제니스 대표', this.canvas.width / 2, this.canvas.height - 74, { fontPx: 12, scale: 2, palette: 'gold', drawScale: 0.85, shadowOffset: 2 });
                     this.ctx.font = 'bold 14px Arial';
                     this.ctx.fillStyle = '#FF1493';
-                    this.ctx.fillText('제니스 대표', this.canvas.width / 2, this.canvas.height - 50);
+                    // (캡션에 통합됨)
 
                     // 2위 아빠 - 동네 탁구장 대표
                     this.ctx.fillStyle = 'rgba(192, 192, 192, 0.9)';
@@ -3654,10 +3704,10 @@ class StoryScene {
                     this.ctx.strokeRect(this.canvas.width / 2 - 220, this.canvas.height - 90, 160, 50);
                     this.ctx.fillStyle = '#000000';
                     this.ctx.font = 'bold 18px Arial';
-                    this.ctx.fillText('아빠', this.canvas.width / 2 - 140, this.canvas.height - 70);
+                    this.drawCaption('아빠 · 동네 탁구장', this.canvas.width / 2 - 140, this.canvas.height - 74, { fontPx: 11, scale: 2, palette: 'steel', drawScale: 0.8, shadowOffset: 2 });
                     this.ctx.font = 'bold 13px Arial';
                     this.ctx.fillStyle = '#4169E1';
-                    this.ctx.fillText('동네 탁구장 대표', this.canvas.width / 2 - 140, this.canvas.height - 50);
+                    // (캡션에 통합됨)
 
                     // 3위 키위 - 도마뱀 대표
                     this.ctx.fillStyle = 'rgba(205, 127, 50, 0.9)';
@@ -3667,10 +3717,10 @@ class StoryScene {
                     this.ctx.strokeRect(this.canvas.width / 2 + 60, this.canvas.height - 90, 160, 50);
                     this.ctx.fillStyle = '#000000';
                     this.ctx.font = 'bold 18px Arial';
-                    this.ctx.fillText('키위', this.canvas.width / 2 + 140, this.canvas.height - 70);
+                    this.drawCaption('키위 · 도마뱀 대표', this.canvas.width / 2 + 140, this.canvas.height - 74, { fontPx: 11, scale: 2, palette: 'steel', drawScale: 0.8, shadowOffset: 2 });
                     this.ctx.font = 'bold 13px Arial';
                     this.ctx.fillStyle = '#FF8C00';
-                    this.ctx.fillText('도마뱀 대표', this.canvas.width / 2 + 140, this.canvas.height - 50);
+                    // (캡션에 통합됨)
 
                     // 컨페티
                     for (let i = 0; i < 50; i++) {
@@ -3691,7 +3741,9 @@ class StoryScene {
                     this.ctx.textAlign = 'center';
                     this.ctx.shadowColor = '#000000';
                     this.ctx.shadowBlur = 10;
-                    this.ctx.fillText('🏆 CHAMPION! 🏆', this.canvas.width / 2, 80);
+                    this.drawPixelTrophy(this.canvas.width / 2 - 200, 68, 30);
+                    this.drawPixelTrophy(this.canvas.width / 2 + 200, 68, 30);
+                    this.drawCaption('CHAMPION!', this.canvas.width / 2, 52, { fontPx: 16, scale: 2, palette: 'gold', drawScale: 1.5, shadowOffset: 3 });
 
                     // 그림자 효과 초기화 (중요!)
                     this.ctx.shadowBlur = 0;
@@ -3708,13 +3760,12 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 탁구장 건물
-                    this.ctx.fillStyle = '#8B7355';
-                    this.ctx.fillRect(50, this.canvas.height - 300, 250, 200);
+                    // 탁구장 건물 (도트 스프라이트)
+                    this.drawPixelBuilding('academy', 50, this.canvas.height - 300, 250, 200);
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('지율 탁구&잉글리시 클럽', 175, this.canvas.height - 250);
+                    this.drawCaption('지율 탁구&잉글리시 클럽', 175, this.canvas.height - 262, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 });
 
                     // ABC 대마왕 (코치 복장)
                     this.drawBossSprite(
@@ -3749,7 +3800,7 @@ class StoryScene {
                     for (let i = 0; i < 5; i++) {
                         const heartY = this.canvas.height - 300 - Math.sin(this.animationFrame * 0.05 + i) * 20;
                         this.ctx.font = '30px Arial';
-                        this.ctx.fillText('❤️', this.canvas.width / 2 - 50 + i * 30, heartY);
+                        this.drawPixelHeartIcon(this.canvas.width / 2 - 50 + i * 30, heartY, 20);
                     }
                 }
             },
@@ -3763,13 +3814,12 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 탁구장 건물
-                    this.ctx.fillStyle = '#8B7355';
-                    this.ctx.fillRect(50, this.canvas.height - 300, 250, 200);
+                    // 탁구장 건물 (도트 스프라이트)
+                    this.drawPixelBuilding('academy', 50, this.canvas.height - 300, 250, 200);
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('지율 탁구&잉글리시 클럽', 175, this.canvas.height - 250);
+                    this.drawCaption('지율 탁구&잉글리시 클럽', 175, this.canvas.height - 262, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 });
 
                     // ABC 대마왕 (코치 복장)
                     this.drawBossSprite(
@@ -3804,7 +3854,7 @@ class StoryScene {
                     for (let i = 0; i < 5; i++) {
                         const heartY = this.canvas.height - 300 - Math.sin(this.animationFrame * 0.05 + i) * 20;
                         this.ctx.font = '30px Arial';
-                        this.ctx.fillText('❤️', this.canvas.width / 2 - 50 + i * 30, heartY);
+                        this.drawPixelHeartIcon(this.canvas.width / 2 - 50 + i * 30, heartY, 20);
                     }
                 }
             },
@@ -3917,7 +3967,7 @@ class StoryScene {
                     this.ctx.textAlign = 'center';
                     this.ctx.shadowColor = '#000000';
                     this.ctx.shadowBlur = 5;
-                    this.ctx.fillText('솔뜰 캠핑장', signX + 90, signY + 38);
+                    this.drawCaption('솔뜰 캠핑장', signX + 90, signY + 24, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.95, shadowOffset: 2 });
                     this.ctx.shadowBlur = 0;
                     this.ctx.shadowColor = 'transparent';
                     this.ctx.textAlign = 'left';
@@ -3998,28 +4048,22 @@ class StoryScene {
                     this.ctx.fillStyle = glowGradient;
                     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-                    // 텐트 (왼쪽 배경에 작게)
+                    // 텐트 (도트 스프라이트, 왼쪽 배경에 작게)
                     const tentX = 100;
                     const tentY = this.canvas.height - 200;
-                    this.ctx.fillStyle = '#8B4513';
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(tentX, tentY);
-                    this.ctx.lineTo(tentX + 40, tentY - 40);
-                    this.ctx.lineTo(tentX + 80, tentY);
-                    this.ctx.closePath();
-                    this.ctx.fill();
-                    this.ctx.strokeStyle = '#654321';
-                    this.ctx.lineWidth = 2;
-                    this.ctx.stroke();
+                    const TENT = [
+                        [0,0,0,0,1,1,0,0,0,0],
+                        [0,0,0,1,2,2,1,0,0,0],
+                        [0,0,1,2,2,2,2,1,0,0],
+                        [0,1,2,2,3,3,2,2,1,0],
+                        [1,2,2,3,4,4,3,2,2,1],
+                        [1,2,3,4,4,4,4,3,2,1],
+                        [1,1,1,1,4,4,1,1,1,1]
+                    ];
+                    const TENT_COLORS = { 0: null, 1: '#4A3018', 2: '#8B5A2B', 3: '#6B4420', 4: '#3A2410' };
+                    this.drawPixelSprite(TENT, TENT_COLORS, tentX, tentY - 56, 8, false);
 
-                    // 텐트 입구
-                    this.ctx.fillStyle = '#654321';
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(tentX + 35, tentY);
-                    this.ctx.lineTo(tentX + 40, tentY - 30);
-                    this.ctx.lineTo(tentX + 45, tentY);
-                    this.ctx.closePath();
-                    this.ctx.fill();
+                    // (텐트 입구는 도트 스프라이트에 포함됨)
 
                     // 지율이 (왼쪽)
                     this.drawJiyul(
@@ -4186,7 +4230,7 @@ class StoryScene {
                     this.ctx.textAlign = 'center';
                     this.ctx.shadowColor = '#000000';
                     this.ctx.shadowBlur = 5;
-                    this.ctx.fillText('솔뜰 캠핑장', signX + 90, signY + 38);
+                    this.drawCaption('솔뜰 캠핑장', signX + 90, signY + 24, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.95, shadowOffset: 2 });
                     this.ctx.shadowBlur = 0;
                     this.ctx.shadowColor = 'transparent';
                     this.ctx.textAlign = 'left';
@@ -4435,7 +4479,7 @@ class StoryScene {
                     this.ctx.textAlign = 'center';
                     this.ctx.shadowColor = '#000000';
                     this.ctx.shadowBlur = 5;
-                    this.ctx.fillText('솔뜰 캠핑장', signX + 90, signY + 38);
+                    this.drawCaption('솔뜰 캠핑장', signX + 90, signY + 24, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.95, shadowOffset: 2 });
                     this.ctx.shadowBlur = 0;
                     this.ctx.shadowColor = 'transparent';
                     this.ctx.textAlign = 'left';
