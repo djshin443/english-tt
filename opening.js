@@ -468,20 +468,23 @@ function showTitleScreen() {
             const sub = 'ENGLISH PING PONG HUNTER';
             const startText = '터치해서 시작!';
 
-            const line1Opts = { fontPx: 15, scale: 2, palette: 'steel' };
+            // 메인 로고(line2)는 굵은 도트 느낌을 유지하고,
+            // 한글 보조 문구는 격자를 촘촘하게(fontPx↑) 만들어 또렷하게 읽히도록 한다
+            const line1Opts = { fontPx: 34, scale: 2, palette: 'steel' };
             const line2Opts = { fontPx: 18, scale: 2, palette: 'gold' };
-            const subOpts = { fontPx: 11, scale: 2, palette: 'fire' };
-            const startOpts = { fontPx: 13, scale: 2, palette: 'white' };
+            const subOpts = { fontPx: 22, scale: 2, palette: 'fire' };
+            const startOpts = { fontPx: 30, scale: 2, palette: 'white' };
 
             // 레이아웃: 1행 → 로고 → 부제목 → 시작 안내를 위에서부터 순서대로 배치
             const m1 = PixelText.measure(line1, line1Opts);
             const m2 = PixelText.measure(line2, line2Opts);
             const m3 = PixelText.measure(sub, subOpts);
             const m4 = PixelText.measure(startText, startOpts);
-            const s1 = Math.min(1.5 * base, (w * 0.42) / m1.width);
+            // fontPx를 키운 만큼 배율 상한을 낮춰 화면 크기는 기존과 동일하게 유지
+            const s1 = Math.min(0.66 * base, (w * 0.42) / m1.width);
             const fit = Math.min(3.0 * base, (w * 0.86) / m2.width);
-            const s3 = Math.min(1.3 * base, (w * 0.66) / m3.width);
-            const s4 = Math.min(1.5 * base, (w * 0.5) / m4.width);
+            const s3 = Math.min(0.65 * base, (w * 0.66) / m3.width);
+            const s4 = Math.min(0.65 * base, (w * 0.5) / m4.width);
             const line1H = m1.height * s1;
             const logoH = m2.height * fit;
             const line1Y = h * 0.05;
