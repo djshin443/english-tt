@@ -3162,20 +3162,29 @@ function gameLoop() {
             }
 
             // 크림이 무기(사인검) 애니메이션
+            // 12시(-90°)에서 시작해 3시(0°)까지만 휘두른다
             if (player.showWeapon && currentCharacter === 0) {
+                const SWING_START = -Math.PI / 2;  // 12시
+                const SWING_END = 0;               // 3시
+
                 if (player.weaponTimer > 0) {
+                    // 천천히 휘두르는 구간
                     player.weaponTimer--;
-                    // 천천히 휘두르기
                     player.weaponAngle += 0.08;
                 } else {
-                    // 타이머 종료 시 빠르게 휘두르기
+                    // 타이머 종료 시 빠르게 마무리
                     player.weaponAngle += 0.3;
-                    if (player.weaponAngle >= 0) {  // 3시 방향까지 휘두르기
-                        player.showWeapon = false;
-                        player.animation = 'idle';  // 애니메이션을 idle로 복귀
-                        player.weaponAngle = 0;
-                        player.weaponTimer = 0;
-                    }
+                }
+
+                // 12시~3시 범위를 벗어나지 않도록 항상 제한
+                if (player.weaponAngle < SWING_START) player.weaponAngle = SWING_START;
+
+                // 3시 방향에 도달하면 스윙 종료 (느린 구간에서도 즉시 멈춤)
+                if (player.weaponAngle >= SWING_END) {
+                    player.weaponAngle = SWING_END;
+                    player.showWeapon = false;
+                    player.animation = 'idle';  // 애니메이션을 idle로 복귀
+                    player.weaponTimer = 0;
                 }
             } else if (currentCharacter === 0 && player.animation === 'casting') {
                 // 무기 애니메이션이 중단되었는데 casting 상태에 갇힌 경우 강제 리셋
