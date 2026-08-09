@@ -69,12 +69,13 @@ function showTitleScreen() {
     const SKY_BANDS = ['#0E1230', '#232B5C', '#4A3B7C', '#8C4A6E', '#C56A50', '#E8925A'];
 
     // 행진하는 캐릭터들 (characters-player.js의 도트 스프라이트 사용)
-    // 초이는 맨 뒤에서 음표와 함께 춤추며 등장
+    // 각자 시그니처 동작: 크림이(라켓 스윙) → 세은(연필+단어 암기) →
+    // 초이(아이돌 댄스) → 하린(곰인형 떨어뜨리고 줍느라 맨 뒤)
     const marchers = [
-        { name: 'jiyul', offset: 0 },
-        { name: 'seeun', offset: 90 },
-        { name: 'harin', offset: 180 },
-        { name: 'choi', offset: 285, dance: true }
+        { name: 'jiyul', offset: 0, sig: 'paddle' },
+        { name: 'seeun', offset: 105, sig: 'study' },
+        { name: 'choi', offset: 215, sig: 'dance' },
+        { name: 'harin', offset: 330, sig: 'bear' }
     ];
 
     // 도트 음표 (초이 댄스용)
@@ -88,6 +89,47 @@ function showTitleScreen() {
     ];
     const NOTE_COLORS_A = { 0: null, 1: '#FFFFFF' };
     const NOTE_COLORS_B = { 0: null, 1: '#FFE55A' };
+
+    // 탁구 라켓 (크림이 스윙용) - 들어올린 포즈 / 휘두른 포즈
+    const PADDLE_UP = [
+        [0,0,1,1,0],
+        [0,1,2,2,1],
+        [1,2,2,2,1],
+        [1,2,2,1,0],
+        [0,1,1,0,0],
+        [0,0,3,0,0],
+        [0,0,3,0,0]
+    ];
+    const PADDLE_SWING = [
+        [0,0,0,1,1,1,0],
+        [3,3,1,2,2,2,1],
+        [0,0,1,2,2,1,0],
+        [0,0,0,1,1,0,0]
+    ];
+    const PADDLE_COLORS = { 0: null, 1: '#5A1420', 2: '#E85060', 3: '#FFC22B' };
+
+    // 갈색 곰돌이 인형 (하린용)
+    const BEAR_SPRITE = [
+        [1,1,0,0,1,1],
+        [1,2,1,1,2,1],
+        [0,2,2,2,2,0],
+        [2,2,3,3,2,2],
+        [0,2,2,2,2,0],
+        [0,2,0,0,2,0]
+    ];
+    const BEAR_COLORS = { 0: null, 1: '#5A3A1E', 2: '#8A5A2B', 3: '#D9B380' };
+
+    // 연필 (세은용, 귀에 꽂은 모양)
+    function drawPencil(x, y, s) {
+        tctx.fillStyle = '#FFC22B';                 // 몸통 (노랑)
+        tctx.fillRect(x, y, s * 4, s);
+        tctx.fillStyle = '#FFD9A8';                 // 깎인 부분
+        tctx.fillRect(x + s * 4, y, s, s);
+        tctx.fillStyle = '#2E2E36';                 // 심
+        tctx.fillRect(x + s * 5, y, Math.ceil(s / 2), s);
+        tctx.fillStyle = '#FF8FB8';                 // 지우개
+        tctx.fillRect(x - s, y, s, s);
+    }
 
     // 메탈슬러그풍 로컬 스프라이트 렌더러 (검은 외곽선 + 상단 하이라이트/하단 셰이드)
     // 셀 경계를 정수 픽셀에 스냅해서 소수 스케일에서도 이음새(안티앨리어싱 줄무늬)가 생기지 않게 한다
@@ -207,7 +249,7 @@ function showTitleScreen() {
             }
         }
 
-        // ---- 행진하는 캐릭터 (걷기 사이클) + 초이 아이돌 댄스 ----
+        // ---- 행진하는 캐릭터 (각자 시그니처 동작) ----
         if (typeof pixelData !== 'undefined') {
             const mScale = Math.max(2, Math.floor(base * 2.6));
             const walkFrame = Math.floor(frame / 8) % 2;
@@ -218,8 +260,137 @@ function showTitleScreen() {
                 const travel = w + spriteW + 240;
                 const mx = ((frame * 1.6 + m.offset * base) % travel) - spriteW - 20;
                 const baseY = groundTop - 16 * mScale + Math.floor(mScale / 2);
+                const walkSprite = walkFrame === 0 ? (data.walking1 || data.idle) : (data.walking2 || data.idle);
 
-                if (m.dance) {
+                if (m.sig === 'paddle') {
+                    // ---- 크림이: 탁구 라켓을 휘두르며 행진 ----
+                    // 28프레임 주기: 들어올렸다가 → 쌩! 휘두르기
+                    const swingT = frame % 28;
+                    const swinging = swingT >= 18;
+                    drawSpriteMS(walkSprite, data.colorMap, mx, baseY, mScale, false);
+                    const ps = Math.max(1, Math.round(mScale * 0.8));
+                    if (!swinging) {
+                        // 라켓 들어올린 포즈 (살짝 흔들림)
+                        const bob = Math.round(Math.sin(frame * 0.25) * ps);
+                        drawSpriteMS(PADDLE_UP, PADDLE_COLORS,
+                            mx + spriteW - ps * 2, baseY + mScale * 2 + bob, ps, false);
+                    } else {
+                        // 휘두른 포즈 + 스윙 궤적 (흰 잔상 도트)
+                        drawSpriteMS(PADDLE_SWING, PADDLE_COLORS,
+                            mx + spriteW - ps, baseY + mScale * 6, ps, false);
+                        tctx.fillStyle = 'rgba(255,255,255,0.7)';
+                        for (let k = 0; k < 4; k++) {
+                            const arcA = -0.9 + k * 0.45;
+                            tctx.fillRect(
+                                Math.round(mx + spriteW + Math.cos(arcA) * mScale * 5),
+                                Math.round(baseY + mScale * 6 + Math.sin(arcA) * mScale * 4),
+                                ps, ps);
+                        }
+                    }
+                } else if (m.sig === 'study') {
+                    // ---- 세은: 귀에 연필 꽂고 영어 단어를 외우며 행진 ----
+                    drawSpriteMS(walkSprite, data.colorMap, mx, baseY, mScale, false);
+                    // 귀에 꽂은 연필 (머리 옆, 걸음에 맞춰 살짝 흔들림)
+                    const pBob = Math.round(Math.sin(frame * 0.2) * 1);
+                    drawPencil(mx - mScale * 2, baseY + mScale * 5 + pBob, Math.max(2, Math.round(mScale * 0.7)));
+                    // 머리 위로 알파벳이 떠오르며 사라지는 암기 연출
+                    if (typeof PixelText !== 'undefined') {
+                        const words = ['A', 'B', 'C', 'CAT', 'DOG', 'SUN'];
+                        for (let n = 0; n < 2; n++) {
+                            const cycle = 70;
+                            const t = (frame + n * 35) % cycle;
+                            const wordIdx = (Math.floor((frame + n * 35) / cycle) + n * 3) % words.length;
+                            const alpha = t < 10 ? t / 10 : (t > 55 ? (cycle - t) / 15 : 1);
+                            PixelText.draw(tctx, words[wordIdx],
+                                mx + spriteW / 2 + (n === 0 ? -mScale * 3 : mScale * 4),
+                                baseY - mScale * (3 + n * 3) - t * 0.5, {
+                                fontPx: 12, scale: 2, palette: n % 2 ? 'gold' : 'white',
+                                drawScale: 0.55 * Math.max(1, base * 0.8), alpha: Math.max(0, alpha)
+                            });
+                        }
+                    }
+                } else if (m.sig === 'bear') {
+                    // ---- 하린: 곰인형 안고 가다 떨어뜨리고 → 알아채고 → 달려가 줍기 ----
+                    // 220프레임 루프라 맨 뒤에서 계속 뒤처지는 귀여운 연출
+                    const T = 220;
+                    const t = frame % T;
+                    const bs = Math.max(1, Math.round(mScale * 0.9));
+                    const bearW = 6 * bs;
+                    let off = 0;          // 행진 기준 위치 대비 보정치
+                    let flip = false;
+                    let sprite = walkSprite;
+                    let bearCarried = true;
+                    let bearFixedX = 0, bearFixedY = 0;
+
+                    const dropT = 90, noticeT = 115, backT = 135, pickT = 165, doneT = 185;
+                    const marchSpeed = 1.6;
+                    const groundBearY = groundTop - bearW + bs;
+
+                    if (t < dropT) {
+                        // 인형 안고 걷기
+                        off = 0;
+                    } else if (t < noticeT) {
+                        // 인형이 떨어졌는데 모르고 계속 걸음 (인형은 낙하 후 바닥에)
+                        bearCarried = false;
+                        const fallP = Math.min(1, (t - dropT) / 10);
+                        bearFixedX = mx - marchSpeed * (t - dropT) + spriteW - bs;
+                        bearFixedY = baseY + mScale * 8 + (groundBearY - baseY - mScale * 8) * fallP
+                            - Math.sin(fallP * Math.PI) * 6;   // 살짝 튀며 떨어짐
+                    } else if (t < backT) {
+                        // 멈추고 뒤돌아봄 + 느낌표
+                        bearCarried = false;
+                        off = 0;
+                        flip = true;
+                        sprite = data.idle;
+                        bearFixedX = mx - marchSpeed * (t - dropT) + spriteW - bs;
+                        bearFixedY = groundBearY;
+                        if (Math.floor(t / 6) % 2 === 0) {
+                            tctx.fillStyle = '#FFE55A';
+                            tctx.fillRect(mx + spriteW / 2 - bs, baseY - mScale * 4, bs * 2, bs * 4);
+                            tctx.fillRect(mx + spriteW / 2 - bs, baseY - mScale * 4 + bs * 5, bs * 2, bs * 2);
+                        }
+                    } else if (t < pickT) {
+                        // 인형을 향해 되돌아 달려감
+                        bearCarried = false;
+                        flip = true;
+                        const backP = (t - backT) / (pickT - backT);
+                        const needBack = marchSpeed * (t - dropT);
+                        off = -needBack * backP;
+                        bearFixedX = mx - needBack + spriteW - bs;
+                        bearFixedY = groundBearY;
+                    } else if (t < doneT) {
+                        // 웅크려서 인형 줍기 (몸을 낮춤)
+                        bearCarried = false;
+                        const needBack = marchSpeed * (t - dropT);
+                        off = -needBack;
+                        flip = true;
+                        sprite = data.idle;
+                        bearFixedX = mx + off + spriteW - bs;
+                        bearFixedY = groundBearY;
+                        // 줍는 순간 인형이 손 위치로 올라옴
+                        if (t > pickT + 10) {
+                            bearCarried = true;
+                            flip = false;
+                        }
+                    } else {
+                        // 인형 꼭 안고 빠른 걸음으로 복귀 (잰걸음)
+                        const needBack = marchSpeed * (doneT - dropT);
+                        const recover = (t - doneT) / (T - doneT);
+                        off = -needBack * (1 - recover);
+                        sprite = Math.floor(frame / 5) % 2 === 0 ? (data.walking1 || data.idle) : (data.walking2 || data.idle);
+                    }
+
+                    const hy = (t >= pickT && t < pickT + 10) ? baseY + mScale * 2 : baseY;  // 줍는 순간 몸 낮춤
+                    drawSpriteMS(sprite, data.colorMap, mx + off, hy, mScale, flip);
+                    // 곰인형 그리기 (품에 안김 / 바닥에 떨어짐)
+                    if (bearCarried) {
+                        drawSpriteMS(BEAR_SPRITE, BEAR_COLORS,
+                            mx + off + spriteW - bs * 3, hy + mScale * 8, bs, false);
+                    } else {
+                        drawSpriteMS(BEAR_SPRITE, BEAR_COLORS,
+                            Math.round(bearFixedX), Math.round(bearFixedY), bs, false);
+                    }
+                } else if (m.sig === 'dance') {
                     // ---- 초이 아이돌 댄스: 4박자 안무 루틴 ----
                     // 박자 0: 대기(리듬 타기) → 1: 점프! → 2: 왼쪽 스텝 → 3: 포인트 포즈(물총 팔 뻗기)
                     const beat = Math.floor(frame / 16) % 4;
