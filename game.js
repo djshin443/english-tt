@@ -2787,8 +2787,8 @@ function drawPlayer() {
         );
     }
 
-    // 하린이가 무기를 들고 있을 때 번개검 그리기
-    if (currentCharacter === 2 && player.showWeapon) {
+    // 크림이가 무기를 들고 있을 때 번개검(사인검) 그리기
+    if (currentCharacter === 0 && player.showWeapon) {
         drawLightningSword(
             player.x + player.width + 20,
             player.y + player.height / 2,
@@ -3161,8 +3161,8 @@ function gameLoop() {
                 player.weaponTimer = 0;
             }
 
-            // 하린이 무기 애니메이션
-            if (player.showWeapon && currentCharacter === 2) {
+            // 크림이 무기(사인검) 애니메이션
+            if (player.showWeapon && currentCharacter === 0) {
                 if (player.weaponTimer > 0) {
                     player.weaponTimer--;
                     // 천천히 휘두르기
@@ -3177,7 +3177,7 @@ function gameLoop() {
                         player.weaponTimer = 0;
                     }
                 }
-            } else if (currentCharacter === 2 && player.animation === 'casting') {
+            } else if (currentCharacter === 0 && player.animation === 'casting') {
                 // 무기 애니메이션이 중단되었는데 casting 상태에 갇힌 경우 강제 리셋
                 player.animation = 'idle';
                 player.showWeapon = false;
@@ -3456,14 +3456,14 @@ function switchCharacter() {
 // 무기 발사 함수
 function fireWeapon() {
     if (currentCharacter === 0) {
-        // 크림 - 신검 발사
-        fireDivineSword();
+        // 크림 - 사인검 (번개체인) 발사
+        fireLightningChain();
     } else if (currentCharacter === 1) {
         // 세은 - 토네이도 발사
         fireTornado();
     } else if (currentCharacter === 2) {
-        // 하린 - 번개체인 발사
-        fireLightningChain();
+        // 하린 - 신검 발사
+        fireDivineSword();
     }
 }
 

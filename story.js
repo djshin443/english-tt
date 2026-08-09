@@ -1680,9 +1680,9 @@ class StoryScene {
 
                         // 신검 글로우
                         const swordGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 60);
-                        swordGradient.addColorStop(0, 'rgba(186, 85, 211, 0.8)');
-                        swordGradient.addColorStop(0.5, 'rgba(255, 105, 180, 0.5)');
-                        swordGradient.addColorStop(1, 'rgba(186, 85, 211, 0)');
+                        swordGradient.addColorStop(0, 'rgba(255, 229, 90, 0.85)');
+                        swordGradient.addColorStop(0.5, 'rgba(255, 194, 43, 0.5)');
+                        swordGradient.addColorStop(1, 'rgba(255, 229, 90, 0)');
                         this.ctx.fillStyle = swordGradient;
                         this.ctx.beginPath();
                         this.ctx.arc(0, 0, 60, 0, Math.PI * 2);
@@ -1690,12 +1690,12 @@ class StoryScene {
 
                         // 신검 본체
                         const gradient = this.ctx.createLinearGradient(-30, 0, 30, 0);
-                        gradient.addColorStop(0, '#FFA500');  // 손잡이 (주황)
-                        gradient.addColorStop(0.2, '#FFD700'); // 금색
-                        gradient.addColorStop(0.4, '#D8BFD8'); // 연보라
-                        gradient.addColorStop(0.6, '#BA55D3'); // 보라
-                        gradient.addColorStop(0.8, '#9370DB'); // 진보라
-                        gradient.addColorStop(1, '#8B008B');   // 다크 마젠타
+                        gradient.addColorStop(0, '#B8860B');  // 손잡이 (짙은 금)
+                        gradient.addColorStop(0.2, '#FFC22B'); // 금색 가드
+                        gradient.addColorStop(0.4, '#FFFFFF'); // 번개 섬광
+                        gradient.addColorStop(0.6, '#FFE55A'); // 밝은 금
+                        gradient.addColorStop(0.8, '#E8ECF4'); // 은백색 칼날
+                        gradient.addColorStop(1, '#C8D4E0');   // 스틸
                         this.ctx.fillStyle = gradient;
                         this.ctx.fillRect(-30, -4, 60, 8);
 
@@ -1708,7 +1708,7 @@ class StoryScene {
                         this.ctx.fill();
 
                         // 핑크 중심선
-                        this.ctx.strokeStyle = '#FF69B4';
+                        this.ctx.strokeStyle = '#FFFFFF';
                         this.ctx.lineWidth = 2;
                         this.ctx.beginPath();
                         this.ctx.moveTo(-25, 0);
@@ -1898,9 +1898,9 @@ class StoryScene {
 
                     // 신검 글로우
                     const swordGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 60);
-                    swordGradient.addColorStop(0, 'rgba(186, 85, 211, 0.8)');
-                    swordGradient.addColorStop(0.5, 'rgba(255, 105, 180, 0.5)');
-                    swordGradient.addColorStop(1, 'rgba(186, 85, 211, 0)');
+                    swordGradient.addColorStop(0, 'rgba(255, 229, 90, 0.85)');
+                    swordGradient.addColorStop(0.5, 'rgba(255, 194, 43, 0.5)');
+                    swordGradient.addColorStop(1, 'rgba(255, 229, 90, 0)');
                     this.ctx.fillStyle = swordGradient;
                     this.ctx.beginPath();
                     this.ctx.arc(0, 0, 60, 0, Math.PI * 2);
@@ -1908,12 +1908,12 @@ class StoryScene {
 
                     // 신검 본체
                     const gradient = this.ctx.createLinearGradient(-30, 0, 30, 0);
-                    gradient.addColorStop(0, '#FFA500');
-                    gradient.addColorStop(0.2, '#FFD700');
-                    gradient.addColorStop(0.4, '#D8BFD8');
-                    gradient.addColorStop(0.6, '#BA55D3');
-                    gradient.addColorStop(0.8, '#9370DB');
-                    gradient.addColorStop(1, '#8B008B');
+                    gradient.addColorStop(0, '#B8860B');
+                    gradient.addColorStop(0.2, '#FFC22B');
+                    gradient.addColorStop(0.4, '#FFFFFF');
+                    gradient.addColorStop(0.6, '#FFE55A');
+                    gradient.addColorStop(0.8, '#E8ECF4');
+                    gradient.addColorStop(1, '#C8D4E0');
                     this.ctx.fillStyle = gradient;
                     this.ctx.fillRect(-30, -4, 60, 8);
 
@@ -1925,8 +1925,8 @@ class StoryScene {
                     this.ctx.closePath();
                     this.ctx.fill();
 
-                    // 핑크 중심선
-                    this.ctx.strokeStyle = '#FF69B4';
+                    // 흰 번개 중심선
+                    this.ctx.strokeStyle = '#FFFFFF';
                     this.ctx.lineWidth = 2;
                     this.ctx.beginPath();
                     this.ctx.moveTo(-25, 0);
@@ -1947,7 +1947,7 @@ class StoryScene {
 
                     // 선생님 대사
                     this.drawDialogBox(
-                        '작전명 [메탈 스매시]! 전설의 신검 라켓을 지급한다!\nABC 대마왕의 본진을 격파할 유일한 무기다!',
+                        '작전명 [메탈 스매시]! 전설의 사인검 라켓을 지급한다!\n번개 체인이 ABC 대마왕의 본진을 꿰뚫을 것이다!',
                         this.canvas.width / 2,
                         this.canvas.height - 130,
                         'sunzero 선생님'
@@ -2517,7 +2517,7 @@ class StoryScene {
                     // 대사
                     if (weaponX >= weaponTargetX - 10) {
                         this.drawDialogBox(
-                            '하린 대원에게는 사인검 라켓을 지급한다!\n번개 체인이 적을 찌릿찌릿 관통한다!',
+                            '하린 대원에게는 신검 라켓을 지급한다!\n신성한 검 세 자루가 적진을 갈라버린다!',
                             this.canvas.width / 2,
                             this.canvas.height - 100,
                             'sunzero 선생님'
@@ -2562,9 +2562,9 @@ class StoryScene {
 
                     // 신검 글로우
                     const swordGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, 60);
-                    swordGradient.addColorStop(0, 'rgba(186, 85, 211, 0.8)');
-                    swordGradient.addColorStop(0.5, 'rgba(255, 105, 180, 0.5)');
-                    swordGradient.addColorStop(1, 'rgba(186, 85, 211, 0)');
+                    swordGradient.addColorStop(0, 'rgba(255, 229, 90, 0.85)');
+                    swordGradient.addColorStop(0.5, 'rgba(255, 194, 43, 0.5)');
+                    swordGradient.addColorStop(1, 'rgba(255, 229, 90, 0)');
                     this.ctx.fillStyle = swordGradient;
                     this.ctx.beginPath();
                     this.ctx.arc(0, 0, 60, 0, Math.PI * 2);
@@ -2572,12 +2572,12 @@ class StoryScene {
 
                     // 신검 본체
                     const gradient = this.ctx.createLinearGradient(-30, 0, 30, 0);
-                    gradient.addColorStop(0, '#FFA500');
-                    gradient.addColorStop(0.2, '#FFD700');
-                    gradient.addColorStop(0.4, '#D8BFD8');
-                    gradient.addColorStop(0.6, '#BA55D3');
-                    gradient.addColorStop(0.8, '#9370DB');
-                    gradient.addColorStop(1, '#8B008B');
+                    gradient.addColorStop(0, '#B8860B');
+                    gradient.addColorStop(0.2, '#FFC22B');
+                    gradient.addColorStop(0.4, '#FFFFFF');
+                    gradient.addColorStop(0.6, '#FFE55A');
+                    gradient.addColorStop(0.8, '#E8ECF4');
+                    gradient.addColorStop(1, '#C8D4E0');
                     this.ctx.fillStyle = gradient;
                     this.ctx.fillRect(-30, -5, 60, 10);
 
@@ -2589,8 +2589,8 @@ class StoryScene {
                     this.ctx.closePath();
                     this.ctx.fill();
 
-                    // 핑크 중심선
-                    this.ctx.strokeStyle = '#FF69B4';
+                    // 흰 번개 중심선
+                    this.ctx.strokeStyle = '#FFFFFF';
                     this.ctx.lineWidth = 2;
                     this.ctx.beginPath();
                     this.ctx.moveTo(-25, 0);

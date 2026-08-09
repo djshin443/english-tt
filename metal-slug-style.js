@@ -141,7 +141,8 @@
                     player.weaponAngle
                 );
             }
-            if (currentCharacter === 2 && player.showWeapon) {
+            // 크림(0)이 사인검(번개검) 사용
+            if (currentCharacter === 0 && player.showWeapon) {
                 drawLightningSword(
                     player.x + player.width + 20,
                     player.y + player.height / 2,
@@ -150,6 +151,96 @@
             }
         };
     }
+
+    // ---- 모바일 액션 버튼 도트 스타일 ----
+    // 이모지 아이콘을 픽셀 아이콘 캔버스로 교체하고 강판 패널 스타일 적용
+    (function stylePixelButtons() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .action-btn { border-radius: 8px !important; border: 3px solid #FFC22B !important;
+                background: rgba(18, 22, 14, 0.92) !important;
+                box-shadow: 0 3px 0 #7A5A00 !important; }
+            .action-btn:active { transform: translateY(2px) scale(0.95) !important;
+                box-shadow: 0 1px 0 #7A5A00 !important; background: rgba(40, 46, 30, 0.95) !important; }
+            .action-btn .btn-label { color: #FFE55A !important; text-shadow: 1px 1px 0 #000 !important; }
+            .joystick-base { border-radius: 14px !important;
+                border: 3px solid rgba(255, 194, 43, 0.55) !important;
+                background: rgba(18, 22, 14, 0.55) !important; }
+            .joystick-stick { border-radius: 10px !important; background: #FFC22B !important;
+                border: 3px solid #7A5A00 !important; }
+        `;
+        document.head.appendChild(style);
+
+        const ICONS = {
+            // 캐릭터 체인지: 두 인물 + 교환 화살표
+            characterBtn: {
+                grid: [
+                    [0,1,1,0,0,0,2,2,0],
+                    [0,1,1,0,0,0,2,2,0],
+                    [1,1,1,1,0,2,2,2,2],
+                    [0,1,1,0,0,0,2,2,0],
+                    [0,0,0,0,0,0,0,0,0],
+                    [0,3,3,3,3,3,3,0,0],
+                    [3,3,0,0,0,0,3,3,0],
+                    [0,0,3,3,3,3,3,3,0]
+                ],
+                colors: { 1: '#FFC22B', 2: '#6EA8DC', 3: '#FFFFFF' }
+            },
+            // 공격: 도트 검
+            swordBtn: {
+                grid: [
+                    [0,0,0,1,0,0,0],
+                    [0,0,1,2,1,0,0],
+                    [0,0,1,2,1,0,0],
+                    [0,0,1,2,1,0,0],
+                    [0,0,1,2,1,0,0],
+                    [0,1,3,3,3,1,0],
+                    [0,0,0,4,0,0,0],
+                    [0,0,4,4,4,0,0]
+                ],
+                colors: { 1: '#2A2E3A', 2: '#E8ECF4', 3: '#FFC22B', 4: '#8A5A2B' }
+            },
+            // 탁구공: 도트 라켓 + 공
+            ballBtn: {
+                grid: [
+                    [0,1,1,1,0,0,0],
+                    [1,2,2,2,1,0,0],
+                    [1,2,2,2,1,0,4],
+                    [1,2,2,2,1,0,0],
+                    [0,1,1,1,0,0,0],
+                    [0,0,3,0,0,0,0],
+                    [0,0,3,0,0,0,0]
+                ],
+                colors: { 1: '#5A1420', 2: '#E85060', 3: '#FFC22B', 4: '#FFFFFF' }
+            }
+        };
+
+        Object.keys(ICONS).forEach(id => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            const span = btn.querySelector('span');
+            if (!span) return;
+            const icon = ICONS[id];
+            const cell = 4;
+            const rows = icon.grid.length;
+            const cols = icon.grid[0].length;
+            const c = document.createElement('canvas');
+            c.width = cols * cell;
+            c.height = rows * cell;
+            c.style.cssText = 'image-rendering: pixelated; width: 32px; height: 32px; pointer-events: none; display: block; margin: 0 auto;';
+            const g = c.getContext('2d');
+            for (let r = 0; r < rows; r++) {
+                for (let cc = 0; cc < cols; cc++) {
+                    const v = icon.grid[r][cc];
+                    if (!v) continue;
+                    g.fillStyle = icon.colors[v];
+                    g.fillRect(cc * cell, r * cell, cell, cell);
+                }
+            }
+            span.textContent = '';
+            span.appendChild(c);
+        });
+    })();
 
     // ---- HTML 상태바를 캔버스 도트 HUD로 교체 ----
     // 기존 DOM 박스(#ui, #wordProgress)를 숨기고 매 프레임 캔버스에
