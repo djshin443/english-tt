@@ -27,7 +27,7 @@ function resizeCanvas() {
         quizChoices && quizChoices.length > 0 && currentStageData) {
         try {
             createQuizChoices();
-            // 공 위치도 재계산 (지율이 위치 기준)
+            // 공 위치도 재계산 (크림이 위치 기준)
             const jiyulX = window.quizJiyulX || 100;
             const jiyulY = quizChoices[jiyulQuizY].y + quizChoices[jiyulQuizY].height / 2;
             if (ball) {
@@ -104,12 +104,12 @@ let ball = null;
 let divineSwords = [];
 let tornados = [];
 let lightningChains = [];
-let currentCharacter = 0;  // 0: 지율, 1: 세은, 2: 하린
+let currentCharacter = 0;  // 0: 크림, 1: 세은, 2: 하린
 const characters = ['jiyul', 'seeun', 'harin'];
-const characterNames = ['지율', '세은', '하린'];
+const characterNames = ['크림', '세은', '하린'];
 const characterEnergies = [10, 10, 10];  // 각 캐릭터의 체력 저장
 
-// 지율이 스매싱 상태
+// 크림이 스매싱 상태
 let jiyulSmashing = false;
 let smashTimer = 0;
 
@@ -125,7 +125,7 @@ const SWORD_COOLDOWN_MAX = 60;  // 60프레임마다 발사 (약 1초)
 // 퀴즈 선택지
 let quizChoices = [];
 
-// 퀴즈/보스 모드에서 지율이 위치
+// 퀴즈/보스 모드에서 크림이 위치
 let jiyulQuizY = 0;  // 현재 선택한 선택지 인덱스 (0~3)
 
 // 초기 캔버스 크기 설정 (모든 변수 정의 후 호출)
@@ -1513,7 +1513,7 @@ class BossBall {
         this.x = x;
         this.y = y;
         this.radius = 8;
-        this.vx = -5;  // 왼쪽으로 (지율이 방향)
+        this.vx = -5;  // 왼쪽으로 (크림이 방향)
         this.vy = (Math.random() - 0.5) * 4;
         this.color = '#FF4444';
     }
@@ -1527,7 +1527,7 @@ class BossBall {
             this.vy *= -1;
         }
 
-        // 지율이와 충돌 (에너지 감소)
+        // 크림이와 충돌 (에너지 감소)
         const jiyulX = 100;
         const jiyulY = player.y;  // 플레이어 실제 위치 사용
         if (this.x > jiyulX &&
@@ -2000,13 +2000,13 @@ function startQuizStage() {
         ui.style.display = 'none';
     }
 
-    // 지율이 위치 초기화 (첫 번째 선택지)
+    // 크림이 위치 초기화 (첫 번째 선택지)
     jiyulQuizY = 0;
 
     // 퀴즈 선택지 먼저 생성
     createQuizChoices();
 
-    // 공 초기화 (지율이 위치에서 발사, 선택지 위치 기준)
+    // 공 초기화 (크림이 위치에서 발사, 선택지 위치 기준)
     const jiyulX = 100;
     const jiyulY = quizChoices[jiyulQuizY].y + quizChoices[jiyulQuizY].height / 2;
     ball = new Ball(jiyulX + player.width + 60, jiyulY);
@@ -2082,20 +2082,20 @@ function createQuizChoices() {
         spacingY = 120;
     }
 
-    // 중앙 정렬 계산: 지율이와 박스를 하나의 그룹으로 중앙 배치 (실제 캔버스 크기 기준)
+    // 중앙 정렬 계산: 크림이와 박스를 하나의 그룹으로 중앙 배치 (실제 캔버스 크기 기준)
     const jiyulWidth = player.width;
-    const gap = isMobile ? 100 : 150; // 지율이와 박스 사이 간격
+    const gap = isMobile ? 100 : 150; // 크림이와 박스 사이 간격
     const totalWidth = jiyulWidth + gap + boxWidth;
     const groupStartX = (canvas.width - totalWidth) / 2;
 
-    // 박스 X 위치 (지율이 오른쪽에 배치)
+    // 박스 X 위치 (크림이 오른쪽에 배치)
     const startX = groupStartX + jiyulWidth + gap;
 
     // 세로: 4개 박스 전체 높이를 계산해서 중앙 정렬
     const totalHeight = boxHeight * 4 + spacingY * 3;
     const startY = (canvas.height - totalHeight) / 2;
 
-    // 지율이 X 위치를 전역 변수에 저장 (drawJiyulWithPaddle에서 사용)
+    // 크림이 X 위치를 전역 변수에 저장 (drawJiyulWithPaddle에서 사용)
     window.quizJiyulX = groupStartX;
 
     for (let i = 0; i < 4; i++) {
@@ -2249,7 +2249,7 @@ function startBossStage(stageNum) {
     player.vx = 0;
     player.vy = 0;
 
-    // 공 초기화 (지율이 위치에서 발사)
+    // 공 초기화 (크림이 위치에서 발사)
     const jiyulX = 100;
     const jiyulY = player.y + player.height / 2;
     ball = new Ball(jiyulX + player.width + 60, jiyulY);
@@ -2434,11 +2434,11 @@ function spawnPotion(x = null) {
 //     ));
 // }
 
-// 공 발사 (지율이 스매싱 모션)
+// 공 발사 (크림이 스매싱 모션)
 function launchBall() {
     if (!ball || ball.active) return;
 
-    // 지율이 현재 위치에서 발사
+    // 크림이 현재 위치에서 발사
     let jiyulX, jiyulY;
 
     if (gameState.mode === GAME_MODE.QUIZ) {
@@ -2488,7 +2488,7 @@ function handleQuizAnswer(choice) {
             particles.push(new Particle(choice.x + choice.width / 2, choice.y + choice.height / 2, '#FF0000', 'normal'));
         }
 
-        // 공 리셋 (지율이 위치에서)
+        // 공 리셋 (크림이 위치에서)
         const jiyulX = 100;
         const jiyulY = quizChoices[jiyulQuizY].y + quizChoices[jiyulQuizY].height / 2;
         ball = new Ball(jiyulX + player.width + 60, jiyulY);
@@ -2521,7 +2521,7 @@ function hitBoss() {
             }, 1000);
         }
     } else {
-        // 공 리셋 (지율이 위치에서)
+        // 공 리셋 (크림이 위치에서)
         const jiyulX = 100;
         const jiyulY = canvas.height / 2;
         ball = new Ball(jiyulX + player.width + 60, jiyulY);
@@ -2616,7 +2616,7 @@ function updatePlayer() {
     }
 }
 
-// 퀴즈 모드 지율이 업데이트 (위아래로 선택지 이동)
+// 퀴즈 모드 크림이 업데이트 (위아래로 선택지 이동)
 let lastMoveTime = 0;
 function updateJiyulQuiz() {
     const now = Date.now();
@@ -2649,9 +2649,9 @@ function updateJiyulQuiz() {
     }
 }
 
-// (라켓 관련 함수 제거됨 - 이제 지율이가 직접 라켓 들고 있음)
+// (라켓 관련 함수 제거됨 - 이제 크림이가 직접 라켓 들고 있음)
 
-// 지율이가 라켓을 든 모습 그리기 (스매싱 모션 포함, 위아래 이동)
+// 크림이가 라켓을 든 모습 그리기 (스매싱 모션 포함, 위아래 이동)
 function drawJiyulWithPaddle() {
     // 스매싱 타이머 업데이트
     if (jiyulSmashing) {
@@ -2662,7 +2662,7 @@ function drawJiyulWithPaddle() {
         }
     }
 
-    // 지율이 위치 (위아래 이동 가능)
+    // 크림이 위치 (위아래 이동 가능)
     let jiyulX, jiyulY;
 
     if (gameState.mode === GAME_MODE.QUIZ) {
@@ -2677,7 +2677,7 @@ function drawJiyulWithPaddle() {
 
     ctx.save();
 
-    // 지율이 픽셀 스프라이트 (스매싱 중이면 smashing 애니메이션)
+    // 크림이 픽셀 스프라이트 (스매싱 중이면 smashing 애니메이션)
     const spriteData = pixelData[player.sprite];
     const animation = jiyulSmashing ? 'smashing' : 'idle';
 
@@ -2691,9 +2691,9 @@ function drawJiyulWithPaddle() {
         );
     }
 
-    // 탁구 라켓 (지율이 오른쪽에, 크기 조절)
+    // 탁구 라켓 (크림이 오른쪽에, 크기 조절)
     const paddleX = jiyulX + player.width + (jiyulSmashing ? 15 : 5);  // 스매싱 시 앞으로
-    const paddleY = jiyulY + player.height / 2 - 20;  // 지율이 중앙에 맞춤
+    const paddleY = jiyulY + player.height / 2 - 20;  // 크림이 중앙에 맞춤
     const paddleWidth = 30;  // 크기 축소
     const paddleHeight = 35;  // 크기 축소
 
@@ -3243,7 +3243,7 @@ function gameLoop() {
 
     } else if (gameState.mode === GAME_MODE.QUIZ) {
         // 퀴즈 모드
-        // 지율이 위아래 이동
+        // 크림이 위아래 이동
         if (!dialogueState.active) {
             updateJiyulQuiz();
 
@@ -3258,7 +3258,7 @@ function gameLoop() {
             }
         }
 
-        // 지율이가 라켓을 든 모습
+        // 크림이가 라켓을 든 모습
         drawJiyulWithPaddle();
 
         // 퀴즈 선택지 (선택된 것 강조)
@@ -3303,7 +3303,7 @@ function gameLoop() {
             }
         }
 
-        // 지율이가 라켓을 든 모습
+        // 크림이가 라켓을 든 모습
         drawJiyulWithPaddle();
 
         // 보스
@@ -3456,7 +3456,7 @@ function switchCharacter() {
 // 무기 발사 함수
 function fireWeapon() {
     if (currentCharacter === 0) {
-        // 지율 - 신검 발사
+        // 크림 - 신검 발사
         fireDivineSword();
     } else if (currentCharacter === 1) {
         // 세은 - 토네이도 발사
@@ -3582,7 +3582,7 @@ function fireLightningChain() {
     }
 }
 
-// 청룡언월도 그리기 함수 (지율 신검 스타일 + 케데헌 미라 날)
+// 청룡언월도 그리기 함수 (크림 신검 스타일 + 케데헌 미라 날)
 function drawGreenDragonBlade(x, y, angle) {
     ctx.save();
     ctx.translate(x, y);
@@ -3633,7 +3633,7 @@ function drawGreenDragonBlade(x, y, angle) {
     ctx.shadowBlur = 0;
     ctx.strokeRect(-90, -4, 90, 8);
 
-    // 창날 본체 (더 크고 날카로운 지율 신검 스타일 + 케데헌 미라 컬러)
+    // 창날 본체 (더 크고 날카로운 크림 신검 스타일 + 케데헌 미라 컬러)
     const spearGradient = ctx.createLinearGradient(0, -10, 60, 10);
     spearGradient.addColorStop(0, '#FFD700');                  // 금색
     spearGradient.addColorStop(0.15, '#DA70D6');               // 오키드
@@ -3846,7 +3846,7 @@ function drawGreenDragonBlade(x, y, angle) {
     ctx.restore();
 }
 
-// 케데헌 루미 보라색 사인검 그리기 함수 (지율/세은 검 스타일 + 보라색 테마)
+// 케데헌 루미 보라색 사인검 그리기 함수 (크림/세은 검 스타일 + 보라색 테마)
 function drawLightningSword(x, y, angle) {
     ctx.save();
     ctx.translate(x, y);
@@ -3898,7 +3898,7 @@ function drawLightningSword(x, y, angle) {
     ctx.shadowBlur = 0;
     ctx.strokeRect(-30, -4, 30, 8);
 
-    // 검날 본체 (더 크고 날카로운 지율 신검 스타일 + 케데헌 루미 보라색)
+    // 검날 본체 (더 크고 날카로운 크림 신검 스타일 + 케데헌 루미 보라색)
     const spearGradient = ctx.createLinearGradient(0, -10, 60, 10);
     spearGradient.addColorStop(0, '#FFD700');                  // 금색
     spearGradient.addColorStop(0.15, '#DA70D6');               // 오키드
@@ -4162,7 +4162,7 @@ function showEnding() {
             gameOverEl.className = 'success';
             gameOverEl.querySelector('h2').textContent = '🎉 HAPPY ENDING! 🎉';
             document.getElementById('gameOverMessage').textContent =
-                '🏆 축하합니다! 금메달 획득!\n🏓 지율이는 영어도 잘하고 탁구도 잘하는 선수가 되었습니다!\n영어 제국의 대마왕은 이제 최고의 탁구 코치!';
+                '🏆 축하합니다! 금메달 획득!\n🏓 크림이는 영어도 잘하고 탁구도 잘하는 선수가 되었습니다!\n영어 제국의 대마왕은 이제 최고의 탁구 코치!';
             gameOverEl.style.display = 'block';
         });
     } else {
@@ -4172,7 +4172,7 @@ function showEnding() {
             gameOverEl.className = 'success';
             gameOverEl.querySelector('h2').textContent = '🎉 HAPPY ENDING! 🎉';
             document.getElementById('gameOverMessage').textContent =
-                '🏆 축하합니다! 금메달 획득!\n🏓 지율이는 영어도 잘하고 탁구도 잘하는 선수가 되었습니다!\n영어 제국의 대마왕은 이제 최고의 탁구 코치!';
+                '🏆 축하합니다! 금메달 획득!\n🏓 크림이는 영어도 잘하고 탁구도 잘하는 선수가 되었습니다!\n영어 제국의 대마왕은 이제 최고의 탁구 코치!';
             gameOverEl.style.display = 'block';
         });
     }

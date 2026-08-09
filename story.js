@@ -170,7 +170,7 @@ class StoryScene {
         }
     }
 
-    // 지율이 캐릭터 그리기
+    // 크림이 캐릭터 그리기
     drawJiyul(x, y, animation = 'idle', frame = 0, scale = 4, flipH = false) {
         const spriteData = pixelData.jiyul;
         let sprite;
@@ -969,7 +969,7 @@ class StoryScene {
                     this.drawCaption('영어학원', 150, this.canvas.height - 220, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.05, shadowOffset: 2 });
                     this.ctx.textAlign = 'left';
 
-                    // 지율이 (걸어나오는 애니메이션)
+                    // 크림이 (걸어나오는 애니메이션)
                     const jiyulX = Math.min(this.canvas.width / 2, 100 + this.animationFrame * 3);
                     this.drawJiyul(
                         jiyulX,
@@ -983,7 +983,7 @@ class StoryScene {
                 }
             },
 
-            // 씬 1-2: 지율이 대사
+            // 씬 1-2: 크림이 대사
             {
                 update: () => {
                     // 하늘 배경
@@ -1006,7 +1006,7 @@ class StoryScene {
                     this.drawCaption('영어학원', 150, this.canvas.height - 220, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.05, shadowOffset: 2 });
                     this.ctx.textAlign = 'left';
 
-                    // 지율이
+                    // 크림이
                     this.drawJiyul(
                         this.canvas.width / 2,
                         this.canvas.height - 170,
@@ -1020,7 +1020,7 @@ class StoryScene {
                         '오늘의 영어 훈련 임무 완료!\n다음 작전은 탁구 특훈이다, 출발!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
-                        '지율'
+                        '크림'
                     );
                 }
             },
@@ -1060,7 +1060,7 @@ class StoryScene {
                         }
                     }
 
-                    // 지율이 (달리기)
+                    // 크림이 (달리기)
                     this.drawJiyul(
                         this.canvas.width / 2 - 50,
                         this.canvas.height - 170,
@@ -1092,7 +1092,7 @@ class StoryScene {
                 }
             },
 
-            // 씬 2-2: 지율이 대사
+            // 씬 2-2: 크림이 대사
             {
                 update: () => {
                     // 하늘
@@ -1106,7 +1106,7 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 지율이
+                    // 크림이
                     this.drawJiyul(
                         this.canvas.width / 2 - 50,
                         this.canvas.height - 170,
@@ -1132,12 +1132,12 @@ class StoryScene {
                         '오늘은 필살 스매싱 훈련의 날!\n작전 개시다. 가자!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
-                        '지율'
+                        '크림'
                     );
                 }
             },
 
-            // 씬 3-1: UFO 등장 (지율이 놀람)
+            // 씬 3-1: UFO 등장 (크림이 놀람)
             {
                 update: () => {
                     // 붉은 하늘
@@ -1146,7 +1146,7 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 지율이 (놀란 표정)
+                    // 크림이 (놀란 표정)
                     this.drawJiyul(
                         this.canvas.width / 2,
                         this.canvas.height - 170,
@@ -1184,7 +1184,7 @@ class StoryScene {
                         '비상!! 상공에 미확인 비행물체!\n...UFO다! 적기 출현!!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
-                        '지율'
+                        '크림'
                     );
                 }
             },
@@ -1198,7 +1198,7 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 지율이
+                    // 크림이
                     this.drawJiyul(
                         this.canvas.width / 2,
                         this.canvas.height - 170,
@@ -1252,7 +1252,7 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // ABC 대마왕 (크게! - 지율이를 바라보도록 좌우 반전)
+                    // ABC 대마왕 (크게! - 크림이를 바라보도록 좌우 반전)
                     const bossScale = 6 + Math.sin(this.animationFrame * 0.05) * 0.5;
                     const bossY = this.canvas.height / 3 - (this.animationFrame < 100 ? (100 - this.animationFrame) * 2 : 0);
                     const bossCenterX = this.canvas.width / 2;
@@ -1302,7 +1302,7 @@ class StoryScene {
                         }
                     }
 
-                    // 지율이
+                    // 크림이
                     this.drawJiyul(
                         this.canvas.width / 4,
                         this.canvas.height - 170,
@@ -1401,7 +1401,7 @@ class StoryScene {
                         }
                     }
 
-                    // 지율이
+                    // 크림이
                     this.drawJiyul(
                         this.canvas.width / 4,
                         this.canvas.height - 170,
@@ -1428,7 +1428,7 @@ class StoryScene {
                 }
             },
 
-            // 씬 4-3: 지율이 반응
+            // 씬 4-3: 크림이 반응
             {
                 update: () => {
                     // 보라색 하늘
@@ -1500,7 +1500,7 @@ class StoryScene {
                         }
                     }
 
-                    // 지율이
+                    // 크림이
                     this.drawJiyul(
                         this.canvas.width / 4,
                         this.canvas.height - 170,
@@ -1517,17 +1517,17 @@ class StoryScene {
                         this.drawAlphabetSprite(letters[i], letterX, letterY, 3);
                     }
 
-                    // 지율이 대사
+                    // 크림이 대사
                     this.drawDialogBox(
                         '뭐라고?! 탁구는 내 심장이다!\n침략자들, 절대 용서 못 해!',
                         this.canvas.width / 4,
                         this.canvas.height - 300,
-                        '지율'
+                        '크림'
                     );
                 }
             },
 
-            // 씬 5-1: 제니스 영어학원 sunzero 선생님 등장! (지율이 놀람)
+            // 씬 5-1: 제니스 영어학원 sunzero 선생님 등장! (크림이 놀람)
             {
                 update: () => {
                     // 신비로운 보라색 하늘
@@ -1567,7 +1567,7 @@ class StoryScene {
                     this.drawCaption('제니스 저항군 기지', 175, this.canvas.height - 296, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.1, shadowOffset: 2 });
                     this.ctx.textAlign = 'left';
 
-                    // 지율이 (놀란 모습)
+                    // 크림이 (놀란 모습)
                     this.drawJiyul(
                         this.canvas.width / 2 - 100,
                         this.canvas.height - 170,
@@ -1598,7 +1598,7 @@ class StoryScene {
                     this.ctx.save();
                     this.ctx.globalAlpha = teacherAlpha;
 
-                    // SD 캐릭터 스프라이트 (16x16 픽셀 - 지율이와 같은 스타일)
+                    // SD 캐릭터 스프라이트 (16x16 픽셀 - 크림이와 같은 스타일)
                     const sunzeroSprite = [
                         [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],  // 긴 머리 (양옆으로 내려옴)
                         [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
@@ -1728,12 +1728,12 @@ class StoryScene {
                         }
                     }
 
-                    // 지율이 대사
+                    // 크림이 대사
                     this.drawDialogBox(
                         '누, 누구냐! 정체를 밝혀라!',
                         this.canvas.width / 4,
                         this.canvas.height - 120,
-                        '지율'
+                        '크림'
                     );
                 }
             },
@@ -1778,7 +1778,7 @@ class StoryScene {
                     this.drawCaption('제니스 저항군 기지', 175, this.canvas.height - 296, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.1, shadowOffset: 2 });
                     this.ctx.textAlign = 'left';
 
-                    // 지율이
+                    // 크림이
                     this.drawJiyul(this.canvas.width / 2 - 100, this.canvas.height - 170, 'idle', 0, 4);
 
                     // sunzero 선생님 그리기 (간단화)
@@ -1810,7 +1810,7 @@ class StoryScene {
 
                     // 선생님 대사
                     this.drawDialogBox(
-                        '나는 제니스 저항군 사령관 sunzero다!\n지율 대원, 너를 특공대로 스카우트하러 왔다!',
+                        '나는 제니스 저항군 사령관 sunzero다!\n크림 대원, 너를 특공대로 스카우트하러 왔다!',
                         this.canvas.width * 3 / 4,
                         this.canvas.height - 150,
                         'sunzero 선생님'
@@ -1858,7 +1858,7 @@ class StoryScene {
                     this.drawCaption('제니스 저항군 기지', 175, this.canvas.height - 296, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.1, shadowOffset: 2 });
                     this.ctx.textAlign = 'left';
 
-                    // 지율이
+                    // 크림이
                     this.drawJiyul(this.canvas.width / 2 - 100, this.canvas.height - 170, 'idle', 0, 4);
 
                     // sunzero 선생님
@@ -1955,7 +1955,7 @@ class StoryScene {
                 }
             },
 
-            // 씬 5-4: 지율이 감사
+            // 씬 5-4: 크림이 감사
             {
                 update: () => {
                     // 신비로운 보라색 하늘
@@ -1995,7 +1995,7 @@ class StoryScene {
                     this.drawCaption('제니스 저항군 기지', 175, this.canvas.height - 296, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.1, shadowOffset: 2 });
                     this.ctx.textAlign = 'left';
 
-                    // 지율이
+                    // 크림이
                     this.drawJiyul(this.canvas.width / 2 - 100, this.canvas.height - 170, 'jump', 0, 4);
 
                     // sunzero 선생님
@@ -2025,12 +2025,12 @@ class StoryScene {
                     this.drawPixelSprite(sunzeroSprite, sunzeroColorMap,
                         this.canvas.width / 2 + 70, this.canvas.height - 200, 4);
 
-                    // 지율이 대사
+                    // 크림이 대사
                     this.drawDialogBox(
                         '임무 접수 완료!\nABC 대마왕을 격파하고 탁구를 되찾겠습니다!',
                         this.canvas.width / 4,
                         this.canvas.height - 140,
-                        '지율'
+                        '크림'
                     );
                 }
             },
@@ -2053,7 +2053,7 @@ class StoryScene {
                     this.ctx.fillText('제니스 영어학원', 175, this.canvas.height - 230);
                     this.ctx.textAlign = 'left';
 
-                    // 지율이 (왼쪽)
+                    // 크림이 (왼쪽)
                     this.drawJiyul(this.canvas.width / 2 - 150, this.canvas.height - 170, 'idle', 0, 4);
 
                     // 세은이 등장 (오른쪽에서 걸어옴)
@@ -2085,7 +2085,7 @@ class StoryScene {
                     // 세은이 대사
                     if (this.animationFrame > 60) {
                         this.drawDialogBox(
-                            '지율 대원! 2번 대원 세은, 작전에 합류한다!',
+                            '크림 대원! 2번 대원 세은, 작전에 합류한다!',
                             this.canvas.width / 2 - 30,
                             this.canvas.height - 300,
                             '세은'
@@ -2112,7 +2112,7 @@ class StoryScene {
                     this.ctx.fillText('제니스 영어학원', 175, this.canvas.height - 230);
                     this.ctx.textAlign = 'left';
 
-                    // 지율이 (왼쪽)
+                    // 크림이 (왼쪽)
                     this.drawJiyul(this.canvas.width / 2 - 150, this.canvas.height - 170, 'idle', 0, 4);
 
                     // 세은이 (중앙)
@@ -2140,7 +2140,7 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 지율이와 하린이 (배경, 작게)
+                    // 크림이와 하린이 (배경, 작게)
                     this.drawJiyul(this.canvas.width / 4 - 50, this.canvas.height - 150, 'idle', 0, 3);
                     this.drawHarin(this.canvas.width * 3 / 4, this.canvas.height - 150, 'idle', 0, 3);
 
@@ -2313,7 +2313,7 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 지율이와 세은이 (배경, 작게)
+                    // 크림이와 세은이 (배경, 작게)
                     this.drawJiyul(this.canvas.width / 4 - 50, this.canvas.height - 150, 'idle', 0, 3);
                     this.drawSeeun(this.canvas.width * 3 / 4 - 50, this.canvas.height - 150, 'idle', 0, 3);
 
@@ -2376,7 +2376,7 @@ class StoryScene {
                     this.ctx.shadowBlur = 0;
                     this.ctx.strokeRect(-30, -4, 30, 8);
 
-                    // 검날 본체 (더 크고 날카로운 지율 신검 스타일 + 케데헌 루미 보라색)
+                    // 검날 본체 (더 크고 날카로운 크림 신검 스타일 + 케데헌 루미 보라색)
                     const spearGradient = this.ctx.createLinearGradient(0, -10, 60, 10);
                     spearGradient.addColorStop(0, '#FFD700');                  // 금색
                     spearGradient.addColorStop(0.15, '#DA70D6');               // 오키드
@@ -2545,7 +2545,7 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 지율이 (파워업!)
+                    // 크림이 (파워업!)
                     const jiyulScale = 5 + Math.sin(this.animationFrame * 0.1) * 0.5;
                     this.drawJiyul(
                         this.canvas.width / 2 - jiyulScale * 8,
@@ -2675,7 +2675,7 @@ class StoryScene {
                         '탁구 특공대, 출격!!\nABC 대마왕을 무찌르고 탁구를 되찾는다! GO GO GO!',
                         this.canvas.width / 2,
                         this.canvas.height - 200,
-                        '지율'
+                        '크림'
                     );
 
                     // READY 텍스트
@@ -2970,7 +2970,7 @@ class StoryScene {
                     this.ctx.strokeRect(tableX + tableWidth - 95, tableY + tableHeight, 15, legHeight);
                     this.ctx.strokeRect(tableX + tableWidth - 35, tableY + tableHeight, 15, legHeight);
 
-                    // 지율이 (승리 포즈) - 탁구대 왼쪽 멀리
+                    // 크림이 (승리 포즈) - 탁구대 왼쪽 멀리
                     this.drawJiyul(
                         this.canvas.width / 2 - 350,
                         this.canvas.height - 180,
@@ -2979,14 +2979,14 @@ class StoryScene {
                         4
                     );
 
-                    // 상대 선수 (지율이 아빠 - 귀여운 SD 캐릭터)
+                    // 상대 선수 (크림이 아빠 - 귀여운 SD 캐릭터)
                     const opponentSprite = [
                         [0,0,0,1,1,1,1,1,1,1,1,0,0,0],  // 짧은 머리
                         [0,0,1,1,1,1,1,1,1,1,1,1,0,0],
                         [0,1,1,1,1,1,1,1,1,1,1,1,1,0],
                         [1,1,2,2,2,2,2,2,2,2,2,2,1,1],  // 얼굴
                         [1,2,2,3,3,2,2,2,3,3,2,2,2,1],  // 눈썹
-                        [1,2,2,4,4,4,2,2,4,4,4,2,2,1],  // 눈 흰자 (지율이와 똑같이)
+                        [1,2,2,4,4,4,2,2,4,4,4,2,2,1],  // 눈 흰자 (크림이와 똑같이)
                         [1,2,2,4,4,5,2,2,4,4,5,2,2,1],  // 검은 눈동자 오른쪽 아래
                         [0,2,2,2,2,2,2,2,2,2,2,2,0,0],  // 얼굴
                         [0,2,2,2,7,7,7,7,2,2,2,2,0,0],  // 웃는 입
@@ -3032,7 +3032,7 @@ class StoryScene {
                         }
                     }
 
-                    // 지율이 라켓 (작게)
+                    // 크림이 라켓 (작게)
                     const jiyulRacketX = this.canvas.width / 2 - 320;
                     const jiyulRacketY = this.canvas.height - 150;
 
@@ -3170,7 +3170,7 @@ class StoryScene {
                     // 특별한 설명
                     this.ctx.fillStyle = '#4169E1';
                     this.ctx.font = 'bold 18px Arial';
-                    this.drawCaption('제니스 대표 지율이 vs 동네 탁구장 대표 아빠', this.canvas.width / 2, bannerY + 8, { fontPx: 12, scale: 2, palette: 'white', drawScale: 0.8, shadowOffset: 2 });
+                    this.drawCaption('제니스 대표 크림이 vs 동네 탁구장 대표 아빠', this.canvas.width / 2, bannerY + 8, { fontPx: 12, scale: 2, palette: 'white', drawScale: 0.8, shadowOffset: 2 });
 
                     // ⭐⭐⭐ 중계 멘트 (화려하게!) ⭐⭐⭐
                     const commentaryY = 350;
@@ -3188,11 +3188,11 @@ class StoryScene {
                     // 중계 멘트 (애니메이션으로 변경)
                     const commentaries = [
                         '⚡ 여기는 세기의 탁구 대회 결승전!!! ⚡',
-                        '🔥 제니스 대표 지율이 선수의 등장입니다!!! 🔥',
-                        '💪 지율이 선수의 강력한 스매싱!!! 💪',
+                        '🔥 제니스 대표 크림이 선수의 등장입니다!!! 🔥',
+                        '💪 크림이 선수의 강력한 스매싱!!! 💪',
                         '🏓 동네 탁구장 대표 아빠의 수비도 만만치 않습니다!!! 🏓',
                         '✨ 도마뱀 대표 키위도 선전하고 있습니다! ✨',
-                        '🎯 제니스 대표 지율이 선수가 11:9로 우승!!! 🎯'
+                        '🎯 제니스 대표 크림이 선수가 11:9로 우승!!! 🎯'
                     ];
 
                     const commentaryIndex = Math.floor(this.animationFrame / 200) % commentaries.length;
@@ -3559,7 +3559,7 @@ class StoryScene {
                         }
                     }
 
-                    // 1위 지율이 (시상대 위)
+                    // 1위 크림이 (시상대 위)
                     this.drawJiyul(
                         this.canvas.width / 2 - 30,
                         this.canvas.height - 350,
@@ -3682,7 +3682,7 @@ class StoryScene {
                     this.ctx.restore();
 
                     // 선수 이름 및 소속 표시
-                    // 1위 지율이 - 제니스 대표
+                    // 1위 크림이 - 제니스 대표
                     this.ctx.fillStyle = 'rgba(255, 215, 0, 0.9)';
                     this.ctx.fillRect(this.canvas.width / 2 - 80, this.canvas.height - 90, 160, 50);
                     this.ctx.strokeStyle = '#FFD700';
@@ -3691,7 +3691,7 @@ class StoryScene {
                     this.ctx.fillStyle = '#000000';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
-                    this.drawCaption('지율이 · 제니스 대표', this.canvas.width / 2, this.canvas.height - 74, { fontPx: 12, scale: 2, palette: 'gold', drawScale: 0.85, shadowOffset: 2 });
+                    this.drawCaption('크림이 · 제니스 대표', this.canvas.width / 2, this.canvas.height - 74, { fontPx: 12, scale: 2, palette: 'gold', drawScale: 0.85, shadowOffset: 2 });
                     this.ctx.font = 'bold 14px Arial';
                     this.ctx.fillStyle = '#FF1493';
                     // (캡션에 통합됨)
@@ -3751,7 +3751,7 @@ class StoryScene {
                 }
             },
 
-            // 씬 3-1: ABC 대마왕이 패배 후 개심 - 지율이 대화
+            // 씬 3-1: ABC 대마왕이 패배 후 개심 - 크림이 대화
             {
                 update: () => {
                     // 화목한 배경
@@ -3765,7 +3765,7 @@ class StoryScene {
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
-                    this.drawCaption('지율 탁구&잉글리시 클럽', 175, this.canvas.height - 262, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 });
+                    this.drawCaption('크림 탁구&잉글리시 클럽', 175, this.canvas.height - 262, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 });
 
                     // ABC 대마왕 (코치 복장)
                     this.drawBossSprite(
@@ -3779,7 +3779,7 @@ class StoryScene {
                     this.ctx.fillStyle = '#C0C0C0';
                     this.ctx.fillRect(this.canvas.width / 2 + 100, this.canvas.height - 150, 30, 10);
 
-                    // 지율이
+                    // 크림이
                     this.drawJiyul(
                         this.canvas.width / 2 - 100,
                         this.canvas.height - 170,
@@ -3788,12 +3788,12 @@ class StoryScene {
                         4
                     );
 
-                    // 지율이 대화
+                    // 크림이 대화
                     this.drawDialogBox(
                         '사령관님! 작전 대성공!\n금메달 획득 완료했습니다!',
                         this.canvas.width / 2 - 100,
                         this.canvas.height - 250,
-                        '지율'
+                        '크림'
                     );
 
                     // 하트 효과
@@ -3819,7 +3819,7 @@ class StoryScene {
                     this.ctx.fillStyle = '#FFFFFF';
                     this.ctx.font = 'bold 20px Arial';
                     this.ctx.textAlign = 'center';
-                    this.drawCaption('지율 탁구&잉글리시 클럽', 175, this.canvas.height - 262, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 });
+                    this.drawCaption('크림 탁구&잉글리시 클럽', 175, this.canvas.height - 262, { fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.9, shadowOffset: 2 });
 
                     // ABC 대마왕 (코치 복장)
                     this.drawBossSprite(
@@ -3833,7 +3833,7 @@ class StoryScene {
                     this.ctx.fillStyle = '#C0C0C0';
                     this.ctx.fillRect(this.canvas.width / 2 + 100, this.canvas.height - 150, 30, 10);
 
-                    // 지율이
+                    // 크림이
                     this.drawJiyul(
                         this.canvas.width / 2 - 100,
                         this.canvas.height - 170,
@@ -4065,7 +4065,7 @@ class StoryScene {
 
                     // (텐트 입구는 도트 스프라이트에 포함됨)
 
-                    // 지율이 (왼쪽)
+                    // 크림이 (왼쪽)
                     this.drawJiyul(
                         this.canvas.width / 2 - 150,
                         this.canvas.height - 170,
@@ -4130,7 +4130,7 @@ class StoryScene {
                             '작전 종료! 캠프파이어 점화!\n오늘 작전 진짜 최고였어. 금메달도 땄고!',
                             this.canvas.width / 2 - 150,
                             this.canvas.height - 370,
-                            '지율'
+                            '크림'
                         );
                     }
                 }
@@ -4672,11 +4672,11 @@ class StoryScene {
                     this.ctx.fillText('THE END', 0, -50);
 
                     this.ctx.font = 'bold 30px Arial';
-                    this.ctx.strokeText('지율이의 영어 대모험', 0, 20);
-                    this.ctx.fillText('지율이의 영어 대모험', 0, 20);
+                    this.ctx.strokeText('크림이의 영어 대모험', 0, 20);
+                    this.ctx.fillText('크림이의 영어 대모험', 0, 20);
 
                     this.ctx.font = '20px Arial';
-                    this.ctx.fillText('영어도 탁구도 최고가 된 지율이!', 0, 60);
+                    this.ctx.fillText('영어도 탁구도 최고가 된 크림이!', 0, 60);
                     this.ctx.fillText('다음에 또 만나요!', 0, 90);
 
                     this.ctx.restore();
@@ -4715,7 +4715,7 @@ class StoryScene {
                     this.ctx.textAlign = 'center';
                     this.ctx.shadowColor = '#000000';
                     this.ctx.shadowBlur = 5;
-                    this.ctx.fillText('지율아, 넌 이제 영어를 마스터했어.', this.canvas.width / 2, this.canvas.height - 180);
+                    this.ctx.fillText('크림아, 넌 이제 영어를 마스터했어.', this.canvas.width / 2, this.canvas.height - 180);
                     this.ctx.fillText('하지만 이것은 시작에 불과하지...', this.canvas.width / 2, this.canvas.height - 140);
                     this.ctx.shadowBlur = 0;
                     this.ctx.shadowColor = 'transparent';
