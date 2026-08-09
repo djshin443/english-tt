@@ -152,6 +152,158 @@
         };
     }
 
+    // ---- 4번째 캐릭터 '초이' 등록 + 물총 무기 ----
+    // 부채꼴로 퍼지는 물총알이 파도 잔상을 그리며 적을 무찌른다
+    if (typeof characters !== 'undefined' && !characters.includes('choi')) {
+        characters.push('choi');
+        characterNames.push('초이');
+        characterEnergies.push(10);
+    }
+
+    // 물방울 탄환: DivineSword와 같은 인터페이스로 divineSwords 배열에 편승
+    // (update에서 몬스터 충돌 처리, filter가 active로 수명 관리)
+    class WaterShot {
+        constructor(x, y, angle) {
+            this.x = x;
+            this.y = y;
+            this.angle = angle;
+            this.speed = 9;
+            this.vx = Math.cos(angle) * this.speed;
+            this.vy = Math.sin(angle) * this.speed;
+            this.active = true;
+            this.width = 34;   // 충돌 반경 계산에 사용
+            this.height = 34;
+            this.lifetime = 70;
+            this.phase = angle * 5;     // 물결 위상 (탄마다 다르게)
+            this.trail = [];
+        }
+
+        update() {
+            if (!this.active) return [];
+            this.lifetime--;
+            if (this.lifetime <= 0) {
+                this.active = false;
+                for (let i = 0; i < 5; i++) {
+                    addParticle(this.x, this.y, i % 2 ? '#4AC8F0' : '#B8ECFF', 'star');
+                }
+                return [];
+            }
+
+            // 파도처럼 출렁이며 전진
+            this.phase += 0.35;
+            this.x += this.vx;
+            this.y += this.vy + Math.sin(this.phase) * 1.8;
+
+            // 파도 잔상 기록
+            this.trail.push({ x: this.x, y: this.y });
+            if (this.trail.length > 7) this.trail.shift();
+
+            if (this.x < -300 || this.x > canvas.width + 300 ||
+                this.y < -300 || this.y > canvas.height + 300) {
+                this.active = false;
+                return [];
+            }
+
+            // 몬스터와 충돌 체크 (물총알은 관통하지 않고 터짐)
+            for (let i = monsters.length - 1; i >= 0; i--) {
+                const m = monsters[i];
+                const dx = this.x - (m.x + m.width / 2);
+                const dy = this.y - (m.y + m.height / 2);
+                if (Math.sqrt(dx * dx + dy * dy) < (this.width / 2 + m.width / 2)) {
+                    monsters.splice(i, 1);
+                    addScore(10);
+                    // 물보라 파티클
+                    for (let p = 0; p < 12; p++) {
+                        addParticle(m.x + m.width / 2, m.y + m.height / 2,
+                            ['#4AC8F0', '#B8ECFF', '#FFFFFF', '#1E88C8'][p % 4], 'star');
+                    }
+                    this.active = false;
+                    return [];
+                }
+            }
+            return [];
+        }
+
+        draw() {
+            if (!this.active) return;
+            const s = 5; // 도트 크기
+
+            // 파도 잔상 (뒤로 갈수록 흐려지는 물결 곡선)
+            this.trail.forEach((t, i) => {
+                const a = (i + 1) / this.trail.length * 0.5;
+                ctx.globalAlpha = a;
+                ctx.fillStyle = i % 2 ? '#7ADCFF' : '#B8ECFF';
+                const waveY = Math.sin(this.phase - (this.trail.length - i) * 0.5) * 4;
+                ctx.fillRect(Math.round(t.x - s / 2), Math.round(t.y + waveY - s / 2), s, s);
+            });
+            ctx.globalAlpha = 1;
+
+            // 물방울 본체 (도트)
+            const dropX = Math.round(this.x), dropY = Math.round(this.y);
+            ctx.fillStyle = '#1E88C8';
+            ctx.fillRect(dropX - s, dropY - s * 2, s * 2, s);       // 위 테두리
+            ctx.fillRect(dropX - s * 2, dropY - s, s, s * 2);       // 좌 테두리
+            ctx.fillRect(dropX + s, dropY - s, s, s * 2);           // 우 테두리
+            ctx.fillRect(dropX - s, dropY + s, s * 2, s);           // 아래 테두리
+            ctx.fillStyle = '#4AC8F0';
+            ctx.fillRect(dropX - s, dropY - s, s * 2, s * 2);       // 몸체
+            ctx.fillStyle = '#B8ECFF';
+            ctx.fillRect(dropX - s, dropY - s, s, s);               // 하이라이트
+        }
+    }
+
+    // 물총 발사: 부채꼴 5발
+    let waterGunReadyAt = 0;
+    function fireWaterGun() {
+        if (Date.now() < waterGunReadyAt) return;
+        waterGunReadyAt = Date.now() + 900;
+
+        const originX = player.x + player.width + 4;
+        const originY = player.y + player.height / 2;
+        for (let i = 0; i < 5; i++) {
+            const angle = -0.45 + i * 0.225;   // -26° ~ +26° 부채꼴
+            divineSwords.push(new WaterShot(originX, originY, angle));
+        }
+
+        player.animation = 'casting';
+        player.frameIndex = 0;
+
+        // 발사 물보라
+        for (let i = 0; i < 8; i++) {
+            addParticle(originX, originY, i % 2 ? '#4AC8F0' : '#FFFFFF', 'star');
+        }
+    }
+
+    // 무기 발사 분기에 초이 추가
+    if (typeof fireWeapon === 'function') {
+        const originalFireWeapon = fireWeapon;
+        fireWeapon = function () {
+            if (currentCharacter === 3) {
+                fireWaterGun();
+            } else {
+                originalFireWeapon();
+            }
+        };
+    }
+
+    // 초이 casting 모션 자동 복귀 (다른 캐릭터는 기존 무기 로직이 복귀시킴)
+    if (typeof updatePlayer === 'function') {
+        const prevUpdatePlayer = updatePlayer;
+        let choiCastTimer = 0;
+        updatePlayer = function () {
+            prevUpdatePlayer();
+            if (currentCharacter === 3 && player.animation === 'casting') {
+                choiCastTimer++;
+                if (choiCastTimer > 18) {
+                    choiCastTimer = 0;
+                    player.animation = 'idle';
+                }
+            } else {
+                choiCastTimer = 0;
+            }
+        };
+    }
+
     // ---- "화면을 돌려주세요" 회전 안내를 도트 스프라이트 화면으로 교체 ----
     (function pixelRotatePrompt() {
         const prompt = document.getElementById('rotatePrompt');
