@@ -104,9 +104,9 @@ let ball = null;
 let divineSwords = [];
 let tornados = [];
 let lightningChains = [];
-let currentCharacter = 0;  // 0: 크림이, 1: 세은, 2: 하린
+let currentCharacter = 0;  // 0: 크림이, 1: 쓰리실버, 2: 아린
 const characters = ['jiyul', 'seeun', 'harin'];
-const characterNames = ['크림이', '세은', '하린'];
+const characterNames = ['크림이', '쓰리실버', '아린'];
 const characterEnergies = [10, 10, 10];  // 각 캐릭터의 체력 저장
 
 // 크림이 스매싱 상태
@@ -878,7 +878,7 @@ class DivineSword {
     }
 }
 
-// 토네이도(용오름) 클래스 - 세은 전용
+// 토네이도(용오름) 클래스 - 쓰리실버 전용
 class Tornado {
     constructor(x, y, angle = 0, depth = 0) {
         this.x = x;
@@ -1098,7 +1098,7 @@ class Tornado {
     }
 }
 
-// 번개체인 클래스 - 하린 전용
+// 번개체인 클래스 - 아린 전용
 class LightningChain {
     constructor(x, y) {
         this.startX = x;
@@ -2778,7 +2778,7 @@ function drawPlayer() {
         );
     }
 
-    // 세은이가 무기를 들고 있을 때 청룡언월도 그리기
+    // 쓰리실버가 무기를 들고 있을 때 청룡언월도 그리기
     if (currentCharacter === 1 && player.showWeapon) {
         drawGreenDragonBlade(
             player.x + player.width + 20,
@@ -3137,7 +3137,7 @@ function gameLoop() {
             if (tornadoCooldown > 0) tornadoCooldown--;
             if (lightningChainCooldown > 0) lightningChainCooldown--;
 
-            // 세은이 무기 애니메이션
+            // 쓰리실버 무기 애니메이션
             if (player.showWeapon && currentCharacter === 1) {
                 if (player.weaponTimer > 0) {
                     player.weaponTimer--;
@@ -3468,10 +3468,10 @@ function fireWeapon() {
         // 크림이 - 사인검 (번개체인) 발사
         fireLightningChain();
     } else if (currentCharacter === 1) {
-        // 세은 - 토네이도 발사
+        // 쓰리실버 - 토네이도 발사
         fireTornado();
     } else if (currentCharacter === 2) {
-        // 하린 - 신검 발사
+        // 아린 - 신검 발사
         fireDivineSword();
     }
 }
@@ -3855,7 +3855,7 @@ function drawGreenDragonBlade(x, y, angle) {
     ctx.restore();
 }
 
-// 케데헌 루미 보라색 사인검 그리기 함수 (크림이/세은 검 스타일 + 보라색 테마)
+// 케데헌 루미 보라색 사인검 그리기 함수 (크림이/쓰리실버 검 스타일 + 보라색 테마)
 function drawLightningSword(x, y, angle) {
     ctx.save();
     ctx.translate(x, y);

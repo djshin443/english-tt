@@ -133,7 +133,7 @@
                 }
             }
 
-            // 세은/하린 무기 렌더링은 원본 로직 유지
+            // 쓰리실버/아린 무기 렌더링은 원본 로직 유지
             if (currentCharacter === 1 && player.showWeapon) {
                 drawGreenDragonBlade(
                     player.x + player.width + 20,
@@ -152,11 +152,11 @@
         };
     }
 
-    // ---- 4번째 캐릭터 '초이' 등록 + 물총 무기 ----
+    // ---- 4번째 캐릭터 '초2' 등록 + 물총 무기 ----
     // 부채꼴로 퍼지는 물총알이 파도 잔상을 그리며 적을 무찌른다
     if (typeof characters !== 'undefined' && !characters.includes('choi')) {
         characters.push('choi');
-        characterNames.push('초이');
+        characterNames.push('초2');
         characterEnergies.push(10);
     }
 
@@ -324,7 +324,7 @@
         }
     }
 
-    // 무기 발사 분기에 초이 추가
+    // 무기 발사 분기에 초2 추가
     if (typeof fireWeapon === 'function') {
         const originalFireWeapon = fireWeapon;
         fireWeapon = function () {
@@ -336,7 +336,7 @@
         };
     }
 
-    // 초이 casting 모션 자동 복귀 (다른 캐릭터는 기존 무기 로직이 복귀시킴)
+    // 초2 casting 모션 자동 복귀 (다른 캐릭터는 기존 무기 로직이 복귀시킴)
     if (typeof updatePlayer === 'function') {
         const prevUpdatePlayer = updatePlayer;
         let choiCastTimer = 0;

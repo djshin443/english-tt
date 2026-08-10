@@ -192,7 +192,7 @@ class StoryScene {
         this.drawPixelSprite(sprite, spriteData.colorMap, x, y, scale, flipH);
     }
 
-    // 세은 캐릭터 그리기
+    // 쓰리실버 캐릭터 그리기
     drawSeeun(x, y, animation = 'idle', frame = 0, scale = 4, flipH = false) {
         const spriteData = pixelData.seeun;
         let sprite;
@@ -214,7 +214,7 @@ class StoryScene {
         this.drawPixelSprite(sprite, spriteData.colorMap, x, y, scale, flipH);
     }
 
-    // 하린 캐릭터 그리기
+    // 아린 캐릭터 그리기
     drawHarin(x, y, animation = 'idle', frame = 0, scale = 4, flipH = false) {
         const spriteData = pixelData.harin;
         let sprite;
@@ -236,7 +236,7 @@ class StoryScene {
         this.drawPixelSprite(sprite, spriteData.colorMap, x, y, scale, flipH);
     }
 
-    // 초이 캐릭터 그리기
+    // 초2 캐릭터 그리기
     drawChoi(x, y, animation = 'idle', frame = 0, scale = 4, flipH = false) {
         const spriteData = pixelData.choi;
         if (!spriteData) return;
@@ -257,7 +257,7 @@ class StoryScene {
         this.drawPixelSprite(sprite, spriteData.colorMap, x, y, scale, flipH);
     }
 
-    // 도트 버블 링 (초이 물총 연출용)
+    // 도트 버블 링 (초2 물총 연출용)
     drawStoryBubble(cx, cy, r, alpha = 1) {
         const s = Math.max(2, Math.round(r / 4));
         this.ctx.globalAlpha = alpha;
@@ -274,7 +274,7 @@ class StoryScene {
         this.ctx.globalAlpha = 1;
     }
 
-    // 초이의 방 (밤) - 핑크핑크한 분위기 (하얀 벽지 + 핑크 소품)
+    // 초2의 방 (밤) - 핑크핑크한 분위기 (하얀 벽지 + 핑크 소품)
     drawChoiRoom() {
         const w = this.canvas.width, h = this.canvas.height;
         // 하얀 벽지 + 연핑크 세로 스트라이프
@@ -1141,7 +1141,7 @@ class StoryScene {
     // 오프닝 씬 정의
     getOpeningScenes() {
         return [
-            // 씬 1-1: 학원 앞 (배경만)
+            // 씬 1-1: 탁구장 앞 (크림이가 특훈을 마치고 나옴)
             {
                 duration: 180, // 3초 자동 진행
                 update: () => {
@@ -1156,16 +1156,12 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 건물 (학원)
-                    this.ctx.fillStyle = '#8B7355';
-                    this.drawPixelBuilding('academy', 50, this.canvas.height - 250, 200, 150);
-                    this.ctx.fillStyle = '#FFFFFF';
-                    this.ctx.font = 'bold 20px Arial';
-                    this.ctx.textAlign = 'center';
-                    this.drawCaption('영어학원', 150, this.canvas.height - 220, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.05, shadowOffset: 2 });
-                    this.ctx.textAlign = 'left';
+                    // 탁구장 건물 (배경과 같은 속도로 스크롤 → 크림이가 걸을수록 뒤로 멀어짐)
+                    const gymX = 50 - this.bgScroll;
+                    this.drawPixelBuilding('academy', gymX, this.canvas.height - 250, 200, 150);
+                    this.drawCaption('탁구장', gymX + 100, this.canvas.height - 220, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.05, shadowOffset: 2 });
 
-                    // 크림이 (걸어나오는 애니메이션)
+                    // 크림이 (탁구장에서 나와 걸어가는 애니메이션)
                     const jiyulX = Math.min(this.canvas.width / 2, 100 + this.animationFrame * 3);
                     this.drawJiyul(
                         jiyulX,
@@ -1193,14 +1189,7 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 건물 (학원)
-                    this.ctx.fillStyle = '#8B7355';
-                    this.drawPixelBuilding('academy', 50, this.canvas.height - 250, 200, 150);
-                    this.ctx.fillStyle = '#FFFFFF';
-                    this.ctx.font = 'bold 20px Arial';
-                    this.ctx.textAlign = 'center';
-                    this.drawCaption('영어학원', 150, this.canvas.height - 220, { fontPx: 14, scale: 2, palette: 'gold', drawScale: 1.05, shadowOffset: 2 });
-                    this.ctx.textAlign = 'left';
+                    // (탁구장 건물은 씬 1-1에서 이미 지나왔으므로 거리 풍경만 보여준다)
 
                     // 크림이
                     this.drawJiyul(
@@ -1213,7 +1202,7 @@ class StoryScene {
 
                     // 대화
                     this.drawDialogBox(
-                        '오늘의 영어 훈련 임무 완료!\n다음 작전은 탁구 특훈이다, 출발!',
+                        '후~ 오늘 탁구 특훈 완료!\n역시 스매싱은 내가 최고라니까?',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
                         '크림이'
@@ -1335,7 +1324,7 @@ class StoryScene {
 
                     // 대화
                     this.drawDialogBox(
-                        '오늘은 필살 스매싱 훈련의 날!\n작전 개시다. 가자!',
+                        '이제 집에 가서 영어 단어 외워야지!\nCAT, DOG, SUN... 오늘도 완벽하게!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
                         '크림이'
@@ -2224,7 +2213,7 @@ class StoryScene {
                 }
             },
 
-            // 씬 5-5: 세은과 하린 등장!
+            // 씬 5-5: 쓰리실버과 아린 등장!
             {
                 update: () => {
                     // 신비로운 보라색 하늘
@@ -2245,7 +2234,7 @@ class StoryScene {
                     // 크림이 (왼쪽)
                     this.drawJiyul(this.canvas.width / 2 - 150, this.canvas.height - 170, 'idle', 0, 4);
 
-                    // 세은이 등장 (오른쪽에서 걸어옴)
+                    // 쓰리실버 등장 (오른쪽에서 걸어옴)
                     const seeunTargetX = this.canvas.width / 2 - 30;
                     const seeunStartX = this.canvas.width + 100;
                     const seeunX = Math.max(seeunTargetX, seeunStartX - this.animationFrame * 4);
@@ -2258,7 +2247,7 @@ class StoryScene {
                         true
                     );
 
-                    // 하린이 등장 (세은 뒤에서)
+                    // 아린이 등장 (쓰리실버 뒤에서)
                     const harinTargetX = this.canvas.width / 2 + 90;
                     const harinStartX = this.canvas.width + 200;
                     const harinX = Math.max(harinTargetX, harinStartX - this.animationFrame * 4);
@@ -2271,19 +2260,19 @@ class StoryScene {
                         true
                     );
 
-                    // 세은이 대사
+                    // 쓰리실버 대사
                     if (this.animationFrame > 60) {
                         this.drawDialogBox(
-                            '크림이 대원! 2번 대원 세은, 작전에 합류한다!',
+                            '크림이 대원! 2번 대원 쓰리실버, 작전에 합류한다!',
                             this.canvas.width / 2 - 30,
                             this.canvas.height - 300,
-                            '세은'
+                            '쓰리실버'
                         );
                     }
                 }
             },
 
-            // 씬 5-6: 하린이 대사
+            // 씬 5-6: 아린이 대사
             {
                 update: () => {
                     // 신비로운 보라색 하늘
@@ -2304,23 +2293,23 @@ class StoryScene {
                     // 크림이 (왼쪽)
                     this.drawJiyul(this.canvas.width / 2 - 150, this.canvas.height - 170, 'idle', 0, 4);
 
-                    // 세은이 (중앙)
+                    // 쓰리실버 (중앙)
                     this.drawSeeun(this.canvas.width / 2 - 30, this.canvas.height - 170, 'idle', 0, 4);
 
-                    // 하린이 (오른쪽)
+                    // 아린이 (오른쪽)
                     this.drawHarin(this.canvas.width / 2 + 90, this.canvas.height - 170, 'idle', 0, 4);
 
-                    // 하린이 대사
+                    // 아린이 대사
                     this.drawDialogBox(
-                        '3번 대원 하린, 전투 준비 완료!',
+                        '3번 대원 아린, 전투 준비 완료!',
                         this.canvas.width / 2 + 90,
                         this.canvas.height - 300,
-                        '하린'
+                        '아린'
                     );
                 }
             },
 
-            // 씬 5-7: 선제로가 세은에게 곡도 라켓 수여
+            // 씬 5-7: 선제로가 쓰리실버에게 곡도 라켓 수여
             {
                 update: () => {
                     // 초록빛 하늘 (곡도 테마)
@@ -2329,11 +2318,11 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 크림이와 하린이 (배경, 작게)
+                    // 크림이와 아린이 (배경, 작게)
                     this.drawJiyul(this.canvas.width / 4 - 50, this.canvas.height - 150, 'idle', 0, 3);
                     this.drawHarin(this.canvas.width * 3 / 4, this.canvas.height - 150, 'idle', 0, 3);
 
-                    // 세은이 (중앙에 크게)
+                    // 쓰리실버 (중앙에 크게)
                     this.drawSeeun(this.canvas.width / 2 - 32, this.canvas.height - 200, 'jump', 0, 4);
 
                     // 곡도 (게임과 동일한 그래픽 - 왼쪽에서 등장)
@@ -2484,7 +2473,7 @@ class StoryScene {
                     // 대사
                     if (weaponX >= weaponTargetX - 10) {
                         this.drawDialogBox(
-                            '세은 대원에게는 곡도 라켓을 지급한다!\n휘두르면 토네이도가 적진을 쓸어버린다!',
+                            '쓰리실버 대원에게는 곡도 라켓을 지급한다!\n휘두르면 토네이도가 적진을 쓸어버린다!',
                             this.canvas.width / 2,
                             this.canvas.height - 100,
                             'sunzero 선생님'
@@ -2493,7 +2482,7 @@ class StoryScene {
                 }
             },
 
-            // 씬 5-8: 선제로가 하린에게 신검 라켓 수여
+            // 씬 5-8: 선제로가 아린에게 신검 라켓 수여
             {
                 update: () => {
                     // 보라빛 하늘 (신검 테마)
@@ -2502,11 +2491,11 @@ class StoryScene {
                     // 땅
                     this.drawStreetScene(this.bgScroll || 0);
 
-                    // 크림이와 세은이 (배경, 작게)
+                    // 크림이와 쓰리실버 (배경, 작게)
                     this.drawJiyul(this.canvas.width / 4 - 50, this.canvas.height - 150, 'idle', 0, 3);
                     this.drawSeeun(this.canvas.width * 3 / 4 - 50, this.canvas.height - 150, 'idle', 0, 3);
 
-                    // 하린이 (중앙에 크게)
+                    // 아린이 (중앙에 크게)
                     this.drawHarin(this.canvas.width / 2 - 32, this.canvas.height - 200, 'jump', 0, 4);
 
                     // 신검 3자루 (왼쪽에서 부채꼴로 등장) - 신성한 보라/금빛 검
@@ -2578,7 +2567,7 @@ class StoryScene {
                     // 대사
                     if (weaponX >= weaponTargetX - 10) {
                         this.drawDialogBox(
-                            '하린 대원에게는 신검 라켓을 지급한다!\n신성한 검 세 자루가 적진을 갈라버린다!',
+                            '아린 대원에게는 신검 라켓을 지급한다!\n신성한 검 세 자루가 적진을 갈라버린다!',
                             this.canvas.width / 2,
                             this.canvas.height - 100,
                             'sunzero 선생님'
@@ -2587,12 +2576,12 @@ class StoryScene {
                 }
             },
 
-            // 씬 5-9: 초이의 방 - 뉴스를 본 초이
+            // 씬 5-9: 초2의 방 - 뉴스를 본 초2
             {
                 update: () => {
                     this.drawChoiRoom();
 
-                    // 초이 (중앙, 놀란 모습)
+                    // 초2 (중앙, 놀란 모습)
                     this.drawChoi(this.canvas.width / 2 - 40, this.canvas.height - 190, 'idle', 0, 4);
 
                     // 머리 위 느낌표
@@ -2606,17 +2595,17 @@ class StoryScene {
                         '큰일이야! 크림이가 영어 제국 침략자들과\n싸우고 있다고?! 나도 도와주러 가야지!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
-                        '초이'
+                        '초2'
                     );
                 }
             },
 
-            // 씬 5-10: 초이, 장난감 물총을 챙기다
+            // 씬 5-10: 초2, 장난감 물총을 챙기다
             {
                 update: () => {
                     this.drawChoiRoom();
 
-                    // 초이 (물총 든 포즈)
+                    // 초2 (물총 든 포즈)
                     this.drawChoi(this.canvas.width / 2 - 40, this.canvas.height - 190, 'casting', 0, 4);
 
                     // 버블이 보글보글 떠오르는 연출
@@ -2628,10 +2617,10 @@ class StoryScene {
                     }
 
                     this.drawDialogBox(
-                        '내 비장의 무기, 반짝반짝 버블 물총!\n기다려 크림아, 4번 대원 초이가 간다!',
+                        '내 비장의 무기, 반짝반짝 버블 물총!\n기다려 크림아, 4번 대원 초2가 간다!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
-                        '초이'
+                        '초2'
                     );
                 }
             },
@@ -4184,7 +4173,7 @@ class StoryScene {
                         4
                     );
 
-                    // 세은이 (중간)
+                    // 쓰리실버 (중간)
                     this.drawSeeun(
                         this.canvas.width / 2 - 30,
                         this.canvas.height - 170,
@@ -4193,7 +4182,7 @@ class StoryScene {
                         4
                     );
 
-                    // 하린이 (오른쪽)
+                    // 아린이 (오른쪽)
                     this.drawHarin(
                         this.canvas.width / 2 + 90,
                         this.canvas.height - 170,
@@ -4246,7 +4235,7 @@ class StoryScene {
                 }
             },
 
-            // 씬 4-2: 솔뜰 캠핑장 - 세은이 대화
+            // 씬 4-2: 솔뜰 캠핑장 - 쓰리실버 대화
             {
                 update: () => {
                     // 배경 재사용 (이전 씬과 동일)
@@ -4485,17 +4474,17 @@ class StoryScene {
                         this.ctx.stroke();
                     }
 
-                    // 세은이 대화
+                    // 쓰리실버 대화
                     this.drawDialogBox(
                         '하하! 최고의 작전이었어! 별도 진짜 예쁘다~\n다음 임무도 셋이 같이 가는 거다?',
                         this.canvas.width / 2 - 30,
                         this.canvas.height - 370,
-                        '세은'
+                        '쓰리실버'
                     );
                 }
             },
 
-            // 씬 4-3: 솔뜰 캠핑장 - 하린이 대화
+            // 씬 4-3: 솔뜰 캠핑장 - 아린이 대화
             {
                 update: () => {
                     // 배경 재사용
@@ -4734,12 +4723,12 @@ class StoryScene {
                         this.ctx.stroke();
                     }
 
-                    // 하린이 대화
+                    // 아린이 대화
                     this.drawDialogBox(
                         '맞아! ABC 코치님도 우리를 축하해 주셨잖아!\n영어도 탁구도 완전 정복이야! 호호호~',
                         this.canvas.width / 2 + 90,
                         this.canvas.height - 370,
-                        '하린'
+                        '아린'
                     );
                 }
             },
@@ -4770,7 +4759,7 @@ class StoryScene {
                 }
             },
 
-            // 씬 4-6: 초이의 무대 인사
+            // 씬 4-6: 초2의 무대 인사
             {
                 update: () => {
                     this.drawIdolStage();
@@ -4780,7 +4769,7 @@ class StoryScene {
                         '버블처럼 반짝반짝 빛나는 우리 넷!\n전 세계 여러분, 사랑해요~!',
                         this.canvas.width / 2,
                         this.canvas.height - 300,
-                        '초이'
+                        '초2'
                     );
                 }
             },

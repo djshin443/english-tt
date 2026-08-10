@@ -69,8 +69,8 @@ function showTitleScreen() {
     const SKY_BANDS = ['#0E1230', '#232B5C', '#4A3B7C', '#8C4A6E', '#C56A50', '#E8925A'];
 
     // 행진하는 캐릭터들 (characters-player.js의 도트 스프라이트 사용)
-    // 각자 시그니처 동작: 크림이(라켓 스윙) → 세은(연필+단어 암기) →
-    // 초이(아이돌 댄스) → 하린(곰인형 떨어뜨리고 줍느라 맨 뒤)
+    // 각자 시그니처 동작: 크림이(라켓 스윙) → 쓰리실버(연필+단어 암기) →
+    // 초2(아이돌 댄스) → 아린(곰인형 떨어뜨리고 줍느라 맨 뒤)
     const marchers = [
         { name: 'jiyul', offset: 0, sig: 'paddle' },
         { name: 'seeun', offset: 105, sig: 'study' },
@@ -78,7 +78,7 @@ function showTitleScreen() {
         { name: 'harin', offset: 330, sig: 'bear' }
     ];
 
-    // 도트 음표 (초이 댄스용)
+    // 도트 음표 (초2 댄스용)
     const NOTE_SPRITE = [
         [0,0,0,1,1,1],
         [0,0,0,1,0,1],
@@ -117,7 +117,7 @@ function showTitleScreen() {
     ];
     const BALL_COLORS = { 0: null, 1: '#FFFFFF', 2: '#D8D8DC' };
 
-    // 갈색 곰돌이 인형 (하린용)
+    // 갈색 곰돌이 인형 (아린용)
     const BEAR_SPRITE = [
         [1,1,0,0,1,1],
         [1,2,1,1,2,1],
@@ -128,7 +128,7 @@ function showTitleScreen() {
     ];
     const BEAR_COLORS = { 0: null, 1: '#5A3A1E', 2: '#8A5A2B', 3: '#D9B380' };
 
-    // 연필 (세은용, 귀에 꽂은 모양)
+    // 연필 (쓰리실버용, 귀에 꽂은 모양)
     function drawPencil(x, y, s) {
         tctx.fillStyle = '#FFC22B';                 // 몸통 (노랑)
         tctx.fillRect(x, y, s * 4, s);
@@ -303,7 +303,7 @@ function showTitleScreen() {
                         tctx.fillRect(ix, iy - ps * 2, ps, ps);
                     }
                 } else if (m.sig === 'study') {
-                    // ---- 세은: 귀에 연필 꽂고 영어 단어를 외우며 행진 ----
+                    // ---- 쓰리실버: 귀에 연필 꽂고 영어 단어를 외우며 행진 ----
                     drawSpriteMS(walkSprite, data.colorMap, mx, baseY, mScale, false);
                     // 귀에 꽂은 연필 (머리 옆, 걸음에 맞춰 살짝 흔들림)
                     const pBob = Math.round(Math.sin(frame * 0.2) * 1);
@@ -325,7 +325,7 @@ function showTitleScreen() {
                         }
                     }
                 } else if (m.sig === 'bear') {
-                    // ---- 하린: 곰인형 안고 가다 떨어뜨리고 → 알아채고 → 달려가 줍기 ----
+                    // ---- 아린: 곰인형 안고 가다 떨어뜨리고 → 알아채고 → 달려가 줍기 ----
                     // 220프레임 루프라 맨 뒤에서 계속 뒤처지는 귀여운 연출
                     const T = 220;
                     const t = frame % T;
@@ -406,7 +406,7 @@ function showTitleScreen() {
                             Math.round(bearFixedX), Math.round(bearFixedY), bs, false);
                     }
                 } else if (m.sig === 'dance') {
-                    // ---- 초이 아이돌 댄스: 4박자 안무 루틴 ----
+                    // ---- 초2 아이돌 댄스: 4박자 안무 루틴 ----
                     // 박자 0: 대기(리듬 타기) → 1: 점프! → 2: 왼쪽 스텝 → 3: 포인트 포즈(물총 팔 뻗기)
                     const beat = Math.floor(frame / 16) % 4;
                     const beatProgress = (frame % 16) / 16;
@@ -435,7 +435,7 @@ function showTitleScreen() {
                     }
                     drawSpriteMS(sprite, data.colorMap, danceX, danceY, mScale, flip);
 
-                    // 음표들: 초이 머리 위에서 좌우로 번갈아 둥실둥실
+                    // 음표들: 초2 머리 위에서 좌우로 번갈아 둥실둥실
                     const noteScale = Math.max(1, Math.round(mScale / 2));
                     for (let n = 0; n < 3; n++) {
                         const notePhase = frame * 0.09 + n * 2.1;
