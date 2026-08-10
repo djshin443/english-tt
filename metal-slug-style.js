@@ -875,6 +875,60 @@
             });
         }
 
+        // ---- 하단 중앙: 아케이드 크레딧 표시 (수집 모드에서만) ----
+        // 퀴즈/보스 모드에서는 선택지·전투 영역을 가리므로 숨긴다
+        // (CONTINUE 화면에는 자체 크레딧 표시가 있음)
+        if (collecting) {
+            const credits = String(window.gameCredits || 0).padStart(2, '0');
+            const cw = 156, ch = 30;
+            const cx = Math.round((canvas.width - cw) / 2), cy = canvas.height - ch - 8;
+            drawPixelPanel(cx, cy, cw, ch);
+            PixelText.draw(ctx, 'CREDIT ' + credits, cx + cw / 2, cy + 8, {
+                fontPx: 12, scale: 2, palette: window.gameCredits > 2 ? 'gold' : 'fire',
+                drawScale: 0.7, shadowOffset: 2
+            });
+        }
+
+        // ---- 스테이지 / 단어 패널 ----
+        // 수집 모드: 우측 상단, 퀴즈/보스 모드: 좌측 상단 (선택지와 겹침 방지)
+        const wp = 240, hp2 = 86;
+        const wx = collecting ? canvas.width - wp - 10 : 10;
+        const wy = 10;
+        drawPixelPanel(wx, wy, wp, hp2);
+        PixelText.draw(ctx, 'STAGE ' + gameState.currentStage + '/20', wx + 12, wy + 10, {
+            fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.8, align: 'left', shadowOffset: 2
+        });
+        if (typeof currentStageData !== 'undefined' && currentStageData && currentStageData.word) {
+            PixelText.draw(ctx, '목표 ' + currentStageData.word, wx + 12, wy + 34, {
+                fontPx: 13, scale: 2, palette: 'fire', drawScale: 0.75, align: 'left'
+            });
+            // 순서대로 수집: 모은 글자는 금색, 지금 필요한 글자는 깜빡이는 흰색,
+            // 아직 안 모은 글자는 회색 언더스코어로 표시
+            const word = currentStageData.word;
+            const done = (currentStageData.collectedLetters || []).length;
+            let lx = wx + 12;
+            const lOpts = { fontPx: 13, scale: 2, drawScale: 0.75, align: 'left' };
+            for (let i = 0; i < word.length; i++) {
+                const isNext = i === done;
+                const ch = i < done ? word[i] : (isNext ? word[i] : '_');
+                if (isNext && Math.floor(Date.now() / 300) % 2 === 0) {
+                    // 다음 차례 글자는 깜빡임 (밝게)
+                    lx += PixelText.draw(ctx, ch, lx, wy + 58, {
+                        ...lOpts, palette: 'white', shadowOffset: 2
+                    }).width + 4;
+                } else {
+                    lx += PixelText.draw(ctx, ch, lx, wy + 58, {
+                        ...lOpts, palette: i < done ? 'gold' : 'steel'
+                    }).width + 4;
+                }
+            }
+        } else if (gameState.mode === GAME_MODE.BOSS) {
+            PixelText.draw(ctx, '보스전!', wx + 12, wy + 40, {
+                fontPx: 14, scale: 2, palette: 'fire', drawScale: 0.9, align: 'left', shadowOffset: 2
+            });
+        }
+
+        // ---- 경고 토스트는 모든 패널보다 위에 보이도록 맨 마지막에 그린다 ----
         // ---- 독약 경고 토스트 ----
         if (typeof poisonWarning !== 'undefined' && poisonWarning.active) {
             if (Date.now() > poisonWarning.until) {
@@ -886,7 +940,7 @@
                 const pts = Math.min(0.95, (canvas.width * 0.6) / pm.width);
                 const ptw = pm.width * pts + 36, pth = pm.height * pts + 22;
                 const ptx = Math.round((canvas.width - ptw) / 2);
-                const pty = Math.round(canvas.height * 0.24 - pth / 2);
+                const pty = Math.round(canvas.height * 0.40 - pth / 2);
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
                 ctx.fillRect(ptx - 8, pty - 8, ptw + 16, pth + 16);
                 drawPixelPanel(ptx, pty, ptw, pth);
@@ -950,58 +1004,6 @@
             }
         }
 
-        // ---- 하단 중앙: 아케이드 크레딧 표시 (수집 모드에서만) ----
-        // 퀴즈/보스 모드에서는 선택지·전투 영역을 가리므로 숨긴다
-        // (CONTINUE 화면에는 자체 크레딧 표시가 있음)
-        if (collecting) {
-            const credits = String(window.gameCredits || 0).padStart(2, '0');
-            const cw = 156, ch = 30;
-            const cx = Math.round((canvas.width - cw) / 2), cy = canvas.height - ch - 8;
-            drawPixelPanel(cx, cy, cw, ch);
-            PixelText.draw(ctx, 'CREDIT ' + credits, cx + cw / 2, cy + 8, {
-                fontPx: 12, scale: 2, palette: window.gameCredits > 2 ? 'gold' : 'fire',
-                drawScale: 0.7, shadowOffset: 2
-            });
-        }
-
-        // ---- 스테이지 / 단어 패널 ----
-        // 수집 모드: 우측 상단, 퀴즈/보스 모드: 좌측 상단 (선택지와 겹침 방지)
-        const wp = 240, hp2 = 86;
-        const wx = collecting ? canvas.width - wp - 10 : 10;
-        const wy = 10;
-        drawPixelPanel(wx, wy, wp, hp2);
-        PixelText.draw(ctx, 'STAGE ' + gameState.currentStage + '/20', wx + 12, wy + 10, {
-            fontPx: 13, scale: 2, palette: 'gold', drawScale: 0.8, align: 'left', shadowOffset: 2
-        });
-        if (typeof currentStageData !== 'undefined' && currentStageData && currentStageData.word) {
-            PixelText.draw(ctx, '목표 ' + currentStageData.word, wx + 12, wy + 34, {
-                fontPx: 13, scale: 2, palette: 'fire', drawScale: 0.75, align: 'left'
-            });
-            // 순서대로 수집: 모은 글자는 금색, 지금 필요한 글자는 깜빡이는 흰색,
-            // 아직 안 모은 글자는 회색 언더스코어로 표시
-            const word = currentStageData.word;
-            const done = (currentStageData.collectedLetters || []).length;
-            let lx = wx + 12;
-            const lOpts = { fontPx: 13, scale: 2, drawScale: 0.75, align: 'left' };
-            for (let i = 0; i < word.length; i++) {
-                const isNext = i === done;
-                const ch = i < done ? word[i] : (isNext ? word[i] : '_');
-                if (isNext && Math.floor(Date.now() / 300) % 2 === 0) {
-                    // 다음 차례 글자는 깜빡임 (밝게)
-                    lx += PixelText.draw(ctx, ch, lx, wy + 58, {
-                        ...lOpts, palette: 'white', shadowOffset: 2
-                    }).width + 4;
-                } else {
-                    lx += PixelText.draw(ctx, ch, lx, wy + 58, {
-                        ...lOpts, palette: i < done ? 'gold' : 'steel'
-                    }).width + 4;
-                }
-            }
-        } else if (gameState.mode === GAME_MODE.BOSS) {
-            PixelText.draw(ctx, '보스전!', wx + 12, wy + 40, {
-                fontPx: 14, scale: 2, palette: 'fire', drawScale: 0.9, align: 'left', shadowOffset: 2
-            });
-        }
     }
 
     // ---- 인게임 대화창을 메탈슬러그풍 픽셀 패널로 교체 ----
