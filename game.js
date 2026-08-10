@@ -1814,6 +1814,107 @@ class Potion {
     }
 }
 
+// 독약 함정 - 먹으면 에너지 -1
+// 딱 봐도 위험해 보이도록: 해골 라벨 + 보글보글 끓는 초록 액체 +
+// 깜빡이는 독기 오라 + 위로 떠오르는 독 기포
+class Poison {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.width = 30;
+        this.height = 40;
+        this.collected = false;
+        this.isPoison = true;
+        this.bounce = 0;
+        this.bounceSpeed = 0.05;
+        this.bubblePhase = Math.random() * 100;
+    }
+
+    update() {
+        this.x -= gameState.scrollSpeed;
+        this.bounce += this.bounceSpeed;
+        if (this.bounce > 0.3 || this.bounce < -0.3) {
+            this.bounceSpeed *= -1;
+        }
+        this.bubblePhase++;
+    }
+
+    draw() {
+        ctx.save();
+        ctx.translate(this.x + this.width / 2, this.y + this.height / 2 + this.bounce * 10);
+
+        // 독기 오라 (초록빛이 스멀스멀 깜빡임)
+        const auraPulse = 0.25 + Math.sin(this.bubblePhase * 0.15) * 0.15;
+        ctx.fillStyle = `rgba(80, 220, 60, ${auraPulse})`;
+        ctx.beginPath();
+        ctx.arc(0, 0, 34 + Math.sin(this.bubblePhase * 0.1) * 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        const scale = 3;
+        // 해골 라벨이 붙은 초록 독약병 (코르크 마개 + 끓는 액체)
+        const poisonPixels = [
+            [0,0,0,0,6,6,6,6,0,0,0,0],  // 코르크 마개
+            [0,0,0,0,6,7,7,6,0,0,0,0],
+            [0,0,0,1,2,2,2,2,1,0,0,0],  // 병목
+            [0,0,0,1,2,2,2,2,1,0,0,0],
+            [0,0,1,2,2,2,2,2,2,1,0,0],
+            [0,1,2,4,8,4,4,8,4,2,1,0],  // 끓는 기포 줄
+            [1,2,4,4,4,4,4,4,4,4,2,1],  // 독액 시작
+            [1,2,4,5,5,4,4,5,5,4,2,1],  // 해골 눈 (검은 구멍)
+            [1,2,4,5,5,4,4,5,5,4,2,1],
+            [1,2,4,4,4,9,9,4,4,4,2,1],  // 해골 코
+            [1,2,4,9,4,9,9,4,9,4,2,1],  // 해골 이빨
+            [0,1,4,4,8,4,4,8,4,4,1,0],
+            [0,0,1,4,4,4,4,4,4,1,0,0],
+            [0,0,0,1,1,1,1,1,1,0,0,0]
+        ];
+        const colors = {
+            0: null,
+            1: '#0E2A08',   // 진한 독초록 테두리
+            2: '#2E5C1E',   // 어두운 초록 유리
+            4: '#4CDC28',   // 형광 독액
+            5: '#0A1404',   // 해골 눈구멍 (검정)
+            6: '#8A5A2B',   // 코르크 마개
+            7: '#B67F3E',   // 코르크 하이라이트
+            8: '#B8FF7A',   // 끓는 기포 (밝은 초록)
+            9: '#EFFFE0'    // 해골 코/이빨 (흰색)
+        };
+        for (let row = 0; row < poisonPixels.length; row++) {
+            for (let col = 0; col < poisonPixels[row].length; col++) {
+                const pixel = poisonPixels[row][col];
+                if (pixel !== 0 && colors[pixel]) {
+                    ctx.fillStyle = colors[pixel];
+                    ctx.fillRect(
+                        (col - 6) * scale,
+                        (row - 7) * scale,
+                        scale, scale
+                    );
+                }
+            }
+        }
+
+        // 병 위로 보글보글 떠오르는 독 기포 3개
+        for (let i = 0; i < 3; i++) {
+            const t = (this.bubblePhase * 1.2 + i * 40) % 90;
+            const bx = Math.sin((this.bubblePhase + i * 30) * 0.1) * 8 + (i - 1) * 6;
+            const by = -16 - t * 0.5;
+            const alpha = Math.max(0, 1 - t / 90);
+            ctx.fillStyle = `rgba(120, 240, 80, ${alpha * 0.8})`;
+            const bs = 3 + (i % 2) * 2;
+            ctx.fillRect(bx - bs / 2, by, bs, bs);
+        }
+
+        ctx.restore();
+    }
+
+    checkCollision(px, py, pw, ph) {
+        return px < this.x + this.width &&
+               px + pw > this.x &&
+               py < this.y + this.height &&
+               py + ph > this.y;
+    }
+}
+
 // 파티클 클래스
 class Particle {
     constructor(x, y, color, type = 'normal') {
@@ -2408,6 +2509,31 @@ function spawnPotion(x = null) {
     potions.push(new Potion(spawnX, spawnY));
 }
 
+// 독약 함정 생성
+function spawnPoison() {
+    // 화면에 안 먹은 독약이 2개 이상이면 생성하지 않음 (난이도 조절)
+    if (potions.filter(p => p.isPoison && !p.collected).length >= 2) return;
+
+    const offsetX = (canvas.width * (1 - GAME_SCALE)) / 2;
+    const offsetY = (canvas.height * (1 - GAME_SCALE)) / 2;
+    const maxX = (canvas.width - offsetX) / GAME_SCALE;
+    const maxY = (canvas.height - offsetY) / GAME_SCALE;
+
+    const spawnX = maxX + 50;
+    // 알파벳 카드나 회복 포션 바로 옆에 붙지 않도록 y를 재시도하며 선택
+    // (필요한 카드를 먹으려다 억울하게 독약까지 먹는 상황 방지)
+    let spawnY, tries = 0;
+    do {
+        spawnY = 150 + Math.random() * (maxY - 150 - 50);
+        tries++;
+    } while (tries < 12 && (
+        letters.some(l => Math.abs(l.x - spawnX) < 350 && Math.abs(l.y - spawnY) < 110) ||
+        potions.some(p => !p.collected && Math.abs(p.x - spawnX) < 250 && Math.abs(p.y - spawnY) < 100)
+    ));
+
+    potions.push(new Poison(spawnX, spawnY));
+}
+
 // 신검 발사 (1시, 3시, 5시 방향으로 3개)
 // 기존 함수 - fireWeapon으로 대체됨
 // function launchDivineSwords() {
@@ -2887,20 +3013,37 @@ function checkCollisions() {
         }
     });
 
-    // 포션 충돌
+    // 포션/독약 충돌
     potions.forEach(potion => {
         if (!potion.collected && potion.checkCollision(player.x, player.y, player.width, player.height)) {
             potion.collected = true;
-            gainEnergy();
-            addScore(30); // 포션 수집 +30점
 
-            // 파티클 효과 (파티클 제한 적용)
-            const colors = ['#FF69B4', '#FFB6C1', '#FF1493'];
-            for (let i = 0; i < 15; i++) {  // 30개 → 15개로 감소
-                addParticle(potion.x + potion.width / 2, potion.y + potion.height / 2, colors[Math.floor(Math.random() * colors.length)], 'heart');
+            if (potion.isPoison) {
+                // 독약 함정! 에너지 감소 + 경고
+                loseEnergy();
+                showPoisonWarning();
+                const colors = ['#4CDC28', '#2E5C1E', '#B8FF7A', '#8A2BE2'];
+                for (let i = 0; i < 15; i++) {
+                    addParticle(potion.x + potion.width / 2, potion.y + potion.height / 2, colors[Math.floor(Math.random() * colors.length)], 'normal');
+                }
+            } else {
+                gainEnergy();
+                addScore(30); // 포션 수집 +30점
+
+                // 파티클 효과 (파티클 제한 적용)
+                const colors = ['#FF69B4', '#FFB6C1', '#FF1493'];
+                for (let i = 0; i < 15; i++) {  // 30개 → 15개로 감소
+                    addParticle(potion.x + potion.width / 2, potion.y + potion.height / 2, colors[Math.floor(Math.random() * colors.length)], 'heart');
+                }
             }
         }
     });
+}
+
+// 독약 경고 상태 (도트 경고 토스트는 metal-slug-style.js에서 렌더링)
+let poisonWarning = { active: false, until: 0 };
+function showPoisonWarning() {
+    poisonWarning = { active: true, until: Date.now() + 1400 };
 }
 
 // 순서 오류 패널티 안내 상태 (도트 경고 토스트는 metal-slug-style.js에서 렌더링)
@@ -3034,6 +3177,11 @@ function manageSpawning() {
     // 포션 스폰 빈도 증가 (800 -> 600, 난이도 쉽게)
     if (spawnTimer % 600 === 0) {
         spawnPotion();
+    }
+
+    // 독약 함정 스폰 (7.5초마다, 포션 타이밍과 어긋나게 오프셋)
+    if (spawnTimer % 450 === 225) {
+        spawnPoison();
     }
 }
 

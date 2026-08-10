@@ -875,6 +875,40 @@
             });
         }
 
+        // ---- 독약 경고 토스트 ----
+        if (typeof poisonWarning !== 'undefined' && poisonWarning.active) {
+            if (Date.now() > poisonWarning.until) {
+                poisonWarning.active = false;
+            } else {
+                const pMsg = '독약이야! 에너지 -1';
+                const pOpts = { fontPx: 28, scale: 2, palette: 'green', weight: '500' };
+                const pm = PixelText.measure(pMsg, pOpts);
+                const pts = Math.min(0.95, (canvas.width * 0.6) / pm.width);
+                const ptw = pm.width * pts + 36, pth = pm.height * pts + 22;
+                const ptx = Math.round((canvas.width - ptw) / 2);
+                const pty = Math.round(canvas.height * 0.24 - pth / 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+                ctx.fillRect(ptx - 8, pty - 8, ptw + 16, pth + 16);
+                drawPixelPanel(ptx, pty, ptw, pth);
+                // 초록 테두리 깜빡임 (독 느낌)
+                if (Math.floor(Date.now() / 160) % 2 === 0) {
+                    ctx.fillStyle = '#4CDC28';
+                    const gpx = 3;
+                    for (let bx = 0; bx < ptw; bx += gpx * 2) {
+                        ctx.fillRect(ptx + bx, pty, gpx, gpx);
+                        ctx.fillRect(ptx + bx, pty + pth - gpx, gpx, gpx);
+                    }
+                    for (let by = 0; by < pth; by += gpx * 2) {
+                        ctx.fillRect(ptx, pty + by, gpx, gpx);
+                        ctx.fillRect(ptx + ptw - gpx, pty + by, gpx, gpx);
+                    }
+                }
+                PixelText.draw(ctx, pMsg, canvas.width / 2, pty + 11, {
+                    ...pOpts, drawScale: pts, shadowOffset: 2
+                });
+            }
+        }
+
         // ---- 순서 오류 패널티 경고 토스트 (화면 중앙, 항상 표시) ----
         if (typeof orderPenalty !== 'undefined' && orderPenalty.active) {
             if (Date.now() > orderPenalty.until) {
